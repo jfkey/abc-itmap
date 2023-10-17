@@ -564,14 +564,62 @@ float Abc_SclComputeDelayCellPin( SC_Lib * p, SC_Cell * pCell, int iPin, float S
     Abc_SclComputeParametersPin( p, pCell, iPin, Slew, &LD, &PD );
     return 0.01 * LD * Gain + PD;
 }
-float Abc_SclComputeDelayClassPin( SC_Lib * p, SC_Cell * pRepr, int iPin, float Slew, float Gain )
+
+float Abc_SclComputeDelayCellPinPara( SC_Lib * p, SC_Cell * pCell, int iPin, float Slew, float Gain, float *LD, float *PD)
+{
+    Abc_SclComputeParametersPin( p, pCell, iPin, Slew, LD, PD );
+    return 0.01 * ( *LD) * Gain + *PD;
+}
+
+// junfeng:
+float Abc_SclComputeDelayClassPinPara( SC_Lib * p, SC_Cell * pRepr, int iPin, float Slew, float Gain, float *LDAvg, float *PDAvg)
 {
     SC_Cell * pCell;
     float Delay = 0;
     int i, Count = 0;
     SC_RingForEachCell( pRepr, pCell, i )
     {
-        if ( pCell->fSkip ) 
+        if ( pCell->fSkip )
+            continue;
+//        if ( pRepr == pCell ) // skip the first gate
+//            continue;
+        float LD = 0, PD = 0;
+        Delay += Abc_SclComputeDelayCellPinPara( p, pCell, iPin, Slew, Gain, &LD, &PD);
+        *LDAvg += LD; *PDAvg += PD;
+        Count++;
+    }
+    *LDAvg = *LDAvg/(Abc_MaxInt(1, Count));
+    *PDAvg = *PDAvg/(Abc_MaxInt(1, Count));
+    return Delay / Abc_MaxInt(1, Count);
+}
+
+
+
+float Abc_SclComputeDelayClassPin( SC_Lib * p, SC_Cell * pRepr, int iPin, float Slew, float Gain )
+{
+//    SC_Cell * pCell;
+//    float Delay = 0, firstDelay = 0.0;
+//    int i, Count = 0;
+//    SC_RingForEachCell( pRepr, pCell, i )
+//    {
+//        if ( pCell->fSkip )
+//            continue;
+//        if ( pRepr == pCell ) // skip the first gate
+//        {
+//            firstDelay = Abc_SclComputeDelayCellPin( p, pCell, iPin, Slew, Gain );
+//            continue;
+//        }
+//        Delay += Abc_SclComputeDelayCellPin( p, pCell, iPin, Slew, Gain );
+//
+//        Count++;
+//    }
+//    return Count==0 ? firstDelay :  Delay / Abc_MaxInt(1, Count);
+    SC_Cell * pCell;
+    float Delay = 0;
+    int i, Count = 0;
+    SC_RingForEachCell( pRepr, pCell, i )
+    {
+        if ( pCell->fSkip )
             continue;
 //        if ( pRepr == pCell ) // skip the first gate
 //            continue;
@@ -580,6 +628,9 @@ float Abc_SclComputeDelayClassPin( SC_Lib * p, SC_Cell * pRepr, int iPin, float 
     }
     return Delay / Abc_MaxInt(1, Count);
 }
+
+
+
 float Abc_SclComputeAreaClass( SC_Cell * pRepr )
 {
     SC_Cell * pCell;
@@ -830,7 +881,8 @@ Vec_Str_t * Abc_SclProduceGenlibStrSimple( SC_Lib * p )
                 Vec_StrPrintStr( vStr, "         PIN " );
                 sprintf( Buffer, "%-4s", pPin->pName );
                 Vec_StrPrintStr( vStr, Buffer );
-                sprintf( Buffer, " UNKNOWN  1  999  1.00  0.00  1.00  0.00\n" );
+//                sprintf( Buffer, " UNKNOWN  1  999  1.00  0.00  1.00  0.00\n" );
+                sprintf( Buffer, " UNKNOWN  1  999  1.00  0.00  1.00  0.00  0.00  0.00\n" );
                 Vec_StrPrintStr( vStr, Buffer );
             }
             Count++;
@@ -909,12 +961,15 @@ Vec_Str_t * Abc_SclProduceGenlibStr( SC_Lib * p, float Slew, float Gain, int nGa
         Vec_StrPrintStr( vStr, ";\n" );
         SC_CellForEachPinIn( pRepr, pPin, k )
         {
-            float Delay = Abc_SclComputeDelayClassPin( p, pRepr, k, Slew, Gain );
+//            float Delay = Abc_SclComputeDelayClassPin( p, pRepr, k, Slew, Gain );
+            float LDAvg = 0, PDAvg = 0;
+            float Delay = Abc_SclComputeDelayClassPinPara(p, pRepr, k, Slew, Gain, & LDAvg, &PDAvg);
+//            printf("%7.2f, %7.2f, %7.2f, %7.2f \n", Delay, LDAvg, PDAvg, 0.01 * LDAvg*Gain + PDAvg);
             assert( Delay > 0 );
             Vec_StrPrintStr( vStr, "         PIN " );
             sprintf( Buffer, "%-4s", pPin->pName );
             Vec_StrPrintStr( vStr, Buffer );
-            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00\n", Delay, Delay );
+            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f\n", Delay, Delay, LDAvg, PDAvg );
             Vec_StrPrintStr( vStr, Buffer );
         }
         Count++;
@@ -977,12 +1032,16 @@ Vec_Str_t * Abc_SclProduceGenlibStrProfile( SC_Lib * p, Mio_Library_t * pLib, fl
         Vec_StrPrintStr( vStr, ";\n" );
         SC_CellForEachPinIn( pRepr, pPin, k )
         {
-            float Delay = Abc_SclComputeDelayClassPin( p, pRepr, k, Slew, Gain );
+//            update by junfeng
+//            float Delay = Abc_SclComputeDelayClassPin( p, pRepr, k, Slew, Gain );
+            float LDAvg = 0, PDAvg = 0;
+            float Delay = Abc_SclComputeDelayClassPinPara(p, pRepr, k, Slew, Gain, & LDAvg, &PDAvg);
             assert( Delay > 0 );
             Vec_StrPrintStr( vStr, "         PIN " );
             sprintf( Buffer, "%-4s", pPin->pName );
             Vec_StrPrintStr( vStr, Buffer );
-            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00\n", Delay, Delay );
+//            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00\n", Delay, Delay );
+            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f\n", Delay, Delay, LDAvg, PDAvg );
             Vec_StrPrintStr( vStr, Buffer );
         }
         Count++;

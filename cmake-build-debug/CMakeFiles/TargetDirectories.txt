@@ -1,0 +1,5 @@
+/home/liujunfeng/ABC/abc-mfs/abc-mfs/cmake-build-debug/CMakeFiles/libabc.dir
+/home/liujunfeng/ABC/abc-mfs/abc-mfs/cmake-build-debug/CMakeFiles/abc.dir
+/home/liujunfeng/ABC/abc-mfs/abc-mfs/cmake-build-debug/CMakeFiles/libabc-pic.dir
+/home/liujunfeng/ABC/abc-mfs/abc-mfs/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/liujunfeng/ABC/abc-mfs/abc-mfs/cmake-build-debug/CMakeFiles/rebuild_cache.dir

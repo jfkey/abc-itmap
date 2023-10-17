@@ -296,6 +296,11 @@ struct Map_SuperStruct_t_
     float               Area;          // the area
     char *              pFormula;      // the symbolic formula
     Map_Super_t *       pNext;         // the pointer to the next super in the list
+    // modify by junfeng.
+    Map_Time_t          tDelaysRLD[6];   // the pin-to-pin load dependent delay (induced delay per unit load) constraints for the rise of the output
+    Map_Time_t          tDelaysFLD[6];   // the pin-to-pin load dependent delay (induced delay per unit load) constraints for the fall of the output
+    Map_Time_t          tDelaysRPD[6];   // the pin-to-pin parasitic delay constraints for the rise of the output
+    Map_Time_t          tDelaysFPD[6];   // the pin-to-pin parasitic delay constraints for the fall of the output
 };
 
 // the vector of nodes

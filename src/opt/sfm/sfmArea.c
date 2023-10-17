@@ -348,10 +348,11 @@ void Abc_NtkChangePerform( Abc_Ntk_t * pNtk, int fVerbose )
             continue;
         if ( Abc_ObjHasDupFanouts(pObj) )
             continue;
+        printf( "Obj %d\n", Abc_ObjId(pObj) );
         Gain = Abc_ObjChangeEval( pObj, vInfo, vFirst, (int)pCells[3].AreaW, &fNeedInv );
         if ( Gain <= 0 )
             continue;
-        //printf( "Obj %d\n", Abc_ObjId(pObj) );
+        printf( "Obj %d\n", Abc_ObjId(pObj) );
         Count++;
         CountInv += Abc_NodeIsInv(pObj);
         GainAll += Gain;

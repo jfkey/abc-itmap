@@ -147,6 +147,11 @@ struct Amap_Pin_t_
     double             dDelayBlockFall;
     double             dDelayFanoutFall;
     double             dDelayBlockMax;
+    // modify by junfeng, used in read_lib command
+    double             dDelayLDRise;
+    double             dDelayPDRise;
+    double             dDelayLDFall;
+    double             dDelayPDFall;
 };
 struct Amap_Gat_t_
 {

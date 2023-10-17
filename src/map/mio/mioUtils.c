@@ -1311,9 +1311,15 @@ void Mio_LibraryTransferDelays( Mio_Library_t * pLibD, Mio_Library_t * pLibS )
             {
                 if (pPinS)
                 {
+
                     pPinD->dDelayBlockRise = pPinS->dDelayBlockRise;
                     pPinD->dDelayBlockFall = pPinS->dDelayBlockFall;
                     pPinD->dDelayBlockMax  = pPinS->dDelayBlockMax;
+                    // update the LDAvg and PDAvg
+                    pPinD->dDelayLDRise = pPinS->dDelayLDRise;
+                    pPinD->dDelayLDFall = pPinS->dDelayLDFall;
+                    pPinD->dDelayPDRise = pPinS->dDelayPDRise;
+                    pPinD->dDelayPDFall = pPinS->dDelayPDFall;
                     pPinS = Mio_PinReadNext(pPinS);
                 }
                 else
@@ -1321,6 +1327,10 @@ void Mio_LibraryTransferDelays( Mio_Library_t * pLibD, Mio_Library_t * pLibS )
                     pPinD->dDelayBlockRise = 0;
                     pPinD->dDelayBlockFall = 0;
                     pPinD->dDelayBlockMax  = 0;
+                    pPinD->dDelayLDRise = 0;
+                    pPinD->dDelayLDFall = 0;
+                    pPinD->dDelayPDRise = 0;
+                    pPinD->dDelayPDFall = 0;
                 }
             }
         }

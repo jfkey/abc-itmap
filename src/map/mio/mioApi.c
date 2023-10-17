@@ -213,6 +213,10 @@ double            Mio_PinReadDelayFanoutRise( Mio_Pin_t * pPin )      { return p
 double            Mio_PinReadDelayBlockFall ( Mio_Pin_t * pPin )      { return pPin->dDelayBlockFall; }
 double            Mio_PinReadDelayFanoutFall( Mio_Pin_t * pPin )      { return pPin->dDelayFanoutFall;}
 double            Mio_PinReadDelayBlockMax  ( Mio_Pin_t * pPin )      { return pPin->dDelayBlockMax;  }
+double            Mio_PinReadDelayLDRise    ( Mio_Pin_t * pPin )      { return pPin->dDelayLDRise;    }
+double            Mio_PinReadDelayLDFall    ( Mio_Pin_t * pPin )      { return pPin->dDelayLDFall;    }
+double            Mio_PinReadDelayPDRise    ( Mio_Pin_t * pPin )      { return pPin->dDelayPDRise;    }
+double            Mio_PinReadDelayPDFall    ( Mio_Pin_t * pPin )      { return pPin->dDelayPDFall;    }
 Mio_Pin_t *       Mio_PinReadNext           ( Mio_Pin_t * pPin )      { return pPin->pNext;           }
 
 /**Function*************************************************************

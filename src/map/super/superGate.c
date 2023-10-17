@@ -1049,6 +1049,17 @@ if ( pMan->fVerbose )
 {
 ABC_PRT( "Writing new format", Abc_Clock() - clk );
 }
+
+//    // write the supergate into file
+//    char * pFileName = Extra_FileNameGenericAppend( pMan->pName, ".super" );
+//    FILE * pFile = fopen( pFileName, "wb" );
+//    if ( pFile == NULL )
+//    {
+//        printf( "Cannot open output file \"%s\".\n", pFileName );
+//        return vStr;
+//    }
+//    fwrite( Vec_StrArray(vStr), 1, Vec_StrSize(vStr), pFile );
+//    fclose( pFile );
     return vStr;
 }
 

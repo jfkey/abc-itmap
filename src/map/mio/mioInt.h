@@ -130,7 +130,12 @@ struct  Mio_PinStruct_t_
     double             dDelayBlockFall;
     double             dDelayFanoutFall;
     double             dDelayBlockMax;
-    Mio_Pin_t *        pNext;     
+    // modify by junfeng
+    double             dDelayLDRise;
+    double             dDelayPDRise;
+    double             dDelayLDFall;
+    double             dDelayPDFall;
+    Mio_Pin_t *        pNext;
 };
 
 

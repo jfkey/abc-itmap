@@ -453,7 +453,8 @@ Mio_Pin_t * Mio_LibraryReadPin( char ** ppToken, int fExtendedFormat )
         *ppToken = pToken;
         return NULL;
     }
-
+    // sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00\n", Delay, Delay );
+    // sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f\n", Delay, Delay, LDAvg, PDAvg );
     pToken = strtok( NULL, " \t\r\n" );
     pPin->dLoadInput = atof( pToken );
 
@@ -471,6 +472,13 @@ Mio_Pin_t * Mio_LibraryReadPin( char ** ppToken, int fExtendedFormat )
 
     pToken = strtok( NULL, " \t\r\n" );
     pPin->dDelayFanoutFall = atof( pToken );
+
+    //parse load dependent  LD and PD
+    pToken = strtok( NULL, " \t\r\n" );
+    pPin->dDelayLDFall = pPin ->dDelayLDRise =  atof( pToken );
+
+    pToken = strtok( NULL, " \t\r\n" );
+    pPin->dDelayPDFall = pPin->dDelayPDRise = atof( pToken );
 
     if ( fExtendedFormat )
     {

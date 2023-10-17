@@ -77,9 +77,11 @@ Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, 
         if ( pLib && Mio_LibraryHasProfile(pLib) )
             pLib = Abc_SclDeriveGenlib( Abc_FrameReadLibScl(), pLib, Slew, Gain, nGatesMin, fVerbose );
         else
+            // junfeng: 1. compute LD and PD, 2. write LD PD to the string, 3. parse LD PD from the string and set their to Mio_Pin_t
             pLib = Abc_SclDeriveGenlib( Abc_FrameReadLibScl(), NULL, Slew, Gain, nGatesMin, fVerbose );
         if ( Abc_FrameReadLibGen() )
         {
+            // junfeng: update the load independent delay, LD and DP to Abc_FrameReadLibGen;
             Mio_LibraryTransferDelays( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
             Mio_LibraryTransferProfile( pLib, (Mio_Library_t *)Abc_FrameReadLibGen() );
         }
@@ -147,7 +149,10 @@ clk = Abc_Clock();
         Map_ManSetUseProfile( pMan );
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
-    if ( !Map_Mapping( pMan ) )
+
+//    if ( !Map_Mapping( pMan ) )
+    // using the delay in STA to guide the mapping.
+    if ( !Map_MappingSTA( pMan, 1))
     {
         Map_ManFree( pMan );
         return NULL;

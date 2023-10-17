@@ -473,10 +473,17 @@ int Map_LibraryReadFileTreeStr( Map_SuperLib_t * pLib, Mio_Library_t * pGenlib, 
         {
             pGate->tDelaysR[k].Rise = pGate->tDelaysR[k].Fall = MAP_NO_VAR;
             pGate->tDelaysF[k].Rise = pGate->tDelaysF[k].Fall = MAP_NO_VAR;
+            // set the LD PD of all input to non-existent delay; modify by junfeng.
+            pGate->tDelaysRLD[k].Rise = pGate->tDelaysRLD[k].Fall = MAP_NO_VAR;
+            pGate->tDelaysRPD[k].Rise = pGate->tDelaysRPD[k].Fall = MAP_NO_VAR;
+            pGate->tDelaysFLD[k].Rise = pGate->tDelaysFLD[k].Fall = MAP_NO_VAR;
+            pGate->tDelaysFPD[k].Rise = pGate->tDelaysFPD[k].Fall = MAP_NO_VAR;
         }
         // set an existent arrival time for rise and fall
         pGate->tDelaysR[i].Rise = 0.0;
         pGate->tDelaysF[i].Fall = 0.0;
+        pGate->tDelaysRLD[i].Rise = pGate->tDelaysRPD[i].Rise = 0.0;
+        pGate->tDelaysFLD[i].Fall = pGate->tDelaysFPD[i].Fall = 0.0;
         // set the gate
         pLib->ppSupers[i] = pGate;
     }
@@ -626,6 +633,11 @@ int Map_LibraryDeriveGateInfo( Map_SuperLib_t * pLib, st__table * tExcludeGate )
         {
             pGate->tDelaysR[k].Rise = pGate->tDelaysR[k].Fall = MAP_NO_VAR;
             pGate->tDelaysF[k].Rise = pGate->tDelaysF[k].Fall = MAP_NO_VAR;
+            // set delay of LD and PD
+            pGate->tDelaysRLD[k].Rise = pGate->tDelaysRLD[k].Fall = MAP_NO_VAR;
+            pGate->tDelaysFLD[k].Rise = pGate->tDelaysFLD[k].Fall = MAP_NO_VAR;
+            pGate->tDelaysRPD[k].Rise = pGate->tDelaysRPD[k].Fall = MAP_NO_VAR;
+            pGate->tDelaysFPD[k].Rise = pGate->tDelaysFPD[k].Fall = MAP_NO_VAR;
         }
         // get the linked list of pins for the given root gate
         pPin = Mio_GateReadPins( pGate->pRoot );
@@ -778,6 +790,7 @@ void Map_LibraryAddFaninDelays( Map_SuperLib_t * pLib, Map_Super_t * pGate, Map_
     int fMaxDelay = 0;
     int i;
 
+    // the max delay model is not allowed.
     // use this node to enable max-delay model
     if ( fMaxDelay )
     {
@@ -809,6 +822,8 @@ void Map_LibraryAddFaninDelays( Map_SuperLib_t * pLib, Map_Super_t * pGate, Map_
     PinPhase = Mio_PinReadPhase(pPin);
     tDelayBlockRise = (float)Mio_PinReadDelayBlockRise( pPin );  
     tDelayBlockFall = (float)Mio_PinReadDelayBlockFall( pPin );  
+    // modify by junfeng, get the LD and PD of this pin
+    float tDelayLDRise = Mio_PinReadDelayLDRise()
 
     // update the rise and fall of the output depending on the phase of the pin 
     if ( PinPhase != MIO_PHASE_INV )  // NONINV phase is present

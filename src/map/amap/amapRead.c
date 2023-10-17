@@ -408,6 +408,12 @@ Amap_Lib_t * Amap_ParseTokens( Vec_Ptr_t * vTokens, int fVerbose )
             pPin->dDelayBlockFall = atof( pToken );
             pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
             pPin->dDelayFanoutFall = atof( pToken );
+            //parse load dependent  LD and PD
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->dDelayLDFall = pPin ->dDelayLDRise = atof( pToken );
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->dDelayPDFall = pPin->dDelayPDRise = atof( pToken );
+
             if ( pPin->dDelayBlockRise > pPin->dDelayBlockFall )
                 pPin->dDelayBlockMax = pPin->dDelayBlockRise;
             else
