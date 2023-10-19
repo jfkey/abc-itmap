@@ -302,9 +302,14 @@ int Map_MappingSTA( Map_Man_t * p, int fStime)
 
     // perform STA,  update the load-dependent delay for the cut
     /*
-    1. construct the mapped network. 
+    
+    //  networkID
+
+    1. construct the mapped network. (also store the mapped network)
     2. perform topo 
-    3. perfrom STA 
+    3. perfrom STA  
+    -> update the delay of  Match_t, Cut_t, or Supergate? 
+
     */
 
 

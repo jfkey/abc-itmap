@@ -181,6 +181,38 @@ ABC_PRT( "Total runtime", Abc_Clock() - clkTotal );
         Abc_NtkDelete( pNtkNew );
         return NULL;
     }
+
+        // print the mapped_network
+   int i =0;
+   Abc_Obj_t * pNode;
+   printf("\nThe original Ntk...\n");
+   Abc_NtkForEachObj(pNtk, pNode, i ) {
+           if(Abc_ObjIsCi(pNode)){
+               printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
+           }
+           if (Abc_ObjIsNode(pNode)){
+               printf("node(%d), index(%d), Node\n", Abc_ObjId(pNode), i);
+           }
+           if (Abc_ObjIsCo(pNode)){
+               printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
+           }
+       }
+
+   printf("\nReturn new Ntk...\n"); 
+   Abc_NtkForEachObj(pNtkNew, pNode, i ) {
+           if(Abc_ObjIsCi(pNode)){
+               printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
+           }
+           if (Abc_ObjIsNode(pNode)){
+               printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNode) , i, Abc_ObjMapNtkId(pNode),
+                      Abc_ObjMapNtkPhase(pNode));
+
+           }
+           if (Abc_ObjIsCo(pNode)){
+               printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
+           }
+       }
+
     return pNtkNew;
 }
 
@@ -457,8 +489,15 @@ Abc_Obj_t * Abc_NodeFromMap_rec( Abc_Ntk_t * pNtkNew, Map_Node_t * pNodeMap, int
         return pNodeNew;
 
     // implement the node if the best cut is assigned
-    if ( Map_NodeReadCutBest(pNodeMap, fPhase) != NULL )
-        return Abc_NodeFromMapPhase_rec( pNtkNew, pNodeMap, fPhase );
+    // update by junfeng, store the mapped network node ID in Abc_Obj_t
+    if ( Map_NodeReadCutBest(pNodeMap, fPhase) != NULL ) {
+        // return Abc_NodeFromMapPhase_rec( pNtkNew, pNodeMap, fPhase );
+        Abc_Obj_t * tmp = Abc_NodeFromMapPhase_rec( pNtkNew, pNodeMap, fPhase );
+        Abc_ObjSetMapNtkId(tmp, Map_NodeReadNum(pNodeMap));
+        Abc_ObjSetMapNtkPhase(tmp, fPhase);
+        return tmp;
+    }
+        
 
     // if the cut is not assigned, implement the node
     assert( Map_NodeReadCutBest(pNodeMap, !fPhase) != NULL || Map_NodeIsConst(pNodeMap) );

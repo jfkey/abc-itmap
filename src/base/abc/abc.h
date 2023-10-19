@@ -148,6 +148,9 @@ struct Abc_Obj_t_     // 48/72 bytes (32-bits/64-bits)
       Abc_Obj_t *     pCopy;         // the copy of this object
       int             iTemp;
       float           dTemp; };
+
+    int               mapNtkId;      // to store the mapped network node id
+    int               mapNtkPhase;   // to store the mapped network node phase
 };
 
 struct Abc_Ntk_t_ 
@@ -338,11 +341,16 @@ static inline Abc_Ntk_t * Abc_ObjModel( Abc_Obj_t * pObj )           { assert( p
 static inline void *      Abc_ObjData( Abc_Obj_t * pObj )            { return pObj->pData;              }
 static inline Abc_Obj_t * Abc_ObjEquiv( Abc_Obj_t * pObj )           { return (Abc_Obj_t *)pObj->pData; }
 static inline Abc_Obj_t * Abc_ObjCopyCond( Abc_Obj_t * pObj )        { return Abc_ObjRegular(pObj)->pCopy? Abc_ObjNotCond(Abc_ObjRegular(pObj)->pCopy, Abc_ObjIsComplement(pObj)) : NULL;  }
+// junfeng
+static inline int         Abc_ObjMapNtkId( Abc_Obj_t * pObj )        { return pObj->mapNtkId;            }
+static inline int         Abc_ObjMapNtkPhase( Abc_Obj_t * pObj )     { return pObj->mapNtkPhase;         }
 
 // setting data members of the network
 static inline void        Abc_ObjSetLevel( Abc_Obj_t * pObj, int Level )         { pObj->Level =  Level;    } 
 static inline void        Abc_ObjSetCopy( Abc_Obj_t * pObj, Abc_Obj_t * pCopy )  { pObj->pCopy =  pCopy;    } 
 static inline void        Abc_ObjSetData( Abc_Obj_t * pObj, void * pData )       { pObj->pData =  pData;    } 
+static inline void        Abc_ObjSetMapNtkId( Abc_Obj_t * pObj, int mapid )      { pObj->mapNtkId = mapid;  }
+static inline void        Abc_ObjSetMapNtkPhase( Abc_Obj_t * pObj, int phase )   { pObj->mapNtkPhase = phase; }
 
 // checking the object type
 static inline int         Abc_ObjIsNone( Abc_Obj_t * pObj )          { return pObj->Type == ABC_OBJ_NONE;    }
