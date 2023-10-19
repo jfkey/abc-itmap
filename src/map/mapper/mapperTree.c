@@ -823,7 +823,7 @@ void Map_LibraryAddFaninDelays( Map_SuperLib_t * pLib, Map_Super_t * pGate, Map_
     tDelayBlockRise = (float)Mio_PinReadDelayBlockRise( pPin );  
     tDelayBlockFall = (float)Mio_PinReadDelayBlockFall( pPin );  
     // modify by junfeng, get the LD and PD of this pin
-    float tDelayLDRise = Mio_PinReadDelayLDRise()
+    float tDelayLDRise = (float)Mio_PinReadDelayLDRise(pPin);
 
     // update the rise and fall of the output depending on the phase of the pin 
     if ( PinPhase != MIO_PHASE_INV )  // NONINV phase is present
