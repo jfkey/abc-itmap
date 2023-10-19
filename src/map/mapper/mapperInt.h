@@ -301,6 +301,9 @@ struct Map_SuperStruct_t_
     Map_Time_t          tDelaysFLD[6];   // the pin-to-pin load dependent delay (induced delay per unit load) constraints for the fall of the output
     Map_Time_t          tDelaysRPD[6];   // the pin-to-pin parasitic delay constraints for the rise of the output
     Map_Time_t          tDelaysFPD[6];   // the pin-to-pin parasitic delay constraints for the fall of the output
+    Map_Time_t          tDelayLDMax;     // the maximum delay of LD
+    Map_Time_t          tDelayPDMax;     // the maximum delay of PD
+    
 };
 
 // the vector of nodes

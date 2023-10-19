@@ -177,7 +177,9 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
         // (the supergates are sorted by increasing area)
         if ( Counter == 30 )
            break;
-
+        
+        printf("max delay: %3.5f, LD: %3.5f, PD: %3.5f \n", pSuper->tDelayMax.Worst, pSuper->tDelayLDMax.Worst,  pSuper->tDelayPDMax.Worst);
+        
         // go through different phases of the given match and supergate
         pMatch->pSuperBest = pSuper;
         for ( i = 0; i < (int)pSuper->nPhases; i++ )

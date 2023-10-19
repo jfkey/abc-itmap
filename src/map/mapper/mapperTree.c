@@ -651,6 +651,7 @@ int Map_LibraryDeriveGateInfo( Map_SuperLib_t * pLib, st__table * tExcludeGate )
                 return 0;
             }
             // update the delay information of k-th fanins info from the corresponding pin
+            // update the LD and PD 
             Map_LibraryAddFaninDelays( pLib, pGate, pGate->pFanins[k], pPin );
         }
         // if there are some pins left, this is a bug, return fail
@@ -659,23 +660,45 @@ int Map_LibraryDeriveGateInfo( Map_SuperLib_t * pLib, st__table * tExcludeGate )
             printf( "There are more pins than gate inputs.\n" );
             return 0;
         }
-        // find the max delay
+        // find the max delay, 
         pGate->tDelayMax.Rise = pGate->tDelayMax.Fall = MAP_NO_VAR;
         for ( k = 0; k < pLib->nVarsMax; k++ )
         {
             // the rise of the output depends on the rise and fall of the output
-            if ( pGate->tDelayMax.Rise < pGate->tDelaysR[k].Rise )
+            if ( pGate->tDelayMax.Rise < pGate->tDelaysR[k].Rise ){
                 pGate->tDelayMax.Rise = pGate->tDelaysR[k].Rise;
-            if ( pGate->tDelayMax.Rise < pGate->tDelaysR[k].Fall )
+                pGate->tDelayLDMax.Rise = pGate->tDelaysRLD[k].Rise; 
+                pGate->tDelayPDMax.Rise = pGate->tDelaysRPD[k].Rise; 
+            }
+                
+            if ( pGate->tDelayMax.Rise < pGate->tDelaysR[k].Fall ) {
                 pGate->tDelayMax.Rise = pGate->tDelaysR[k].Fall;
+                pGate->tDelayLDMax.Rise = pGate->tDelaysRLD[k].Fall; 
+                pGate->tDelayPDMax.Rise = pGate->tDelaysRPD[k].Fall; 
+            }
+                
             // the fall of the output depends on the rise and fall of the output
-            if ( pGate->tDelayMax.Fall < pGate->tDelaysF[k].Rise )
+            if ( pGate->tDelayMax.Fall < pGate->tDelaysF[k].Rise ){
                 pGate->tDelayMax.Fall = pGate->tDelaysF[k].Rise;
-            if ( pGate->tDelayMax.Fall < pGate->tDelaysF[k].Fall )
+                pGate->tDelayLDMax.Fall = pGate->tDelaysFLD[k].Rise;
+                pGate->tDelayPDMax.Fall = pGate->tDelaysFPD[k].Rise;
+            }
+                
+            if ( pGate->tDelayMax.Fall < pGate->tDelaysF[k].Fall ){
                 pGate->tDelayMax.Fall = pGate->tDelaysF[k].Fall;
-
+                pGate->tDelayLDMax.Fall = pGate->tDelaysFLD[k].Fall;
+                pGate->tDelayPDMax.Fall = pGate->tDelaysFPD[k].Fall;
+            }
+                
             pGate->tDelaysF[k].Worst = MAP_MAX( pGate->tDelaysF[k].Fall, pGate->tDelaysF[k].Rise );
             pGate->tDelaysR[k].Worst = MAP_MAX( pGate->tDelaysR[k].Fall, pGate->tDelaysR[k].Rise );
+            
+            // update by junfeng
+            pGate->tDelaysFLD[k].Worst = MAP_MAX( pGate->tDelaysFLD[k].Fall, pGate->tDelaysFLD[k].Rise );
+            pGate->tDelaysFPD[k].Worst = MAP_MAX( pGate->tDelaysFPD[k].Fall, pGate->tDelaysFPD[k].Rise );
+
+            pGate->tDelaysRLD[k].Worst = MAP_MAX( pGate->tDelaysRLD[k].Fall, pGate->tDelaysRLD[k].Rise );
+            pGate->tDelaysRPD[k].Worst = MAP_MAX( pGate->tDelaysRPD[k].Fall, pGate->tDelaysRPD[k].Rise );
         }
 
         // count gates and area of the supergate
@@ -824,6 +847,9 @@ void Map_LibraryAddFaninDelays( Map_SuperLib_t * pLib, Map_Super_t * pGate, Map_
     tDelayBlockFall = (float)Mio_PinReadDelayBlockFall( pPin );  
     // modify by junfeng, get the LD and PD of this pin
     float tDelayLDRise = (float)Mio_PinReadDelayLDRise(pPin);
+    float tDelayLDFall = (float)Mio_PinReadDelayLDFall(pPin);
+    float tDelayPDRise = (float) Mio_PinReadDelayPDRise(pPin);
+    float tDelayPDFall = (float) Mio_PinReadDelayPDFall(pPin);
 
     // update the rise and fall of the output depending on the phase of the pin 
     if ( PinPhase != MIO_PHASE_INV )  // NONINV phase is present
@@ -841,14 +867,26 @@ void Map_LibraryAddFaninDelays( Map_SuperLib_t * pLib, Map_Super_t * pGate, Map_
             if ( pFanin->tDelaysR[i].Rise >= 0 ) // case (1)
             { // fanin's rise depends on the rise of i-th PI
                 // update the rise of the gate's output
-                if ( pGate->tDelaysR[i].Rise < pFanin->tDelaysR[i].Rise + tDelayBlockRise )
+                if ( pGate->tDelaysR[i].Rise < pFanin->tDelaysR[i].Rise + tDelayBlockRise ){
                     pGate->tDelaysR[i].Rise = pFanin->tDelaysR[i].Rise + tDelayBlockRise;
+                    // update by junfeng 
+                    pGate->tDelaysRLD[i].Rise = pFanin ->tDelaysRLD[i].Rise + tDelayLDRise; 
+                    pGate->tDelaysRPD[i].Rise = pFanin ->tDelaysRPD[i].Rise + tDelayPDRise; 
+                }
+
+                    
             }
             if ( pFanin->tDelaysR[i].Fall >= 0 ) // case (2)
             { // fanin's rise depends on the fall of i-th PI
                 // update the rise of the gate's output
-                if ( pGate->tDelaysR[i].Fall < pFanin->tDelaysR[i].Fall + tDelayBlockRise )
+                if ( pGate->tDelaysR[i].Fall < pFanin->tDelaysR[i].Fall + tDelayBlockRise ) {
                     pGate->tDelaysR[i].Fall = pFanin->tDelaysR[i].Fall + tDelayBlockRise;
+                    // update by junfeng
+                    pGate->tDelaysRLD[i].Fall = pFanin->tDelaysRLD[i].Fall + tDelayLDRise; 
+                    pGate->tDelaysRPD[i].Fall = pFanin->tDelaysRPD[i].Fall + tDelayPDRise; 
+                }
+                    
+
             }
             ////////////////////////////////////////////////////////
 
@@ -860,13 +898,24 @@ void Map_LibraryAddFaninDelays( Map_SuperLib_t * pLib, Map_Super_t * pGate, Map_
             // (2) the constraints related to the fall of the PIs
             if ( pFanin->tDelaysF[i].Rise >= 0 ) // case (1) 
             { 
-                if ( pGate->tDelaysF[i].Rise < pFanin->tDelaysF[i].Rise + tDelayBlockFall )
+                if ( pGate->tDelaysF[i].Rise < pFanin->tDelaysF[i].Rise + tDelayBlockFall ) {
                     pGate->tDelaysF[i].Rise = pFanin->tDelaysF[i].Rise + tDelayBlockFall;
+
+                    pGate->tDelaysFLD[i].Rise = pFanin->tDelaysFLD[i].Rise + tDelayLDFall;
+                    pGate->tDelaysFPD[i].Rise = pFanin->tDelaysFPD[i].Rise + tDelayPDFall;
+                }
+                    
             }
             if ( pFanin->tDelaysF[i].Fall >= 0 ) // case (2) 
             { 
-                if ( pGate->tDelaysF[i].Fall < pFanin->tDelaysF[i].Fall + tDelayBlockFall )
+                if ( pGate->tDelaysF[i].Fall < pFanin->tDelaysF[i].Fall + tDelayBlockFall ) {
                     pGate->tDelaysF[i].Fall = pFanin->tDelaysF[i].Fall + tDelayBlockFall;
+
+                    pGate->tDelaysFLD[i].Fall = pFanin->tDelaysFLD[i].Fall + tDelayLDFall; 
+                    pGate->tDelaysFPD[i].Fall = pFanin->tDelaysFPD[i].Fall + tDelayPDFall; 
+                    
+                }
+                    
             }
             ////////////////////////////////////////////////////////
         }
@@ -886,14 +935,24 @@ void Map_LibraryAddFaninDelays( Map_SuperLib_t * pLib, Map_Super_t * pGate, Map_
             if ( pFanin->tDelaysF[i].Rise >= 0 ) // case (1)
             { // fanin's rise depends on the rise of i-th PI
                 // update the rise of the gate
-                if ( pGate->tDelaysR[i].Rise < pFanin->tDelaysF[i].Rise + tDelayBlockRise )
+                if ( pGate->tDelaysR[i].Rise < pFanin->tDelaysF[i].Rise + tDelayBlockRise ) {
                     pGate->tDelaysR[i].Rise = pFanin->tDelaysF[i].Rise + tDelayBlockRise;
+
+                    pGate->tDelaysRLD[i].Rise = pFanin->tDelaysFLD[i].Rise + tDelayLDRise;
+                    pGate->tDelaysRPD[i].Rise = pFanin->tDelaysFPD[i].Rise + tDelayPDRise;
+                }
+                    
             }
             if ( pFanin->tDelaysF[i].Fall >= 0 ) // case (2)
             { // fanin's rise depends on the fall of i-th PI
                 // update the rise of the gate
-                if ( pGate->tDelaysR[i].Fall < pFanin->tDelaysF[i].Fall + tDelayBlockRise )
+                if ( pGate->tDelaysR[i].Fall <  pFanin->tDelaysF[i].Fall + tDelayBlockRise ) {
                     pGate->tDelaysR[i].Fall = pFanin->tDelaysF[i].Fall + tDelayBlockRise;
+
+                    pGate->tDelaysRLD[i].Fall = pFanin->tDelaysFLD[i].Fall + tDelayLDRise;
+                    pGate->tDelaysRPD[i].Fall = pFanin->tDelaysFPD[i].Fall + tDelayPDRise;
+                }
+                    
             }
             ////////////////////////////////////////////////////////
 
@@ -905,13 +964,23 @@ void Map_LibraryAddFaninDelays( Map_SuperLib_t * pLib, Map_Super_t * pGate, Map_
             // (2) the constraints related to the fall of the PIs
             if ( pFanin->tDelaysR[i].Rise >= 0 ) // case (1) 
             { 
-                if ( pGate->tDelaysF[i].Rise < pFanin->tDelaysR[i].Rise + tDelayBlockFall )
+                if ( pGate->tDelaysF[i].Rise < pFanin->tDelaysR[i].Rise + tDelayBlockFall ){
                     pGate->tDelaysF[i].Rise = pFanin->tDelaysR[i].Rise + tDelayBlockFall;
+
+                    pGate->tDelaysFLD[i].Rise = pFanin->tDelaysRLD[i].Rise + tDelayLDFall;
+                    pGate->tDelaysFPD[i].Rise = pFanin->tDelaysRPD[i].Rise + tDelayPDFall;
+                } 
+                    
             }
             if ( pFanin->tDelaysR[i].Fall >= 0 ) // case (2) 
             { 
-                if ( pGate->tDelaysF[i].Fall < pFanin->tDelaysR[i].Fall + tDelayBlockFall )
+                if ( pGate->tDelaysF[i].Fall < pFanin->tDelaysR[i].Fall + tDelayBlockFall ) {
                     pGate->tDelaysF[i].Fall = pFanin->tDelaysR[i].Fall + tDelayBlockFall;
+
+                    pGate->tDelaysFLD[i].Fall = pFanin->tDelaysRLD[i].Fall + tDelayLDFall;
+                    pGate->tDelaysFPD[i].Fall = pFanin->tDelaysRPD[i].Fall + tDelayPDFall;
+                }
+                    
             }
             ////////////////////////////////////////////////////////
         }
