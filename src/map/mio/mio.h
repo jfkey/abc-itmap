@@ -175,6 +175,10 @@ extern double            Mio_PinReadDelayFanoutRise( Mio_Pin_t * pPin );
 extern double            Mio_PinReadDelayBlockFall ( Mio_Pin_t * pPin );  
 extern double            Mio_PinReadDelayFanoutFall( Mio_Pin_t * pPin );  
 extern double            Mio_PinReadDelayBlockMax  ( Mio_Pin_t * pPin );  
+extern double            Mio_PinReadDelayLDRise    ( Mio_Pin_t * pPin );
+extern double            Mio_PinReadDelayLDFall    ( Mio_Pin_t * pPin );
+extern double            Mio_PinReadDelayPDRise    ( Mio_Pin_t * pPin );
+extern double            Mio_PinReadDelayPDFall    ( Mio_Pin_t * pPin );
 extern Mio_Pin_t *       Mio_PinReadNext           ( Mio_Pin_t * pPin );  
 /*=== mioRead.c =============================================================*/
 extern char *            Mio_ReadFile( char * FileName, int fAddEnd );
