@@ -150,9 +150,9 @@ clk = Abc_Clock();
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
 
-//    if ( !Map_Mapping( pMan ) )
+    // if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
-    if ( !Map_MappingSTA( pMan, 1))
+    if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
     {
         Map_ManFree( pMan );
         return NULL;
@@ -183,35 +183,35 @@ ABC_PRT( "Total runtime", Abc_Clock() - clkTotal );
     }
 
         // print the mapped_network
-   int i =0;
-   Abc_Obj_t * pNode;
-   printf("\nThe original Ntk...\n");
-   Abc_NtkForEachObj(pNtk, pNode, i ) {
-           if(Abc_ObjIsCi(pNode)){
-               printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
-           }
-           if (Abc_ObjIsNode(pNode)){
-               printf("node(%d), index(%d), Node\n", Abc_ObjId(pNode), i);
-           }
-           if (Abc_ObjIsCo(pNode)){
-               printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
-           }
-       }
+//    int i =0;
+//    Abc_Obj_t * pNode;
+//    printf("\nThe original Ntk...\n");
+//    Abc_NtkForEachObj(pNtk, pNode, i ) {
+//            if(Abc_ObjIsCi(pNode)){
+//                printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
+//            }
+//            if (Abc_ObjIsNode(pNode)){
+//                printf("node(%d), index(%d), Node\n", Abc_ObjId(pNode), i);
+//            }
+//            if (Abc_ObjIsCo(pNode)){
+//                printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
+//            }
+//        }
 
-   printf("\nReturn new Ntk...\n"); 
-   Abc_NtkForEachObj(pNtkNew, pNode, i ) {
-           if(Abc_ObjIsCi(pNode)){
-               printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
-           }
-           if (Abc_ObjIsNode(pNode)){
-               printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNode) , i, Abc_ObjMapNtkId(pNode),
-                      Abc_ObjMapNtkPhase(pNode));
+//    printf("\nReturn new Ntk...\n"); 
+//    Abc_NtkForEachObj(pNtkNew, pNode, i ) {
+//            if(Abc_ObjIsCi(pNode)){
+//                printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
+//            }
+//            if (Abc_ObjIsNode(pNode)){
+//                printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNode) , i, Abc_ObjMapNtkId(pNode),
+//                       Abc_ObjMapNtkPhase(pNode));
 
-           }
-           if (Abc_ObjIsCo(pNode)){
-               printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
-           }
-       }
+//            }
+//            if (Abc_ObjIsCo(pNode)){
+//                printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
+//            }
+//        }
 
     return pNtkNew;
 }

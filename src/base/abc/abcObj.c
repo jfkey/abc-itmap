@@ -398,6 +398,10 @@ Abc_Obj_t * Abc_NtkDupObj( Abc_Ntk_t * pNtkNew, Abc_Obj_t * pObj, int fCopyName 
 //    pObjNew->pEquiv = pObj->pEquiv;
     // remember the new node in the old node
     pObj->pCopy = pObjNew;
+    // updated by junfeng
+    // copy the mapped id and mapped phase 
+    pObjNew->mapNtkId = pObj->mapNtkId; 
+    pObjNew->mapNtkPhase = pObj->mapNtkPhase;   
     return pObjNew;
 }
 

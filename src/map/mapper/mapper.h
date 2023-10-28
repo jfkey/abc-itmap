@@ -169,7 +169,8 @@ extern void            Map_CutCreateFromNode( Map_Man_t * p, Map_Super_t * pSupe
                            int * pLeaves, int nLeaves, unsigned uPhaseLeaves );
 /*=== mapperCore.c =============================================================*/
 extern int             Map_Mapping( Map_Man_t * p );
-extern int             Map_MappingSTA( Map_Man_t * p, int fStime);
+// extern int          Map_MappingSTA( Map_Man_t * p, int fStime);
+extern int             Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs);
 /*=== mapperLib.c =============================================================*/
 extern int             Map_SuperLibDeriveFromGenlib( Mio_Library_t * pLib, int fVerbose );
 extern void            Map_SuperLibFree( Map_SuperLib_t * p );

@@ -229,6 +229,32 @@ ABC_PRT( "Time", Abc_Clock() - clk );
     return 1;
 }
 
+// pNtkNew = Abc_NtkFromMap( pMan, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
+//     if ( Mio_LibraryHasProfile(pLib) )
+//         Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
+//     Map_ManFree( pMan );
+//     if ( pNtkNew == NULL )
+//         return NULL;
+
+//     if ( pNtk->pExdc )
+//         pNtkNew->pExdc = Abc_NtkDup( pNtk->pExdc );
+// if ( fVerbose )
+// {
+// ABC_PRT( "Total runtime", Abc_Clock() - clkTotal );
+// }
+
+//     // make sure that everything is okay
+//     if ( !Abc_NtkCheck( pNtkNew ) )
+//     {
+//         printf( "Abc_NtkMap: The network check has failed.\n" );
+//         Abc_NtkDelete( pNtkNew );
+//         return NULL;
+//     }
+
+void Map_MappingIteratable() 
+{
+
+}
 
 /**Function*************************************************************
 
@@ -247,7 +273,7 @@ ABC_PRT( "Time", Abc_Clock() - clk );
   SeeAlso     []
 
 ***********************************************************************/
-int Map_MappingSTA( Map_Man_t * p, int fStime)
+int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs)
 {
     int fShowSwitching         = 0;
     int fUseAreaFlow           = 1;
@@ -300,17 +326,92 @@ int Map_MappingSTA( Map_Man_t * p, int fStime)
         return 1;
     }
 
-    // perform STA,  update the load-dependent delay for the cut
-    /*
     
-    //  networkID
-
-    1. construct the mapped network. (also store the mapped network)
-    2. perform topo 
-    3. perfrom STA  
-    -> update the delay of  Match_t, Cut_t, or Supergate? 
-
+    /* perform STA,  update the load-dependent delay for the cut
+        1. construct the mapped network. (also store the mapped network)
+        2. perform topo 
+        3. perfrom STA  
+        -> update the delay of  Match_t, Cut_t, or Supergate? 
     */
+
+    // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
+    extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
+    Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
+    if ( Mio_LibraryHasProfile(pLib) )
+            Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
+    Map_ManFree( p );
+    if ( pNtkMapped == NULL )
+        return NULL;
+
+    if ( pNtk->pExdc )
+        pNtkMapped->pExdc = Abc_NtkDup( pNtk->pExdc );
+    // make sure that everything is okay
+    if ( !Abc_NtkCheck( pNtkMapped ) )
+    {
+        printf( "Abc_NtkMap: The network check has failed.\n" );
+        Abc_NtkDelete( pNtkMapped );
+        return NULL;
+    }
+    /* debug
+    // print the mapped_network
+    printf("\nReturn mapped Ntk...\n"); 
+    Abc_Obj_t * pNode;
+    int i = 0; 
+    Abc_NtkForEachObj(pNtkMapped, pNode, i ) {
+        if (i < 2950) continue;
+        if(Abc_ObjIsCi(pNode)){
+            printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
+        }
+        if (Abc_ObjIsNode(pNode)){
+            printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNode) , i, Abc_ObjMapNtkId(pNode),
+                    Abc_ObjMapNtkPhase(pNode));
+
+        }
+        if (Abc_ObjIsCo(pNode)){
+            printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
+        }
+    }
+    */
+
+    // 2. execute topo command 
+    if ( pNtkMapped == NULL )
+    {
+        Abc_Print( -1, "Empty network.\n" );
+        return 1;
+    }
+    if ( !Abc_NtkIsLogic(pNtkMapped) )
+    {
+        Abc_Print( -1, "This command can only be applied to a logic network.\n" );
+        return 1;
+    }
+    // modify the current network
+    Abc_Ntk_t* pNtkTopoed  = Abc_NtkDupDfs( pNtkMapped );
+    if ( pNtkTopoed == NULL )
+    {
+        Abc_Print( -1, "The command has failed.\n" );
+        return 1;
+    } 
+    // replace the current network
+    // Abc_FrameReplaceCurrentNetwork( pAbc, pNtkRes );
+    /*
+    // debug
+    printf("\nReturn the topological ordered Ntk...\n"); 
+    Abc_NtkForEachObj(pNtkTopoed, pNode, i ) {
+        if (i < 2950) continue;
+        if(Abc_ObjIsCi(pNode)){
+            printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
+        }
+        if (Abc_ObjIsNode(pNode)){
+            printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNode) , i, Abc_ObjMapNtkId(pNode),
+                    Abc_ObjMapNtkPhase(pNode));
+        }
+        if (Abc_ObjIsCo(pNode)){
+            printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
+        }
+    }
+    */
+   
+   // 3. perform STA 
 
 
 /*
