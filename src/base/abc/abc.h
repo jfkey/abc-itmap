@@ -119,6 +119,13 @@ typedef struct Abc_ManTime_t_   Abc_ManTime_t;
 typedef struct Abc_ManCut_t_    Abc_ManCut_t;
 typedef struct Abc_Time_t_      Abc_Time_t;
 
+typedef struct Abc_ObjTime_t_   Abc_ObjTime_t;  // TODO junfeng
+
+struct Abc_ObjTime_t_
+{
+    float             time;
+};
+ 
 struct Abc_Time_t_
 {
     float             Rise;
@@ -149,8 +156,9 @@ struct Abc_Obj_t_     // 48/72 bytes (32-bits/64-bits)
       int             iTemp;
       float           dTemp; };
 
-    int               mapNtkId;      // to store the mapped network node id
-    int               mapNtkPhase;   // to store the mapped network node phase
+    int               mapNtkId;      // to store id    of the mapped network node
+    int               mapNtkPhase;   // to store phase of the mapped network node
+    float             mapNtkTime;    // to store time  of the mapped network node
 };
 
 struct Abc_Ntk_t_ 
@@ -344,6 +352,7 @@ static inline Abc_Obj_t * Abc_ObjCopyCond( Abc_Obj_t * pObj )        { return Ab
 // junfeng
 static inline int         Abc_ObjMapNtkId( Abc_Obj_t * pObj )        { return pObj->mapNtkId;            }
 static inline int         Abc_ObjMapNtkPhase( Abc_Obj_t * pObj )     { return pObj->mapNtkPhase;         }
+static inline int         Abc_ObjMapNtkTime( Abc_Obj_t * pObj )      { return pObj->mapNtkTime;          }  
 
 // setting data members of the network
 static inline void        Abc_ObjSetLevel( Abc_Obj_t * pObj, int Level )         { pObj->Level =  Level;    } 
@@ -351,6 +360,7 @@ static inline void        Abc_ObjSetCopy( Abc_Obj_t * pObj, Abc_Obj_t * pCopy ) 
 static inline void        Abc_ObjSetData( Abc_Obj_t * pObj, void * pData )       { pObj->pData =  pData;    } 
 static inline void        Abc_ObjSetMapNtkId( Abc_Obj_t * pObj, int mapid )      { pObj->mapNtkId = mapid;  }
 static inline void        Abc_ObjSetMapNtkPhase( Abc_Obj_t * pObj, int phase )   { pObj->mapNtkPhase = phase; }
+static inline void        Abc_ObjSetMapNtkTime( Abc_Obj_t * pObj, float time )   { pObj->mapNtkTime = time; }
 
 // checking the object type
 static inline int         Abc_ObjIsNone( Abc_Obj_t * pObj )          { return pObj->Type == ABC_OBJ_NONE;    }

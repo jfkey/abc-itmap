@@ -117,11 +117,14 @@ Abc_Obj_t * Abc_SclFindMostCriticalFanin( SC_Man * p, int * pfRise, Abc_Obj_t * 
 static inline void Abc_SclTimeNodePrint( SC_Man * p, Abc_Obj_t * pObj, int fRise, int Length, float maxDelay )
 {
     SC_Cell * pCell = Abc_ObjIsNode(pObj) ? Abc_SclObjCell(pObj) : NULL;
-    printf( "%8d : ",           Abc_ObjId(pObj) );
+    printf("%8d : ",            Abc_ObjId(pObj) );
+    printf("%d,",               Abc_ObjMapNtkId(pObj) );
+    printf("%d,",               Abc_ObjMapNtkPhase(pObj) );
+    printf("%.3f,",             Abc_SclObjTimeMax(p, pObj)  - Abc_SclGetMaxDelayNodeFanins(p, pObj) );
     printf( "%d ",              Abc_ObjFaninNum(pObj) );
     printf( "%4d ",             Abc_ObjFanoutNum(pObj) );
     printf( "%-*s ",            Length, pCell ? pCell->pName : "pi" );
-    printf( "A =%7.2f  ",       pCell ? pCell->area : 0.0 );
+    //printf( "A =%7.2f  ",       pCell ? pCell->area : 0.0 );
     printf( "D%s =",            fRise ? "r" : "f" );
     printf( "%6.1f",            Abc_SclObjTimeMax(p, pObj) );
     printf( "%7.1f ps  ",       -Abc_AbsFloat(Abc_SclObjTimeOne(p, pObj, 0) - Abc_SclObjTimeOne(p, pObj, 1)) );
@@ -266,7 +269,22 @@ static inline void Abc_SclTimeFanin( SC_Man * p, SC_Timing * pTime, Abc_Obj_t * 
     SC_Pair * pLoad    = Abc_SclObjLoad( p, pObj );
     SC_Pair * pArrOut  = Abc_SclObjTime( p, pObj );   // modified
     SC_Pair * pSlewOut = Abc_SclObjSlew( p, pObj );   // modified
+    
     Scl_LibPinArrival( pTime, pArrIn, pSlewIn, pLoad, pArrOut, pSlewOut );
+    if (Abc_ObjId(pObj) == 845 ||Abc_ObjId(pObj) == 843 || Abc_ObjId(pObj) == 842 || Abc_ObjId(pObj) == 841 ||
+     Abc_ObjId(pObj) == 712 || Abc_ObjId(pObj) == 664 || Abc_ObjId(pObj) == 655 || Abc_ObjId(pObj) == 641 || Abc_ObjId(pObj) == 626 ) {
+        printf("%8d : ",            Abc_ObjId(pObj) );
+        printf("%d,",               Abc_ObjMapNtkId(pObj) );
+        printf("%d,",               Abc_ObjMapNtkPhase(pObj) );
+        printf( "%d ",              Abc_ObjFaninNum(pObj) );
+        printf( "%4d ",             Abc_ObjFanoutNum(pObj) );
+        printf( "pArrIn =(%4.1f, %4.1f)",       pArrIn->rise, pArrIn->fall );
+        printf(" pSlewIn =(%4.1f, %4.1f)",      pSlewIn->rise, pSlewIn->fall );
+        printf(" pLoad =(%4.1f, %4.1f)",        pLoad->rise, pLoad->fall );
+        printf(" pArrOut =(%4.1f, %4.1f)",      pArrOut->rise, pArrOut->fall );
+        printf(" pSlewOut =(%4.1f, %4.1f)",     pSlewOut->rise, pSlewOut->fall );
+        printf("\n"); // Abc_SclObjLoadMax(p, pObj)
+    }
 }
 static inline void Abc_SclDeptFanin( SC_Man * p, SC_Timing * pTime, Abc_Obj_t * pObj, Abc_Obj_t * pFanin )
 {
@@ -405,12 +423,19 @@ void Abc_SclTimeNtkRecompute( SC_Man * p, float * pArea, float * pDelay, int fRe
     Abc_SclComputeLoad( p );
     Abc_SclManCleanTime( p );
     p->nEstNodes = 0;
-    Abc_NtkForEachCi( p->pNtk, pObj, i )
+    Abc_NtkForEachCi( p->pNtk, pObj, i ){
+        printf("CI node id=(%d) pLoad Max =(%4.4f) \n", Abc_ObjId(pObj), Abc_SclObjLoadMax(p, pObj) );
         Abc_SclTimeNode( p, pObj, 0 );
-    Abc_NtkForEachNode1( p->pNtk, pObj, i )
+    }
+    Abc_NtkForEachNode1( p->pNtk, pObj, i ){
+        // printf("AND node id=(%d) pLoad Max =(%4.4f) \n", Abc_ObjId(pObj), Abc_SclObjLoadMax(p, pObj) );
         Abc_SclTimeNode( p, pObj, 0 );
-    Abc_NtkForEachCo( p->pNtk, pObj, i )
+    } 
+    Abc_NtkForEachCo( p->pNtk, pObj, i ){
+        printf("CO node id=(%d) pLoad Max =(%4.4f) \n", Abc_ObjId(pObj), Abc_SclObjLoadMax(p, pObj) );
         Abc_SclTimeNode( p, pObj, 0 );
+    }
+        
     D = Abc_SclReadMaxDelay( p );
     if ( fReverse && DUser > 0 && D < DUser )
         D = DUser;

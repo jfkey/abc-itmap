@@ -150,9 +150,9 @@ clk = Abc_Clock();
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
 
-    // if ( !Map_Mapping( pMan ) )
+    if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
-    if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
+    // if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
     {
         Map_ManFree( pMan );
         return NULL;

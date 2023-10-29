@@ -17,6 +17,7 @@
 ***********************************************************************/
 
 #include "mapperInt.h"
+#include "map/scl/sclLib.h"
 //#include "resm.h"
 
 ABC_NAMESPACE_IMPL_START
@@ -411,8 +412,29 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     }
     */
    
-   // 3. perform STA 
-
+    // 3. perform STA 
+    int fShowAll      = 1;
+    int fUseWireLoads = 0;
+    int fPrintPath    = 0;
+    int fDumpStats    = 0;
+    int nTreeCRatio   = 0; 
+    if ( !Abc_NtkHasMapping(pNtkTopoed) )
+    {
+        Abc_Print(-1, "The current network is not mapped.\n" );
+        return 1;
+    }
+    if ( !Abc_SclCheckNtk(pNtkTopoed, 0) )
+    {
+        Abc_Print(-1, "The current network is not in a topo order (run \"topo\").\n" );
+        return 1;
+    }
+    if ( Abc_FrameReadLibScl() == NULL )
+    {
+        Abc_Print(-1, "There is no Liberty library available.\n" );
+        return 1;
+    }
+    extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
+    Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
 
 /*
     //////////////////////////////////////////////////////////////////////
