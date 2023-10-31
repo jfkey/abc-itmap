@@ -257,6 +257,7 @@ struct Map_MatchStruct_t_
     // the parameters of the match
     Map_Time_t          tArrive;       // the arrival time of this match
     float               AreaFlow;      // the area flow or area of this match
+    
 };
   
 // the cuts used for matching
@@ -272,6 +273,7 @@ struct Map_CutStruct_t_
     char                fMark;         // the mark to denote visited cut
     char                Phase;         // the mark to denote complemented cut
     Map_Match_t         M[2];          // the matches for positive/negative phase
+    float               delay[2];      // the delay of cut
 };
 
 // the supergate internally represented

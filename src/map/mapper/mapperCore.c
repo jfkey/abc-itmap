@@ -18,6 +18,9 @@
 
 #include "mapperInt.h"
 #include "map/scl/sclLib.h"
+#include "map/scl/sclSize.h"
+#include "map/mio/mio.h"
+#include "map/mio/mioInt.h"
 //#include "resm.h"
 
 ABC_NAMESPACE_IMPL_START
@@ -320,12 +323,12 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     }
     //////////////////////////////////////////////////////////////////////
 
-    if ( !p->fAreaRecovery )
-    {
-        if ( p->fVerbose )
-            Map_MappingPrintOutputArrivals( p );
-        return 1;
-    }
+    // if ( !p->fAreaRecovery )
+    // {
+    //     if ( p->fVerbose )
+    //         Map_MappingPrintOutputArrivals( p );
+    //     return 1;
+    // }
 
     
     /* perform STA,  update the load-dependent delay for the cut
@@ -340,7 +343,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
     if ( Mio_LibraryHasProfile(pLib) )
             Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
-    Map_ManFree( p );
+    // Map_ManFree( p );
     if ( pNtkMapped == NULL )
         return NULL;
 
@@ -353,26 +356,23 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
         Abc_NtkDelete( pNtkMapped );
         return NULL;
     }
-    /* debug
+    
     // print the mapped_network
     printf("\nReturn mapped Ntk...\n"); 
     Abc_Obj_t * pNode;
-    int i = 0; 
-    Abc_NtkForEachObj(pNtkMapped, pNode, i ) {
-        if (i < 2950) continue;
+    int i1 = 0; 
+    Abc_NtkForEachObj(pNtkMapped, pNode, i1 ) { 
         if(Abc_ObjIsCi(pNode)){
-            printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
+            printf("CI index=(%d), mappingID=(%d) \n", i1, Abc_ObjMapNtkId(pNode));
         }
         if (Abc_ObjIsNode(pNode)){
-            printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNode) , i, Abc_ObjMapNtkId(pNode),
-                    Abc_ObjMapNtkPhase(pNode));
-
+            printf("Cell index=(%d), mappingID=(%d) \n", i1, Abc_ObjMapNtkId(pNode));
         }
         if (Abc_ObjIsCo(pNode)){
-            printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
+            printf("CO index=(%d), mappingID=(%d) \n", i1, Abc_ObjMapNtkId(pNode));
         }
     }
-    */
+     
 
     // 2. execute topo command 
     if ( pNtkMapped == NULL )
@@ -394,26 +394,28 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     } 
     // replace the current network
     // Abc_FrameReplaceCurrentNetwork( pAbc, pNtkRes );
+
     /*
     // debug
     printf("\nReturn the topological ordered Ntk...\n"); 
-    Abc_NtkForEachObj(pNtkTopoed, pNode, i ) {
-        if (i < 2950) continue;
-        if(Abc_ObjIsCi(pNode)){
-            printf("node(%d), index(%d), CI\n", Abc_ObjId(pNode), i);
+    Abc_Obj_t *pNodej; int j; 
+    Abc_NtkForEachObj(pNtkTopoed, pNodej, j ) {
+        if (j < 100 || j > 110) continue;
+        if(Abc_ObjIsCi(pNodej)){
+            printf("node(%d), index(%d), CI\n", Abc_ObjId(pNodej), j);
         }
-        if (Abc_ObjIsNode(pNode)){
-            printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNode) , i, Abc_ObjMapNtkId(pNode),
-                    Abc_ObjMapNtkPhase(pNode));
+        if (Abc_ObjIsNode(pNodej)){
+            printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNodej) , j, Abc_ObjMapNtkId(pNodej),
+                    Abc_ObjMapNtkPhase(pNodej));
         }
-        if (Abc_ObjIsCo(pNode)){
-            printf("node(%d), index(%d), CO\n", Abc_ObjId(pNode), i);
+        if (Abc_ObjIsCo(pNodej)){
+            printf("node(%d), index(%d), CO\n", Abc_ObjId(pNodej), j);
         }
     }
-    */
+   */ 
    
     // 3. perform STA 
-    int fShowAll      = 1;
+    int fShowAll      = 0;
     int fUseWireLoads = 0;
     int fPrintPath    = 0;
     int fDumpStats    = 0;
@@ -435,6 +437,84 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     }
     extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
     Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
+     
+    // 4. update delay of STA in the the mapping graph (rather the mapped network)
+    Abc_Obj_t * pObj; 
+    Map_Node_t * pNodeMap; 
+    Map_Cut_t * pCutBest;
+    Map_Super_t *       pSuperBest;
+    Mio_Gate_t * pRoot;
+    int i,  mappingID, fPhase; 
+    float gateDelay;
+    
+    
+    Abc_NtkForEachCi( pNtkTopoed, pObj, i ){
+        printf("CI node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
+    }
+    Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){
+        printf("Cell node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
+    }
+    Abc_NtkForEachCo( pNtkTopoed, pObj, i ){
+        printf("Co node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
+    }
+    Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){ 
+        mappingID = Abc_ObjMapNtkId(pObj);
+        fPhase =  Abc_ObjMapNtkPhase(pObj);
+        gateDelay = Abc_ObjMapNtkTime(pObj);
+        pNodeMap = p->vMapObjs->pArray[mappingID];
+        int num = Map_NodeReadNum(pNodeMap);
+        printf("%d,",  num);
+        if ( Map_NodeReadCutBest(pNodeMap, fPhase) != NULL ) {
+            pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);
+            pCutBest->delay[fPhase] = gateDelay;
+            pSuperBest = pCutBest->M[fPhase].pSuperBest;
+            pRoot = Map_SuperReadRoot(pSuperBest); 
+            printf("%24s, ",               Mio_GateReadName(pRoot)); 
+            printf("%4d, ",              mappingID );
+            printf("%4d, ",              fPhase );
+            printf("%4.2f, ",            gateDelay);
+            Abc_Obj_t * pObj2;
+            int k = 0;
+            int maxFaninDegree = 0;
+            Abc_ObjForEachFanin( pObj, pObj2, k ) {
+                if (maxFaninDegree < Abc_ObjFanoutNum(pObj2))
+                    maxFaninDegree = Abc_ObjFanoutNum(pObj2);
+            }
+            printf( "%4d, ",             maxFaninDegree);    
+            printf( "%4d, ",             Abc_ObjFanoutNum(pObj) );
+            printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayLDMax.Rise, pSuperBest->tDelayLDMax.Fall)); 
+            printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayPDMax.Rise, pSuperBest->tDelayPDMax.Fall)); 
+            printf("\n");
+        } else {
+            // inveter
+            Mio_Gate_t * inveter =  (Mio_Gate_t *)pObj->pData;
+            printf("%24s, ",               Mio_GateReadName(inveter)); 
+            printf("%4d, ",              mappingID );
+            printf("%4d, ",              fPhase );
+            printf("%6.2f, ",            gateDelay);
+            Abc_Obj_t * pObj2;
+            int k = 0;
+            int maxFaninDegree = 0;
+            Abc_ObjForEachFanin( pObj, pObj2, k ) {
+                if (maxFaninDegree < Abc_ObjFanoutNum(pObj2))
+                    maxFaninDegree = Abc_ObjFanoutNum(pObj2);
+            }
+            printf( "%4d, ",             maxFaninDegree);    
+            printf( "%4d, ",             Abc_ObjFanoutNum(pObj) ); 
+            
+            printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayLDRise, inveter->pPins->dDelayLDFall)); 
+            printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayPDRise, inveter->pPins->dDelayPDFall)); 
+            printf("\n");
+        } 
+    }
+    // LD, PD, faninD, D b
+    // 2.4  1.1  -0.01   2.1  -10.9
+    // 2.4 * 2.5 + 1.1 * 7.6 - 0.01*6 + 2.1 * 2 -10.9 
+    // 0.7 * LD * ( 0.9 * D + 0.2 * sqrt(faninD)) + 0.6 * PD + 5
+    
+    // 5. update the new delay of the mapped network
+
+    
 
 /*
     //////////////////////////////////////////////////////////////////////

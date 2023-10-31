@@ -25,6 +25,7 @@
 #include "misc/util/utilNam.h"
 #include "map/scl/sclCon.h"
 
+
 ABC_NAMESPACE_IMPL_START
 
 
@@ -150,9 +151,9 @@ clk = Abc_Clock();
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
 
-    if ( !Map_Mapping( pMan ) )
+    // if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
-    // if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
+    if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
     {
         Map_ManFree( pMan );
         return NULL;
@@ -468,6 +469,8 @@ Abc_Obj_t * Abc_NodeFromMapPhase_rec( Abc_Ntk_t * pNtkNew, Map_Node_t * pNodeMap
     // implement the supergate
     pNodeNew = Abc_NodeFromMapSuper_rec( pNtkNew, pNodeMap, pSuperBest, pNodePIs, nLeaves );
     Map_NodeSetData( pNodeMap, fPhase, (char *)pNodeNew );
+    Abc_ObjSetMapNtkId(pNodeNew, Map_NodeReadNum(pNodeMap));
+    Abc_ObjSetMapNtkPhase(pNodeNew, fPhase);
     return pNodeNew;
 }
 Abc_Obj_t * Abc_NodeFromMap_rec( Abc_Ntk_t * pNtkNew, Map_Node_t * pNodeMap, int fPhase )
@@ -480,22 +483,28 @@ Abc_Obj_t * Abc_NodeFromMap_rec( Abc_Ntk_t * pNtkNew, Map_Node_t * pNodeMap, int
         pNodeNew = fPhase? Abc_NtkCreateNodeConst1(pNtkNew) : Abc_NtkCreateNodeConst0(pNtkNew);
         if ( pNodeNew->pData == NULL )
             printf( "Error creating mapped network: Library does not have a constant %d gate.\n", fPhase );
+        Abc_ObjSetMapNtkId(pNodeNew, Map_NodeReadNum(pNodeMap));
+        Abc_ObjSetMapNtkPhase(pNodeNew, fPhase);
         return pNodeNew;
     }
 
     // check if the phase is already implemented
     pNodeNew = (Abc_Obj_t *)Map_NodeReadData( pNodeMap, fPhase );
-    if ( pNodeNew )
+    if ( pNodeNew ){
+        Abc_ObjSetMapNtkId(pNodeNew, Map_NodeReadNum(pNodeMap));
+        Abc_ObjSetMapNtkPhase(pNodeNew, fPhase);
         return pNodeNew;
+    }
+        
 
     // implement the node if the best cut is assigned
     // update by junfeng, store the mapped network node ID in Abc_Obj_t
     if ( Map_NodeReadCutBest(pNodeMap, fPhase) != NULL ) {
-        // return Abc_NodeFromMapPhase_rec( pNtkNew, pNodeMap, fPhase );
-        Abc_Obj_t * tmp = Abc_NodeFromMapPhase_rec( pNtkNew, pNodeMap, fPhase );
-        Abc_ObjSetMapNtkId(tmp, Map_NodeReadNum(pNodeMap));
-        Abc_ObjSetMapNtkPhase(tmp, fPhase);
-        return tmp;
+        return Abc_NodeFromMapPhase_rec( pNtkNew, pNodeMap, fPhase );
+        // Abc_Obj_t * tmp = Abc_NodeFromMapPhase_rec( pNtkNew, pNodeMap, fPhase );
+        // Abc_ObjSetMapNtkId(tmp, Map_NodeReadNum(pNodeMap));
+        // Abc_ObjSetMapNtkPhase(tmp, fPhase);
+        // return tmp;
     }
         
 
@@ -510,6 +519,8 @@ Abc_Obj_t * Abc_NodeFromMap_rec( Abc_Ntk_t * pNtkNew, Map_Node_t * pNodeMap, int
 
     // set the inverter
     Map_NodeSetData( pNodeMap, fPhase, (char *)pNodeInv );
+    Abc_ObjSetMapNtkId(pNodeInv, Map_NodeReadNum(pNodeMap));
+    Abc_ObjSetMapNtkPhase(pNodeInv, fPhase);
     return pNodeInv;
 }
 Abc_Ntk_t * Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs )

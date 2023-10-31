@@ -175,6 +175,18 @@ void Abc_SclTimeNtkPrint( SC_Man * p, int fShowAll, int fPrintPath )
     Abc_Print( 1, "(%5.1f %%)   ",         100.0 * Abc_SclCountNearCriticalNodes(p) / Abc_NtkNodeNum(p->pNtk) );
     Abc_Print( 1, "            \n" );
 #endif
+      
+    // update time info in the topological ordered network
+    { 
+        Abc_NtkForEachNodeReverse( p->pNtk, pObj, i )
+            if ( Abc_ObjFaninNum(pObj) > 0 )
+                nLength = Abc_MaxInt( nLength, strlen(Abc_SclObjCell(pObj)->pName) );
+        Abc_NtkForEachNodeReverse( p->pNtk, pObj, i )
+            if ( Abc_ObjFaninNum(pObj) > 0 ) {
+                float supergateDelay = Abc_SclObjTimeMax(p, pObj)  - Abc_SclGetMaxDelayNodeFanins(p, pObj);
+                Abc_ObjSetMapNtkTime(pObj, supergateDelay);
+            } 
+    }
 
     if ( fShowAll )
     {
@@ -271,20 +283,19 @@ static inline void Abc_SclTimeFanin( SC_Man * p, SC_Timing * pTime, Abc_Obj_t * 
     SC_Pair * pSlewOut = Abc_SclObjSlew( p, pObj );   // modified
     
     Scl_LibPinArrival( pTime, pArrIn, pSlewIn, pLoad, pArrOut, pSlewOut );
-    if (Abc_ObjId(pObj) == 845 ||Abc_ObjId(pObj) == 843 || Abc_ObjId(pObj) == 842 || Abc_ObjId(pObj) == 841 ||
-     Abc_ObjId(pObj) == 712 || Abc_ObjId(pObj) == 664 || Abc_ObjId(pObj) == 655 || Abc_ObjId(pObj) == 641 || Abc_ObjId(pObj) == 626 ) {
-        printf("%8d : ",            Abc_ObjId(pObj) );
-        printf("%d,",               Abc_ObjMapNtkId(pObj) );
-        printf("%d,",               Abc_ObjMapNtkPhase(pObj) );
-        printf( "%d ",              Abc_ObjFaninNum(pObj) );
-        printf( "%4d ",             Abc_ObjFanoutNum(pObj) );
-        printf( "pArrIn =(%4.1f, %4.1f)",       pArrIn->rise, pArrIn->fall );
-        printf(" pSlewIn =(%4.1f, %4.1f)",      pSlewIn->rise, pSlewIn->fall );
-        printf(" pLoad =(%4.1f, %4.1f)",        pLoad->rise, pLoad->fall );
-        printf(" pArrOut =(%4.1f, %4.1f)",      pArrOut->rise, pArrOut->fall );
-        printf(" pSlewOut =(%4.1f, %4.1f)",     pSlewOut->rise, pSlewOut->fall );
-        printf("\n"); // Abc_SclObjLoadMax(p, pObj)
-    }
+    // if (Abc_ObjId(pObj) == 153 ||Abc_ObjId(pObj) == 33 || Abc_ObjId(pObj) == 25 ) {
+    //     printf("%8d : ",            Abc_ObjId(pObj) );
+    //     printf("%d,",               Abc_ObjMapNtkId(pObj) );
+    //     printf("%d,",               Abc_ObjMapNtkPhase(pObj) );
+    //     printf( "%d ",              Abc_ObjFaninNum(pObj) );
+    //     printf( "%4d ",             Abc_ObjFanoutNum(pObj) );
+    //     printf( "pArrIn =(%4.1f, %4.1f)",       pArrIn->rise, pArrIn->fall );
+    //     printf(" pSlewIn =(%4.1f, %4.1f)",      pSlewIn->rise, pSlewIn->fall );
+    //     printf(" pLoad =(%4.1f, %4.1f)",        pLoad->rise, pLoad->fall );
+    //     printf(" pArrOut =(%4.1f, %4.1f)",      pArrOut->rise, pArrOut->fall );
+    //     printf(" pSlewOut =(%4.1f, %4.1f)",     pSlewOut->rise, pSlewOut->fall );
+    //     printf("\n"); // Abc_SclObjLoadMax(p, pObj)
+    // }
 }
 static inline void Abc_SclDeptFanin( SC_Man * p, SC_Timing * pTime, Abc_Obj_t * pObj, Abc_Obj_t * pFanin )
 {
@@ -424,7 +435,7 @@ void Abc_SclTimeNtkRecompute( SC_Man * p, float * pArea, float * pDelay, int fRe
     Abc_SclManCleanTime( p );
     p->nEstNodes = 0;
     Abc_NtkForEachCi( p->pNtk, pObj, i ){
-        printf("CI node id=(%d) pLoad Max =(%4.4f) \n", Abc_ObjId(pObj), Abc_SclObjLoadMax(p, pObj) );
+        // printf("CI node id=(%d) pLoad Max =(%4.4f) \n", Abc_ObjId(pObj), Abc_SclObjLoadMax(p, pObj) );
         Abc_SclTimeNode( p, pObj, 0 );
     }
     Abc_NtkForEachNode1( p->pNtk, pObj, i ){
@@ -432,7 +443,7 @@ void Abc_SclTimeNtkRecompute( SC_Man * p, float * pArea, float * pDelay, int fRe
         Abc_SclTimeNode( p, pObj, 0 );
     } 
     Abc_NtkForEachCo( p->pNtk, pObj, i ){
-        printf("CO node id=(%d) pLoad Max =(%4.4f) \n", Abc_ObjId(pObj), Abc_SclObjLoadMax(p, pObj) );
+        // printf("CO node id=(%d) pLoad Max =(%4.4f) \n", Abc_ObjId(pObj), Abc_SclObjLoadMax(p, pObj) );
         Abc_SclTimeNode( p, pObj, 0 );
     }
         

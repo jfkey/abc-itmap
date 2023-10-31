@@ -352,7 +352,7 @@ static inline Abc_Obj_t * Abc_ObjCopyCond( Abc_Obj_t * pObj )        { return Ab
 // junfeng
 static inline int         Abc_ObjMapNtkId( Abc_Obj_t * pObj )        { return pObj->mapNtkId;            }
 static inline int         Abc_ObjMapNtkPhase( Abc_Obj_t * pObj )     { return pObj->mapNtkPhase;         }
-static inline int         Abc_ObjMapNtkTime( Abc_Obj_t * pObj )      { return pObj->mapNtkTime;          }  
+static inline float       Abc_ObjMapNtkTime( Abc_Obj_t * pObj )      { return pObj->mapNtkTime;          }  
 
 // setting data members of the network
 static inline void        Abc_ObjSetLevel( Abc_Obj_t * pObj, int Level )         { pObj->Level =  Level;    } 
