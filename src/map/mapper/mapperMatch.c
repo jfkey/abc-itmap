@@ -263,13 +263,13 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
 
     // skip the cuts that have been unassigned during area recovery
     pCutBest = pNode->pCutBest[fPhase];
-    if ( p->fMappingMode != 0 && pCutBest == NULL )
+    if ( p->fMappingMode != 0 && pCutBest == NULL  && p->fMappingMode != 5)
         return 1;
 
     // recompute the arrival times of the current best match 
     // because the arrival times of the fanins may have changed 
     // as a result of remapping fanins in the topological order
-    if ( p->fMappingMode != 0 )
+    if ( p->fMappingMode != 0 && p->fMappingMode != 5 )
     {
         Map_TimeCutComputeArrival( pNode, pCutBest, fPhase, MAP_FLOAT_LARGE );
         // make sure that the required times are met
@@ -340,8 +340,7 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     pCutBest->M[fPhase]     = MatchBest;
 
     // reference the new cut if it used
-    if ( p->fMappingMode >= 2 && 
-         (pNode->nRefAct[fPhase] > 0 || 
+    if ( p->fMappingMode >= 2 && p->fMappingMode != 5 && (pNode->nRefAct[fPhase] > 0 || 
          (pNode->pCutBest[!fPhase] == NULL && pNode->nRefAct[!fPhase] > 0)) )
     {
         if ( p->fMappingMode == 2 || p->fMappingMode == 3 )
@@ -441,6 +440,8 @@ void Map_NodeTryDroppingOnePhase( Map_Man_t * p, Map_Node_t * pNode )
     // do not drop while recovering area flow
     if ( p->fMappingMode == 1 )//|| p->fMappingMode == 2 )
         return;
+
+    // TODO 
 
     // get the pointers to the matches of the best cuts
     pMatchBest0 = pNode->pCutBest[0]->M + 0;
@@ -586,7 +587,7 @@ int Map_MappingMatches( Map_Man_t * p )
     Map_Node_t * pNode;
     int i;
 
-    assert( p->fMappingMode >= 0 && p->fMappingMode <= 4 );
+    assert( p->fMappingMode >= 0 && p->fMappingMode <= 5 );
 
     // use the externally given PI arrival times
     if ( p->fMappingMode == 0 )

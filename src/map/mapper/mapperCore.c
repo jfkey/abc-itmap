@@ -357,6 +357,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
         return NULL;
     }
     
+    /*
     // print the mapped_network
     printf("\nReturn mapped Ntk...\n"); 
     Abc_Obj_t * pNode;
@@ -372,7 +373,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
             printf("CO index=(%d), mappingID=(%d) \n", i1, Abc_ObjMapNtkId(pNode));
         }
     }
-     
+    */
 
     // 2. execute topo command 
     if ( pNtkMapped == NULL )
@@ -447,7 +448,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     int i,  mappingID, fPhase; 
     float gateDelay;
     
-    
+    /*
     Abc_NtkForEachCi( pNtkTopoed, pObj, i ){
         printf("CI node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
     }
@@ -457,18 +458,20 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     Abc_NtkForEachCo( pNtkTopoed, pObj, i ){
         printf("Co node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
     }
+    */
     Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){ 
         mappingID = Abc_ObjMapNtkId(pObj);
         fPhase =  Abc_ObjMapNtkPhase(pObj);
         gateDelay = Abc_ObjMapNtkTime(pObj);
         pNodeMap = p->vMapObjs->pArray[mappingID];
         int num = Map_NodeReadNum(pNodeMap);
-        printf("%d,",  num);
+        // printf("%d,",  num);
         if ( Map_NodeReadCutBest(pNodeMap, fPhase) != NULL ) {
             pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);
             pCutBest->delay[fPhase] = gateDelay;
             pSuperBest = pCutBest->M[fPhase].pSuperBest;
             pRoot = Map_SuperReadRoot(pSuperBest); 
+            /*
             printf("%24s, ",               Mio_GateReadName(pRoot)); 
             printf("%4d, ",              mappingID );
             printf("%4d, ",              fPhase );
@@ -484,8 +487,9 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
             printf( "%4d, ",             Abc_ObjFanoutNum(pObj) );
             printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayLDMax.Rise, pSuperBest->tDelayLDMax.Fall)); 
             printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayPDMax.Rise, pSuperBest->tDelayPDMax.Fall)); 
-            printf("\n");
+            printf("\n");*/
         } else {
+            /*
             // inveter
             Mio_Gate_t * inveter =  (Mio_Gate_t *)pObj->pData;
             printf("%24s, ",               Mio_GateReadName(inveter)); 
@@ -504,7 +508,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
             
             printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayLDRise, inveter->pPins->dDelayLDFall)); 
             printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayPDRise, inveter->pPins->dDelayPDFall)); 
-            printf("\n");
+            printf("\n");*/
         } 
     }
     // LD, PD, faninD, D b
@@ -513,11 +517,103 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     // 0.7 * LD * ( 0.9 * D + 0.2 * sqrt(faninD)) + 0.6 * PD + 5
     
     // 5. update the new delay of the mapped network
+    // print the nRef of the mapping network 
+    /*
+    printf("the number of fanout of the mapping network \n");
+    Map_Node_t * pNodeM; 
+    for ( i = 0; i < p->vMapObjs->nSize; i++ )
+    {
+        pNodeM = p->vMapObjs->pArray[i];
+        if ( Map_NodeIsBuf(pNodeM) ) 
+            continue;  
+        printf("node(%d), nRefs(%d), nRefAct(%d, %d), nRefEst(%2.2f, %2.2f) \n", Map_NodeReadNum(pNodeM), pNodeM->nRefs, pNodeM->nRefAct[0], pNodeM->nRefAct[1], pNodeM->nRefEst[0], pNodeM->nRefEst[1]);   
+    }
+    */
 
-    
+    //////////////////////////////////////////////////////////////////////
+    // delay-depenpent mapping
+    clk = Abc_Clock();
+    p->fMappingMode = 5;            
+    if ( !Map_MappingMatches( p ) )
+        return 0;
+    p->timeMatch = Abc_Clock() - clk;
+    // compute the references and collect the nodes used in the mapping
+    Map_MappingSetRefs( p );
+    p->AreaBase = Map_MappingGetArea( p );
+    if ( p->fVerbose )
+    {
+        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
+                fShowSwitching? "Switch" : "Delay",
+                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
+                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
+        ABC_PRT( "Time", p->timeMatch );
+    }
+    //////////////////////////////////////////////////////////////////////
+
+       //////////////////////////////////////////////////////////////////////
+    // delay-depenpent mapping
+    clk = Abc_Clock();
+    p->fMappingMode = 5;            
+    if ( !Map_MappingMatches( p ) )
+        return 0;
+    p->timeMatch = Abc_Clock() - clk;
+    // compute the references and collect the nodes used in the mapping
+    Map_MappingSetRefs( p );
+    p->AreaBase = Map_MappingGetArea( p );
+    if ( p->fVerbose )
+    {
+        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
+                fShowSwitching? "Switch" : "Delay",
+                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
+                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
+        ABC_PRT( "Time", p->timeMatch );
+    }
+    //////////////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////////////////
+    // delay-depenpent mapping
+    clk = Abc_Clock();
+    p->fMappingMode = 5;            
+    if ( !Map_MappingMatches( p ) )
+        return 0;
+    p->timeMatch = Abc_Clock() - clk;
+    // compute the references and collect the nodes used in the mapping
+    Map_MappingSetRefs( p );
+    p->AreaBase = Map_MappingGetArea( p );
+    if ( p->fVerbose )
+    {
+        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
+                fShowSwitching? "Switch" : "Delay",
+                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
+                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
+        ABC_PRT( "Time", p->timeMatch );
+    }
+    //////////////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////////////////
+    // delay-depenpent mapping
+    clk = Abc_Clock();
+    p->fMappingMode = 5;            
+    if ( !Map_MappingMatches( p ) )
+        return 0;
+    p->timeMatch = Abc_Clock() - clk;
+    // compute the references and collect the nodes used in the mapping
+    Map_MappingSetRefs( p );
+    p->AreaBase = Map_MappingGetArea( p );
+    if ( p->fVerbose )
+    {
+        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
+                fShowSwitching? "Switch" : "Delay",
+                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
+                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
+        ABC_PRT( "Time", p->timeMatch );
+    }
+    //////////////////////////////////////////////////////////////////////
+
 
 /*
     //////////////////////////////////////////////////////////////////////
+
     // perform area recovery using area flow
     clk = Abc_Clock();
     if ( fUseAreaFlow )
