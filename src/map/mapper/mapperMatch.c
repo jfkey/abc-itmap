@@ -190,7 +190,7 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
             if ( p->fMappingMode == 0 )
             {
                 // get the arrival time
-                Map_TimeCutComputeArrival( pNode, pCut, fPhase, fWorstLimit );
+                Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, fWorstLimit );
                 // skip the cut if the arrival times exceed the required times
                 if ( pMatch->tArrive.Worst > fWorstLimit + p->fEpsilon )
                     continue;
@@ -210,7 +210,7 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
                 if ( pMatch->AreaFlow > MatchBest.AreaFlow + p->fEpsilon )
                     continue;
                 // get the arrival time
-                Map_TimeCutComputeArrival( pNode, pCut, fPhase, fWorstLimit );
+                Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, fWorstLimit );
                 // skip the cut if the arrival times exceed the required times
                 if ( pMatch->tArrive.Worst > fWorstLimit + p->fEpsilon )
                     continue;
@@ -232,7 +232,7 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
     // recompute the arrival time and area (area flow) of this cut
     if ( pMatch->pSuperBest )
     {
-        Map_TimeCutComputeArrival( pNode, pCut, fPhase, MAP_FLOAT_LARGE );
+        Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, MAP_FLOAT_LARGE );
         if ( p->fMappingMode == 2 || p->fMappingMode == 3 )
             pMatch->AreaFlow = Map_CutGetAreaDerefed( pCut, fPhase );
         else if ( p->fMappingMode == 4 )
@@ -271,7 +271,7 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     // as a result of remapping fanins in the topological order
     if ( p->fMappingMode != 0 && p->fMappingMode != 5 )
     {
-        Map_TimeCutComputeArrival( pNode, pCutBest, fPhase, MAP_FLOAT_LARGE );
+        Map_TimeCutComputeArrivalIt( pNode, pCutBest, fPhase, MAP_FLOAT_LARGE );
         // make sure that the required times are met
 //        assert( pCutBest->M[fPhase].tArrive.Rise < pNode->tRequired[fPhase].Rise + p->fEpsilon );
 //        assert( pCutBest->M[fPhase].tArrive.Fall < pNode->tRequired[fPhase].Fall + p->fEpsilon );
@@ -324,6 +324,12 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
         // if the cut can be matched compare the matchings
         if ( Map_MatchCompare( p, &MatchBest, pMatch, p->fMappingMode ) )
         {
+            /*
+            if (p ->fMappingMode == 1) {
+                printf( "ori(%s), \t rep(%s) \n", Mio_GateReadName(MatchBest.pSuperBest->pRoot),  Mio_GateReadName(pMatch->pSuperBest->pRoot));
+                p->nodeGainArea += (int)(pCut->nVolume - pCutBest->nVolume);
+                p->leavesGainArea += (int)(pCut->nLeaves - pCutBest->nLeaves);
+            }*/
             pCutBest  =  pCut;
             MatchBest = *pMatch;
             // if we are mapping for delay, the worst-case limit should be tightened
@@ -596,7 +602,7 @@ int Map_MappingMatches( Map_Man_t * p )
     // estimate the fanouts
     if ( p->fMappingMode == 0 )
         Map_MappingEstimateRefsInit( p );
-    else if ( p->fMappingMode == 1 )
+    else if ( p->fMappingMode == 1 || p->fMappingMode == 5)
         Map_MappingEstimateRefs( p );
 
     // the PI cuts are matched in the cut computation package
@@ -625,36 +631,69 @@ int Map_MappingMatches( Map_Man_t * p )
             return 0;
         }
 
-        // match negative phase
-        if ( !Map_MatchNodePhase( p, pNode, 0 ) )
-        {
-            Extra_ProgressBarStop( pProgress );
-            return 0;
-        }
-        // match positive phase
-        if ( !Map_MatchNodePhase( p, pNode, 1 ) )
-        {
-            Extra_ProgressBarStop( pProgress );
-            return 0;
+        if (i == 264) {
+            // match negative phase
+            if ( !Map_MatchNodePhase( p, pNode, 0 ) )
+            {
+                Extra_ProgressBarStop( pProgress );
+                return 0;
+            }
+            // match positive phase
+            if ( !Map_MatchNodePhase( p, pNode, 1 ) )
+            {
+                Extra_ProgressBarStop( pProgress );
+                return 0;
+            }
+            // make sure that at least one phase is mapped
+            if ( pNode->pCutBest[0] == NULL && pNode->pCutBest[1] == NULL )
+            {
+                printf( "\nError: Could not match both phases of AIG node %d.\n", pNode->Num );
+                printf( "Please make sure that the supergate library has equivalents of AND2 or NAND2.\n" );
+                printf( "If such supergates exist in the library, report a bug.\n" );
+                Extra_ProgressBarStop( pProgress );
+                return 0;
+            }
+
+            // if both phases are assigned, check if one of them can be dropped
+            Map_NodeTryDroppingOnePhase( p, pNode );
+            // set the arrival times of the node using the best cuts
+            Map_NodeTransferArrivalTimes( p, pNode );
+
+            // update the progress bar
+            Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
+
+        }else {
+            // match negative phase
+            if ( !Map_MatchNodePhase( p, pNode, 0 ) )
+            {
+                Extra_ProgressBarStop( pProgress );
+                return 0;
+            }
+            // match positive phase
+            if ( !Map_MatchNodePhase( p, pNode, 1 ) )
+            {
+                Extra_ProgressBarStop( pProgress );
+                return 0;
+            }
+            // make sure that at least one phase is mapped
+            if ( pNode->pCutBest[0] == NULL && pNode->pCutBest[1] == NULL )
+            {
+                printf( "\nError: Could not match both phases of AIG node %d.\n", pNode->Num );
+                printf( "Please make sure that the supergate library has equivalents of AND2 or NAND2.\n" );
+                printf( "If such supergates exist in the library, report a bug.\n" );
+                Extra_ProgressBarStop( pProgress );
+                return 0;
+            }
+
+            // if both phases are assigned, check if one of them can be dropped
+            Map_NodeTryDroppingOnePhase( p, pNode );
+            // set the arrival times of the node using the best cuts
+            Map_NodeTransferArrivalTimes( p, pNode );
+
+            // update the progress bar
+            Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
         }
 
-        // make sure that at least one phase is mapped
-        if ( pNode->pCutBest[0] == NULL && pNode->pCutBest[1] == NULL )
-        {
-            printf( "\nError: Could not match both phases of AIG node %d.\n", pNode->Num );
-            printf( "Please make sure that the supergate library has equivalents of AND2 or NAND2.\n" );
-            printf( "If such supergates exist in the library, report a bug.\n" );
-            Extra_ProgressBarStop( pProgress );
-            return 0;
-        }
-
-        // if both phases are assigned, check if one of them can be dropped
-        Map_NodeTryDroppingOnePhase( p, pNode );
-        // set the arrival times of the node using the best cuts
-        Map_NodeTransferArrivalTimes( p, pNode );
-
-        // update the progress bar
-        Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
     }
     Extra_ProgressBarStop( pProgress );
     return 1;

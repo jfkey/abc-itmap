@@ -66,6 +66,7 @@ typedef struct Amap_Pin_t_ Amap_Pin_t;
 typedef struct Amap_Gat_t_ Amap_Gat_t;
 typedef struct Amap_Nod_t_ Amap_Nod_t;
 typedef struct Amap_Set_t_ Amap_Set_t;
+typedef struct Amap_TimingLA_t_ Amap_TimingLA_t;
 
 typedef struct Amap_Man_t_ Amap_Man_t;
 typedef struct Amap_Obj_t_ Amap_Obj_t;
@@ -136,6 +137,11 @@ struct Amap_Lib_t_
     Aig_MmFlex_t *     pMemSet;     // memory manager for sets
     int                nSets;       // the number of sets created
 };
+struct Amap_TimingLA_t_ {
+    double              LD;
+    double              PD;
+};
+
 struct Amap_Pin_t_
 {
     char *             pName;
@@ -152,6 +158,11 @@ struct Amap_Pin_t_
     double             dDelayPDRise;
     double             dDelayLDFall;
     double             dDelayPDFall;
+    Amap_TimingLA_t    fallLA;      // bi-linear approximate for delay
+    Amap_TimingLA_t    riseLA;
+    Amap_TimingLA_t    fallTransLA;
+    Amap_TimingLA_t    riseTransLA;
+
 };
 struct Amap_Gat_t_
 {
@@ -175,6 +186,8 @@ struct Amap_Set_t_
     unsigned           nIns     : 15;
     char               Ins[AMAP_MAXINS];// mapping from gate inputs into fanins
 };
+
+
 struct Amap_Nod_t_
 {
     unsigned           Id       : 16;   // ID of the node

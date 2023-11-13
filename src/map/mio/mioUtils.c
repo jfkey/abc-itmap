@@ -1036,12 +1036,16 @@ void Mio_DeriveTruthTable( Mio_Gate_t * pGate, unsigned uTruthsIn[][2], int nSig
 {
     word uRes, uFanins[6];
     int i;
+//    if (pGate->nInputs != nSigns){
+//        printf("%s, \t %d \t %d\n", Mio_GateReadName(  pGate), pGate->nInputs, nSigns);
+//    }
     assert( pGate->nInputs == nSigns );
     for ( i = 0; i < nSigns; i++ )
         uFanins[i] = (((word)uTruthsIn[i][1]) << 32) | (word)uTruthsIn[i][0];
     uRes = Exp_Truth6( nSigns, pGate->vExpr, (word *)uFanins );
     uTruthRes[0] = uRes & 0xFFFFFFFF;
     uTruthRes[1] = uRes >> 32;
+
 }
 
 /**Function*************************************************************
@@ -1320,6 +1324,11 @@ void Mio_LibraryTransferDelays( Mio_Library_t * pLibD, Mio_Library_t * pLibS )
                     pPinD->dDelayLDFall = pPinS->dDelayLDFall;
                     pPinD->dDelayPDRise = pPinS->dDelayPDRise;
                     pPinD->dDelayPDFall = pPinS->dDelayPDFall;
+                    // update bi-linear approximate
+                    pPinD->riseLA = pPinS->riseLA;
+                    pPinD->fallLA = pPinS->fallLA;
+                    pPinD->riseTransLA = pPinS->riseTransLA;
+                    pPinD->fallTransLA = pPinS->fallTransLA;
                     pPinS = Mio_PinReadNext(pPinS);
                 }
                 else
@@ -1331,6 +1340,11 @@ void Mio_LibraryTransferDelays( Mio_Library_t * pLibD, Mio_Library_t * pLibS )
                     pPinD->dDelayLDFall = 0;
                     pPinD->dDelayPDRise = 0;
                     pPinD->dDelayPDFall = 0;
+                    //  update bi-linear approximate
+                    pPinD->riseLA.LD = pPinD->riseLA.PD = 0;
+                    pPinD->fallLA.LD = pPinD->fallLA.PD = 0;
+                    pPinD->riseTransLA.LD = pPinD->riseTransLA.PD = 0;
+                    pPinD->fallTransLA.LD = pPinD->fallTransLA.PD = 0;
                 }
             }
         }

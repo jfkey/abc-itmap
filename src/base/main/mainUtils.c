@@ -82,7 +82,7 @@ char * Abc_UtilsGetUsersInput( Abc_Frame_t * pAbc )
     {
     static char * line = NULL;
     if (line != NULL) ABC_FREE(line);
-    line = readline(Prompt);  
+        line = readline(Prompt);
     if (line == NULL){ printf("***EOF***\n"); exit(0); }
     add_history(line);
     return line;

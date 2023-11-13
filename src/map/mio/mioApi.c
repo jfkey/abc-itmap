@@ -218,6 +218,11 @@ double            Mio_PinReadDelayLDFall    ( Mio_Pin_t * pPin )      { return p
 double            Mio_PinReadDelayPDRise    ( Mio_Pin_t * pPin )      { return pPin->dDelayPDRise;    }
 double            Mio_PinReadDelayPDFall    ( Mio_Pin_t * pPin )      { return pPin->dDelayPDFall;    }
 Mio_Pin_t *       Mio_PinReadNext           ( Mio_Pin_t * pPin )      { return pPin->pNext;           }
+Mio_TimingLA_t   Mio_PinReadDelayRiseLA     ( Mio_Pin_t * pPin )      { return pPin->riseLA;    }
+Mio_TimingLA_t   Mio_PinReadDelayFallLA     ( Mio_Pin_t * pPin )      { return pPin->fallLA;    }
+Mio_TimingLA_t   Mio_PinReadDelayRTransLA   ( Mio_Pin_t * pPin )      { return pPin->riseTransLA;    }
+Mio_TimingLA_t   Mio_PinReadDelayFTransLA   ( Mio_Pin_t * pPin )      { return pPin->fallTransLA;    }
+
 
 /**Function*************************************************************
 

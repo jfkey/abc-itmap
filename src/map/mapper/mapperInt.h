@@ -162,6 +162,9 @@ struct Map_ManStruct_t_
     abctime             time1;         // time to transfer to the mapping structure
     abctime             time2;         // time to transfer to the mapping structure
     abctime             time3;         // time to transfer to the mapping structure
+    // area recovery statistics
+    int                 nodeGainArea;
+    int                 leavesGainArea;
 };
 
 // the supergate library
@@ -303,8 +306,16 @@ struct Map_SuperStruct_t_
     Map_Time_t          tDelaysFLD[6];   // the pin-to-pin load dependent delay (induced delay per unit load) constraints for the fall of the output
     Map_Time_t          tDelaysRPD[6];   // the pin-to-pin parasitic delay constraints for the rise of the output
     Map_Time_t          tDelaysFPD[6];   // the pin-to-pin parasitic delay constraints for the fall of the output
+
+    Map_Time_t          tDelaysRTransLD[6];   // the pin-to-pin load dependent delay (induced delay per unit load) constraints for the rise of the output
+    Map_Time_t          tDelaysRTransPD[6];   // the pin-to-pin load dependent delay (induced delay per unit load) constraints for the fall of the output
+    Map_Time_t          tDelaysFTransLD[6];   // the pin-to-pin parasitic delay constraints for the rise of the output
+    Map_Time_t          tDelaysFTransPD[6];   // the pin-to-pin parasitic delay constraints for the fall of the output
+
     Map_Time_t          tDelayLDMax;     // the maximum delay of LD
     Map_Time_t          tDelayPDMax;     // the maximum delay of PD
+
+
     
 };
 
@@ -423,6 +434,7 @@ extern void              Map_SuperTableSortSupergates( Map_HashTable_t * p, int 
 extern void              Map_SuperTableSortSupergatesByDelay( Map_HashTable_t * p, int nSupersMax );
 /*=== mapperTime.c =============================================================*/
 extern float             Map_TimeCutComputeArrival( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhase, float tWorstCaseLimit );
+extern float             Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhase, float tWorstCaseLimit );
 extern float             Map_TimeComputeArrivalMax( Map_Man_t * p );
 extern void              Map_TimeComputeRequiredGlobal( Map_Man_t * p );
 /*=== mapperTruth.c ===============================================================*/

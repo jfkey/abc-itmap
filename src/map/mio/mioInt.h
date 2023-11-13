@@ -118,6 +118,11 @@ struct  Mio_GateStruct_t_
     word *             pTruth; };   // pointer to the truth table
     int                Value;       // user's information
 };
+struct Mio_PinTimingLA_{
+    double               LD;
+    double               PD;
+};
+
 
 struct  Mio_PinStruct_t_
 {
@@ -135,6 +140,11 @@ struct  Mio_PinStruct_t_
     double             dDelayPDRise;
     double             dDelayLDFall;
     double             dDelayPDFall;
+    Mio_TimingLA_t     fallLA;      // bi-linear approximate for delay
+    Mio_TimingLA_t     riseLA;
+    Mio_TimingLA_t     fallTransLA;
+    Mio_TimingLA_t     riseTransLA;
+
     Mio_Pin_t *        pNext;
 };
 

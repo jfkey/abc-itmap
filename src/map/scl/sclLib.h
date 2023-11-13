@@ -119,6 +119,7 @@ typedef struct SC_Timings_     SC_Timings;
 typedef struct SC_Pin_         SC_Pin;
 typedef struct SC_Cell_        SC_Cell;
 typedef struct SC_Lib_         SC_Lib;
+typedef struct SC_TimingLA_    SC_TimingLA;        // junfeng: bi-linear approximate for the non-linear delay model
 
 struct SC_WireLoad_ 
 {
@@ -156,6 +157,11 @@ struct SC_Surface_
     float          approx[3][6];
 };
 
+struct SC_TimingLA_{
+    float          LD;
+    float          PD;
+};
+
 struct SC_Timing_ 
 {
     char *         related_pin;    // -- related pin
@@ -165,6 +171,10 @@ struct SC_Timing_
     SC_Surface     pCellFall;
     SC_Surface     pRiseTrans;     // -- Used to compute output slew
     SC_Surface     pFallTrans;
+    SC_TimingLA    pFallLA;        //
+    SC_TimingLA    pRiseLA;
+    SC_TimingLA    pRiseTransLA;
+    SC_TimingLA    pFallTransLA;
 };
 
 struct SC_Timings_ 

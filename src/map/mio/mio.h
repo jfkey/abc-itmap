@@ -42,6 +42,7 @@ typedef enum { MIO_PHASE_UNKNOWN, MIO_PHASE_INV, MIO_PHASE_NONINV } Mio_PinPhase
 typedef struct  Mio_LibraryStruct_t_      Mio_Library_t;
 typedef struct  Mio_GateStruct_t_         Mio_Gate_t;
 typedef struct  Mio_PinStruct_t_          Mio_Pin_t;
+typedef struct  Mio_PinTimingLA_          Mio_TimingLA_t;
 
 typedef struct Mio_Cell_t_ Mio_Cell_t; 
 struct Mio_Cell_t_
@@ -179,6 +180,11 @@ extern double            Mio_PinReadDelayLDRise    ( Mio_Pin_t * pPin );
 extern double            Mio_PinReadDelayLDFall    ( Mio_Pin_t * pPin );
 extern double            Mio_PinReadDelayPDRise    ( Mio_Pin_t * pPin );
 extern double            Mio_PinReadDelayPDFall    ( Mio_Pin_t * pPin );
+extern Mio_TimingLA_t    Mio_PinReadDelayRiseLA    ( Mio_Pin_t * pPin );
+extern Mio_TimingLA_t    Mio_PinReadDelayFallLA    ( Mio_Pin_t * pPin );
+extern Mio_TimingLA_t    Mio_PinReadDelayRTransLA  ( Mio_Pin_t * pPin );
+extern Mio_TimingLA_t    Mio_PinReadDelayFTransLA  ( Mio_Pin_t * pPin );
+
 extern Mio_Pin_t *       Mio_PinReadNext           ( Mio_Pin_t * pPin );  
 /*=== mioRead.c =============================================================*/
 extern char *            Mio_ReadFile( char * FileName, int fAddEnd );

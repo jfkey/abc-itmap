@@ -1,4 +1,4 @@
-/home/liujunfeng/.cache/JetBrains/RemoteDev/dist/c221e6861d714_CLion-2022.3.2/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/liujunfeng/.cache/JetBrains/RemoteDev/dist/c221e6861d714_CLion-2022.3.2/bin/ninja/linux/x64/ninja -G Ninja -S /home/liujunfeng/ABC/abc-mfs/abc-mfs -B /home/liujunfeng/ABC/abc-mfs/abc-mfs/cmake-build-debug
+/home/liujunfeng/.cache/JetBrains/RemoteDev/dist/c221e6861d714_CLion-2022.3.2/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/liujunfeng/.cache/JetBrains/RemoteDev/dist/c221e6861d714_CLion-2022.3.2/bin/ninja/linux/x64/ninja -G Ninja -S /home/liujunfeng/ABC/abc-itmap -B /home/liujunfeng/ABC/abc-itmap/cmake-build-debug
 -- The C compiler identification is GNU 7.5.0
 -- The CXX compiler identification is GNU 7.5.0
 -- Detecting C compiler ABI info
@@ -33,4 +33,4 @@
 -- Performing Test CXX_COMPILER_SUPPORTS__-Wno-unused-but-set-variable - Success
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/liujunfeng/ABC/abc-mfs/abc-mfs/cmake-build-debug
+-- Build files have been written to: /home/liujunfeng/ABC/abc-itmap/cmake-build-debug

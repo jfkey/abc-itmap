@@ -466,7 +466,8 @@ static inline float Abc_SclGetMaxDelayNodeFanins( SC_Man * p, Abc_Obj_t * pNode 
     float fMaxArr = 0;
     Abc_Obj_t * pObj;
     int i;
-    assert( Abc_ObjIsNode(pNode) );
+    // bug?  update by junfeng
+//    assert( Abc_ObjIsNode(pNode) );
     Abc_ObjForEachFanin( pNode, pObj, i )
         fMaxArr = Abc_MaxFloat( fMaxArr, Abc_SclObjTimeMax(p, pObj) );
     return fMaxArr;

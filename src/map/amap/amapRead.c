@@ -413,7 +413,24 @@ Amap_Lib_t * Amap_ParseTokens( Vec_Ptr_t * vTokens, int fVerbose )
             pPin->dDelayLDFall = pPin ->dDelayLDRise = atof( pToken );
             pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
             pPin->dDelayPDFall = pPin->dDelayPDRise = atof( pToken );
-
+            // parse linear approximate of rise, fall, slewrise, slewfall
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->riseLA.LD = atof(pToken);
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->riseLA.PD = atof(pToken);
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->fallLA.LD = atof(pToken);
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->fallLA.PD = atof(pToken);
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->riseTransLA.LD = atof(pToken);
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->riseTransLA.PD = atof(pToken);
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->fallTransLA.LD = atof(pToken);
+            pToken = (char *)Vec_PtrEntry(vTokens, iPos++);
+            pPin->fallTransLA.PD = atof(pToken);
+ 
             if ( pPin->dDelayBlockRise > pPin->dDelayBlockFall )
                 pPin->dDelayBlockMax = pPin->dDelayBlockRise;
             else

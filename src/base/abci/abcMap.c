@@ -151,9 +151,9 @@ clk = Abc_Clock();
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
 
-    // if ( !Map_Mapping( pMan ) )
+    if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
-    if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
+//     if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
     {
         Map_ManFree( pMan );
         return NULL;
@@ -566,7 +566,7 @@ Abc_Ntk_t * Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs )
         Abc_ObjAddFanin( pNode->pCopy, pNodeNew );
     }
     // decouple the PO driver nodes to reduce the number of levels
-    nDupGates = Abc_NtkLogicMakeSimpleCos( pNtkNew, !fUseBuffs );
+    nDupGates =  ( pNtkNew, !fUseBuffs );
 //    if ( nDupGates && Map_ManReadVerbose(pMan) )
 //        printf( "Duplicated %d gates to decouple the CO drivers.\n", nDupGates );
     return pNtkNew;

@@ -464,6 +464,21 @@ float Abc_SclComputeAverageSlew( SC_Lib * p )
     return Vec_FltEntry( vIndex, Vec_FltSize(vIndex)/3 );
 }
 
+float Abc_SclComputeAverageCap( SC_Lib * p )
+{
+    SC_Cell * pCell;
+    SC_Timing * pTime;
+    Vec_Flt_t * vIndex;
+    pCell = Abc_SclFindInvertor(p, 0);
+    if ( pCell == NULL )
+        return 0;
+    pTime = Scl_CellPinTime( pCell, 0 );
+    if ( pTime == NULL )
+        return 0;
+    vIndex = &pTime->pCellRise.vIndex1; // cap
+    return Vec_FltEntry( vIndex, Vec_FltSize(vIndex)/3 );
+}
+
 /**Function*************************************************************
 
   Synopsis    [Compute delay parameters of pin/cell/class.]
@@ -512,6 +527,99 @@ int Abc_SclComputeParametersPin( SC_Lib * p, SC_Cell * pCell, int iPin, float Sl
     *pPD = ArrOut0.rise;
     return 1;
 }
+
+
+int Abc_SclComputeParametersPinLoad( SC_Lib * p, SC_Cell * pCell, int iPin, float Slew, float * pLD, float * pPD, float *riseLD, float *risePD, float *fallLD, float *fallPD )
+{
+    SC_Pair Load0, Load1, Load2;
+    SC_Pair ArrIn  = { 0.0, 0.0 };
+    SC_Pair SlewIn = { Slew, Slew };
+    SC_Pair ArrOut0 = { 0.0, 0.0 };
+    SC_Pair ArrOut1 = { 0.0, 0.0 };
+    SC_Pair ArrOut2 = { 0.0, 0.0 };
+    SC_Pair SlewOut = { 0.0, 0.0 };
+    SC_Timing * pTime = Scl_CellPinTime( pCell, iPin );
+    Vec_Flt_t * vIndex = pTime ? &pTime->pCellRise.vIndex1 : NULL; // capacitance
+    if ( vIndex == NULL )
+        return 0;
+    // handle constant table
+    if ( Vec_FltSize(vIndex) == 1 )
+    {
+        *pLD = 0;
+        *pPD = Vec_FltEntry( (Vec_Flt_t *)Vec_PtrEntry(&pTime->pCellRise.vData, 0), 0 );
+        return 1;
+    }
+    // get load points
+    Load0.rise = Load0.fall = 0.0;
+    Load1.rise = Load1.fall = Vec_FltEntry( vIndex, 0 );
+    Load2.rise = Load2.fall = Vec_FltEntry( vIndex, Vec_FltSize(vIndex) - 2 );
+    // compute delay
+    Scl_LibPinArrival( pTime, &ArrIn, &SlewIn, &Load0, &ArrOut0, &SlewOut );
+    Scl_LibPinArrival( pTime, &ArrIn, &SlewIn, &Load1, &ArrOut1, &SlewOut );
+    Scl_LibPinArrival( pTime, &ArrIn, &SlewIn, &Load2, &ArrOut2, &SlewOut );
+    *riseLD = (ArrOut2.rise - ArrOut1.rise) / ((Load2.rise - Load1.rise) / SC_CellPinCap(pCell, iPin));
+    *risePD = ArrOut0.rise;
+    *fallLD = (ArrOut2.fall - ArrOut1.fall) / ((Load2.fall - Load1.fall) / SC_CellPinCap(pCell, iPin));
+    *fallPD = ArrOut0.fall;
+
+    ArrOut0.rise = 0.5 * ArrOut0.rise + 0.5 * ArrOut0.fall;
+    ArrOut1.rise = 0.5 * ArrOut1.rise + 0.5 * ArrOut1.fall;
+    ArrOut2.rise = 0.5 * ArrOut2.rise + 0.5 * ArrOut2.fall;
+    // get tangent
+    *pLD = (ArrOut2.rise - ArrOut1.rise) / ((Load2.rise - Load1.rise) / SC_CellPinCap(pCell, iPin));
+    // get constant
+    *pPD = ArrOut0.rise;
+    return 1;
+}
+
+int Abc_SclComputeParametersPinSlew( SC_Lib * p, SC_Cell * pCell, int iPin, float *rTransLD, float *rTransPD, float *fTransLD, float *fTransPD )
+{
+//    SC_Pair Load0, Load1, Load2;
+    SC_Pair SlewIn0,SlewIn1,SlewIn2;
+    SC_Pair ArrIn  = { 0.0, 0.0 };
+    SC_Pair ArrOut0 = { 0.0, 0.0 };
+    SC_Pair ArrOut1 = { 0.0, 0.0 };
+    SC_Pair ArrOut2 = { 0.0, 0.0 };
+    SC_Pair SlewOut0 = { 0.0, 0.0 };
+    SC_Pair SlewOut1 = { 0.0, 0.0 };
+    SC_Pair SlewOut2 = { 0.0, 0.0 };
+
+    SC_Timing * pTime = Scl_CellPinTime( pCell, iPin );
+    Vec_Flt_t * vIndex = pTime ? &pTime->pCellRise.vIndex0 : NULL; // slew array
+    if ( vIndex == NULL )
+        return 0;
+    // handle constant table
+    if ( Vec_FltSize(vIndex) == 1 )
+    {
+//        *pLD = 0;
+//        *pPD = Vec_FltEntry( (Vec_Flt_t *)Vec_PtrEntry(&pTime->pCellRise.vData, 0), 0 );
+        return 1;
+    }
+    Vec_Flt_t * vIndexCap = pTime ? &pTime->pCellRise.vIndex1 : NULL; // slew array
+
+    float avgLoad = Vec_FltEntry( vIndexCap, Vec_FltSize(vIndexCap)/3 );
+
+    SC_Pair Load = { avgLoad, avgLoad };
+
+    // get slew points
+    SlewIn0.rise = SlewIn0.fall = 0.0;
+    SlewIn1.rise = SlewIn1.fall = Vec_FltEntry( vIndex, 0 );
+    SlewIn2.rise = SlewIn2.fall = Vec_FltEntry( vIndex, Vec_FltSize(vIndex) - 2 );
+    // compute delay
+    Scl_LibPinArrival( pTime, &ArrIn, &SlewIn0, &Load, &ArrOut0, &SlewOut0 );
+    Scl_LibPinArrival( pTime, &ArrIn, &SlewIn1, &Load, &ArrOut1, &SlewOut1 );
+    Scl_LibPinArrival( pTime, &ArrIn, &SlewIn2, &Load, &ArrOut2, &SlewOut2 );
+
+
+    *rTransLD = (ArrOut2.rise - ArrOut1.rise)/((SlewIn2.rise - SlewIn1.rise));
+    *rTransPD = ArrOut0.rise;
+
+    *fTransLD = (ArrOut2.fall - ArrOut1.fall)/((SlewIn2.fall - SlewIn1.fall));
+    *fTransPD = ArrOut0.fall;
+    return 1;
+}
+
+
 int Abc_SclComputeParametersCell( SC_Lib * p, SC_Cell * pCell, float Slew, float * pLD, float * pPD )
 {
     SC_Pin * pPin;
@@ -565,14 +673,25 @@ float Abc_SclComputeDelayCellPin( SC_Lib * p, SC_Cell * pCell, int iPin, float S
     return 0.01 * LD * Gain + PD;
 }
 
-float Abc_SclComputeDelayCellPinPara( SC_Lib * p, SC_Cell * pCell, int iPin, float Slew, float Gain, float *LD, float *PD)
+// junfeng
+float Abc_SclComputeDelayCellPinPara( SC_Lib * p, SC_Cell * pCell, int iPin, float Slew, float Gain, float *LD, float *PD,
+                                      float *riseLD, float *risePD, float *fallLD, float *fallPD,
+                                      float *rTransLD, float *rTransPD, float *fTransLD, float *fTransPD)
+{
+    Abc_SclComputeParametersPinLoad( p, pCell, iPin, Slew, LD, PD, riseLD, risePD, fallLD, fallPD );
+    Abc_SclComputeParametersPinSlew( p, pCell, iPin, rTransLD, rTransPD, fTransLD, fTransPD);
+    return 0.01 * ( *LD) * Gain + *PD;
+}
+
+float Abc_SclComputeDelayCellPinSlewLoad( SC_Lib * p, SC_Cell * pCell, int iPin, float Slew, float Gain, float *LD, float *PD)
 {
     Abc_SclComputeParametersPin( p, pCell, iPin, Slew, LD, PD );
     return 0.01 * ( *LD) * Gain + *PD;
 }
 
+
 // junfeng:
-float Abc_SclComputeDelayClassPinPara( SC_Lib * p, SC_Cell * pRepr, int iPin, float Slew, float Gain, float *LDAvg, float *PDAvg)
+float Abc_SclComputeDelayClassPinPara( SC_Lib * p, SC_Cell * pRepr, int iPin, float Slew, float Gain, float *LDAvg, float *PDAvg, float *riseLD, float *risePD, float *fallLD, float *fallPD, float *rTransLD, float *rTransPD, float *fTransLD, float *fTransPD)
 {
     SC_Cell * pCell;
     float Delay = 0;
@@ -583,13 +702,31 @@ float Abc_SclComputeDelayClassPinPara( SC_Lib * p, SC_Cell * pRepr, int iPin, fl
             continue;
 //        if ( pRepr == pCell ) // skip the first gate
 //            continue;
-        float LD = 0, PD = 0;
-        Delay += Abc_SclComputeDelayCellPinPara( p, pCell, iPin, Slew, Gain, &LD, &PD);
+        float LD = 0, PD = 0, R_LD, R_PD, F_LD, F_PD, TR_LD, TR_PD, TF_LD, TF_PD = 0;
+        Delay += Abc_SclComputeDelayCellPinPara( p, pCell, iPin, Slew, Gain, &LD, &PD, &R_LD, &R_PD, &F_LD,   &F_PD, &TR_LD, &TR_PD, &TF_LD, &TF_PD);
         *LDAvg += LD; *PDAvg += PD;
+        *riseLD += R_LD;
+        *risePD  += R_PD;
+        *fallLD += F_LD;
+        *fallPD += F_PD;
+        *rTransLD += TR_LD;
+        *rTransPD += TR_PD;
+        *fTransLD += TF_LD;
+        *fTransPD += TF_PD;
         Count++;
     }
+    // float *riseLD, float *risePD, float *fallLD, float *fallPD, float *rTransLD, float *rTransPD, float *fTransLD, float *fTransPD)
     *LDAvg = *LDAvg/(Abc_MaxInt(1, Count));
     *PDAvg = *PDAvg/(Abc_MaxInt(1, Count));
+    *riseLD = *riseLD/(Abc_MaxInt(1, Count));
+    *risePD = *risePD/(Abc_MaxInt(1, Count));
+    *fallLD = *fallLD/(Abc_MaxInt(1, Count));
+    *fallPD = *fallPD/(Abc_MaxInt(1, Count));
+    *rTransLD = *rTransLD/(Abc_MaxInt(1, Count));
+    *rTransPD = *rTransPD/(Abc_MaxInt(1, Count));
+    *fTransLD = *fTransLD/(Abc_MaxInt(1, Count));
+    *fTransPD = *fTransPD/(Abc_MaxInt(1, Count));
+
     return Delay / Abc_MaxInt(1, Count);
 }
 
@@ -882,7 +1019,8 @@ Vec_Str_t * Abc_SclProduceGenlibStrSimple( SC_Lib * p )
                 sprintf( Buffer, "%-4s", pPin->pName );
                 Vec_StrPrintStr( vStr, Buffer );
 //                sprintf( Buffer, " UNKNOWN  1  999  1.00  0.00  1.00  0.00\n" );
-                sprintf( Buffer, " UNKNOWN  1  999  1.00  0.00  1.00  0.00  0.00  0.00\n" );
+//                sprintf( Buffer, " UNKNOWN  1  999  1.00  0.00  1.00  0.00  0.00  0.00\n" );
+                sprintf( Buffer, " UNKNOWN  1  999  1.00  0.00  1.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00\n" );
                 Vec_StrPrintStr( vStr, Buffer );
             }
             Count++;
@@ -963,13 +1101,24 @@ Vec_Str_t * Abc_SclProduceGenlibStr( SC_Lib * p, float Slew, float Gain, int nGa
         {
 //            float Delay = Abc_SclComputeDelayClassPin( p, pRepr, k, Slew, Gain );
             float LDAvg = 0, PDAvg = 0;
-            float Delay = Abc_SclComputeDelayClassPinPara(p, pRepr, k, Slew, Gain, & LDAvg, &PDAvg);
+            float riseLD =0,  risePD = 0, fallLD = 0, fallPD = 0, rTransLD = 0, rTransPD = 0, fTransLD = 0, fTransPD = 0;
+            float Delay = Abc_SclComputeDelayClassPinPara(p, pRepr, k, Slew, Gain, & LDAvg, &PDAvg,
+                                                          &riseLD, &risePD, &fallLD, &fallPD, &rTransLD, &rTransPD, &fTransLD, &fTransPD);
 //            printf("%7.2f, %7.2f, %7.2f, %7.2f \n", Delay, LDAvg, PDAvg, 0.01 * LDAvg*Gain + PDAvg);
+//            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f\n", Delay, Delay, LDAvg, PDAvg );
             assert( Delay > 0 );
             Vec_StrPrintStr( vStr, "         PIN " );
             sprintf( Buffer, "%-4s", pPin->pName );
             Vec_StrPrintStr( vStr, Buffer );
-            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f\n", Delay, Delay, LDAvg, PDAvg );
+            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f  "
+                             "%7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",
+                             Delay, Delay, LDAvg, PDAvg,
+                             riseLD, risePD, fallLD, fallPD, rTransLD, rTransPD, fTransLD, fTransPD);
+//            printf(" UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f  "
+//                             "%7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",
+//                     Delay, Delay, LDAvg, PDAvg,
+//                     riseLD, risePD, fallLD, fallPD, rTransLD, rTransPD, fTransLD, fTransPD);
+
             Vec_StrPrintStr( vStr, Buffer );
         }
         Count++;
@@ -1035,13 +1184,25 @@ Vec_Str_t * Abc_SclProduceGenlibStrProfile( SC_Lib * p, Mio_Library_t * pLib, fl
 //            update by junfeng
 //            float Delay = Abc_SclComputeDelayClassPin( p, pRepr, k, Slew, Gain );
             float LDAvg = 0, PDAvg = 0;
-            float Delay = Abc_SclComputeDelayClassPinPara(p, pRepr, k, Slew, Gain, & LDAvg, &PDAvg);
+            float riseLD =0,  risePD = 0, fallLD = 0, fallPD = 0, rTransLD = 0, rTransPD = 0, fTransLD = 0, fTransPD = 0;
+            float Delay = Abc_SclComputeDelayClassPinPara(p, pRepr, k, Slew, Gain, & LDAvg, &PDAvg,
+                                                          &riseLD, &risePD, &fallLD, &fallPD, &rTransLD, &rTransPD, &fTransLD, &fTransPD);
             assert( Delay > 0 );
             Vec_StrPrintStr( vStr, "         PIN " );
             sprintf( Buffer, "%-4s", pPin->pName );
             Vec_StrPrintStr( vStr, Buffer );
 //            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00\n", Delay, Delay );
-            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f\n", Delay, Delay, LDAvg, PDAvg );
+//            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f\n", Delay, Delay, LDAvg, PDAvg );
+            sprintf( Buffer, " UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f  "
+                             "%7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",
+                     Delay, Delay, LDAvg, PDAvg,
+                     riseLD, risePD, fallLD, fallPD, rTransLD, rTransPD, fTransLD, fTransPD);
+
+//            printf(" UNKNOWN  1  999  %7.2f  0.00  %7.2f  0.00  %7.2f  %7.2f  "
+//                             "%7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f\n",
+//                     Delay, Delay, LDAvg, PDAvg,
+//                     riseLD, risePD, fallLD, fallPD, rTransLD, rTransPD, fTransLD, fTransPD);
+
             Vec_StrPrintStr( vStr, Buffer );
         }
         Count++;

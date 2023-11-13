@@ -202,6 +202,8 @@ Map_Man_t * Map_ManCreate( int nInputs, int nOutputs, int fVerbose )
     p->nVarsMax  = p->pSuperLib->nVarsMax;
     p->fVerbose  = fVerbose;
     p->fEpsilon  = (float)0.001;
+    p->nodeGainArea = 0;
+    p->leavesGainArea = 0;
     assert( p->nVarsMax > 0 );
 
     if ( p->nVarsMax == 5 )
