@@ -324,6 +324,104 @@ void Map_TimePropagateRequiredPhase( Map_Man_t * p, Map_Node_t * pNode, int fPha
 //    assert( pNode->tArrival[fPhase].Rise < ptReqOut->Rise + p->fEpsilon );
 //    assert( pNode->tArrival[fPhase].Fall < ptReqOut->Fall + p->fEpsilon );
 }
+
+
+/**Function*************************************************************
+
+  Synopsis    [Propagate the required time under different phase using our iterative mapping.]
+
+  Description [However, it contains two bugs. (1) the assertion is wrong. 
+  (2) nRefEst may change during the mapping which leads to incorrect required time. ]
+               
+  SideEffects []
+
+  SeeAlso     []
+
+***********************************************************************/
+void Map_TimePropagateRequiredPhaseIt( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
+{
+    Map_Time_t * ptReqIn, * ptReqOut;
+    Map_Cut_t * pCut;
+    Map_Super_t * pSuper;
+    float tNewReqTime, tExtra, estDelay;
+    unsigned uPhase;
+    int fPinPhase, i;
+
+    tExtra = pNode->p->pNodeDelays ? pNode->p->pNodeDelays[pNode->Num] : 0;
+    // get the cut to be propagated
+    pCut = pNode->pCutBest[fPhase];
+    assert( pCut != NULL );
+    // get the supergate and its polarity
+    pSuper  = pCut->M[fPhase].pSuperBest;
+    uPhase  = pCut->M[fPhase].uPhaseBest;
+    // get the required time of the output of the supergate
+    ptReqOut = pNode->tRequired + fPhase;
+    // set the required time of the children
+    for ( i = 0; i < pCut->nLeaves; i++ )
+    {
+        // get the phase of the given pin of the supergate
+        fPinPhase = ((uPhase & (1 << i)) == 0);
+        ptReqIn = pCut->ppLeaves[i]->tRequired + fPinPhase;
+        assert( pCut->ppLeaves[i]->nRefAct[2] > 0 );
+
+
+        // get the rise of the output due to rise of the inputs
+//            if ( ptArrOut->Rise < ptArrIn->Rise + pSuper->tDelaysR[i].Rise )
+//                ptArrOut->Rise = ptArrIn->Rise + pSuper->tDelaysR[i].Rise;
+        if ( pSuper->tDelaysR[i].Rise > 0 )
+        {
+
+            estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase] + 1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysRTransLD[i].Rise * 5 +  pSuper->tDelaysRTransPD[i].Rise ) +
+                    0.5 * ( (pNode->nRefEst[fPhase]+1 + pNode->taoRefs[1]* 0.3) * pSuper->tDelaysRLD[i].Rise * 2.5 + pSuper->tDelaysRPD[i].Rise);
+            tNewReqTime = ptReqOut->Rise - estDelay - tExtra;  
+            // tNewReqTime = ptReqOut->Rise - pSuper->tDelaysR[i].Rise - tExtra;
+            ptReqIn->Rise = MAP_MIN( ptReqIn->Rise, tNewReqTime );
+        }
+
+        // get the rise of the output due to fall of the inputs
+//            if ( ptArrOut->Rise < ptArrIn->Fall + pSuper->tDelaysR[i].Fall )
+//                ptArrOut->Rise = ptArrIn->Fall + pSuper->tDelaysR[i].Fall;
+        if ( pSuper->tDelaysR[i].Fall > 0 )
+        {
+            estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase]+1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysRTransLD[i].Fall * 5 + pSuper->tDelaysRTransPD[i].Fall ) +
+                    0.5 * ( (pNode->nRefEst[fPhase] +1 + pNode->taoRefs[1]*0.3) * pSuper->tDelaysRLD[i].Fall * 2.5 + pSuper->tDelaysRPD[i].Fall);
+            tNewReqTime = ptReqOut->Rise - estDelay - tExtra;
+            // tNewReqTime = ptReqOut->Rise - pSuper->tDelaysR[i].Fall - tExtra;
+            ptReqIn->Fall = MAP_MIN( ptReqIn->Fall, tNewReqTime );
+        }
+
+        // get the fall of the output due to rise of the inputs
+//            if ( ptArrOut->Fall < ptArrIn->Rise + pSuper->tDelaysF[i].Rise )
+//                ptArrOut->Fall = ptArrIn->Rise + pSuper->tDelaysF[i].Rise;
+        if ( pSuper->tDelaysF[i].Rise > 0 )
+        {
+              estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase]+1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysFTransLD[i].Rise * 5 + pSuper->tDelaysFTransPD[i].Rise ) +
+                       0.5 * ( (pNode->nRefEst[fPhase] +1 + pNode->taoRefs[1]*0.3) * pSuper->tDelaysFLD[i].Rise * 2.5 + pSuper->tDelaysFPD[i].Rise);
+
+            // tNewReqTime = ptReqOut->Fall - pSuper->tDelaysF[i].Rise - tExtra;
+            tNewReqTime = ptReqOut->Fall - estDelay - tExtra;
+            ptReqIn->Rise = MAP_MIN( ptReqIn->Rise, tNewReqTime );
+        }
+
+        // get the fall of the output due to fall of the inputs
+//            if ( ptArrOut->Fall < ptArrIn->Fall + pSuper->tDelaysF[i].Fall )
+//                ptArrOut->Fall = ptArrIn->Fall + pSuper->tDelaysF[i].Fall;
+        if ( pSuper->tDelaysF[i].Fall > 0 )
+        {
+               estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase] +1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3)* pSuper->tDelaysFTransLD[i].Fall * 5 + pSuper->tDelaysFTransPD[i].Fall ) +
+                       0.5 * ( (pNode->nRefEst[fPhase]+1 + pNode->taoRefs[1]*0.3)* pSuper->tDelaysFLD[i].Fall * 2.5 + pSuper->tDelaysFPD[i].Fall);
+            tNewReqTime = ptReqOut->Fall - estDelay - tExtra;
+            // tNewReqTime = ptReqOut->Fall - pSuper->tDelaysF[i].Fall - tExtra;
+            ptReqIn->Fall = MAP_MIN( ptReqIn->Fall, tNewReqTime );
+        }
+    }
+
+    // Junfeng,  assert arises bugs!
+    // compare the required times with the arrival times
+//    assert( pNode->tArrival[fPhase].Rise < ptReqOut->Rise + p->fEpsilon );
+//    assert( pNode->tArrival[fPhase].Fall < ptReqOut->Fall + p->fEpsilon );
+}
+
 float Map_MatchComputeReqTimes( Map_Cut_t * pCut, int fPhase, Map_Time_t * ptArrRes )
 {
     Map_Time_t * ptArrIn;
@@ -456,9 +554,11 @@ void Map_TimePropagateRequired( Map_Man_t * p )
         // propagate required times of different phases of the node
         // the ordering of phases does not matter since they are mapped independently
         if ( pNode->pCutBest[0] && pNode->tRequired[0].Worst < MAP_FLOAT_LARGE )
-            Map_TimePropagateRequiredPhase( p, pNode, 0 );
+            // Map_TimePropagateRequiredPhase( p, pNode, 0 );
+            Map_TimePropagateRequiredPhaseIt( p, pNode, 0 );
         if ( pNode->pCutBest[1] && pNode->tRequired[1].Worst < MAP_FLOAT_LARGE )
-            Map_TimePropagateRequiredPhase( p, pNode, 1 );
+            // Map_TimePropagateRequiredPhase( p, pNode, 1 );
+            Map_TimePropagateRequiredPhaseIt( p, pNode, 1 );
     }
 /*
     // in the end, we verify the required times
