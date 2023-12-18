@@ -67,6 +67,7 @@ int Map_Mapping( Map_Man_t * p )
     if ( p->fVerbose )
         Map_MappingReportChoices( p ); 
     Map_MappingSetChoiceLevels( p ); // should always be called before mapping!
+    
 //    return 1;
 
     // compute the cuts of nodes in the DFS order

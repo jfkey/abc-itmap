@@ -826,6 +826,18 @@ void Map_MappingSetChoiceLevels( Map_Man_t * pMan )
         Map_MappingUpdateLevel_rec( pMan, Map_Regular(pMan->pOutputs[i]), 1 );
 }
 
+void Map_MappingSetTaoRefs(Map_Man_t * pMan) {
+    Map_Node_t * pNode;
+    int i;
+    for ( i = 0; i < pMan->vMapObjs->nSize; i++ )
+    {
+        pNode = pMan->vMapObjs->pArray[i];
+        if ( !Map_NodeIsAnd(pNode) )
+            continue;
+        // pNode->nRefTao = pNode->nRefAct[0] + pNode->nRefAct[1];
+    }
+}
+
 /**Function*************************************************************
 
   Synopsis    [Reports statistics on choice nodes.]

@@ -83,6 +83,9 @@ ABC_NAMESPACE_HEADER_START
 // returns the complemented attribute of the node
 #define Map_NodeIsSimComplement(p) (Map_IsComplement(p)? !(Map_Regular(p)->fInv) : (p)->fInv)
 
+// 
+#define MAP_TAO               (3)       
+
 ////////////////////////////////////////////////////////////////////////
 ///                    STRUCTURE DEFINITIONS                         ///
 ////////////////////////////////////////////////////////////////////////
@@ -223,6 +226,8 @@ struct Map_NodeStruct_t_
     float               nRefEst[3];    // actual fanout for previous covering phase, neg and pos and sum
     float               Switching;     // the probability of switching
 
+    int                 taoRefs[MAP_TAO]; // tao-order degrees, for each node
+
     // connectivity
     Map_Node_t *        p1;            // the first child
     Map_Node_t *        p2;            // the second child
@@ -344,6 +349,8 @@ struct Map_HashEntryStruct_t_
     Map_Super_t *       pGates;        // the linked list of matching supergates
     Map_HashEntry_t *   pNext;         // the next entry in the hash table
 };
+
+ 
 
 // getting hold of the next fanout of the node
 #define Map_NodeReadNextFanout( pNode, pFanout )                \

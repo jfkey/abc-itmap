@@ -46,7 +46,9 @@ typedef struct Map_SuperStruct_t_       Map_Super_t;
 typedef struct Map_SuperLibStruct_t_    Map_SuperLib_t;
 typedef struct Map_HashTableStruct_t_   Map_HashTable_t;
 typedef struct Map_HashEntryStruct_t_   Map_HashEntry_t;
-typedef struct Map_TimeStruct_t_        Map_Time_t;
+typedef struct Map_TimeStruct_t_        Map_Time_t; 
+ 
+
 
 // the pair of rise/fall time parameters
 struct Map_TimeStruct_t_

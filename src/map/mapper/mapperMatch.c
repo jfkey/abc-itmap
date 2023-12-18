@@ -309,6 +309,7 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     fWorstLimit = pNode->tRequired[fPhase].Worst;
     for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext )
     {
+        
         // limit gate sizes based on fanout count
         if ( p->fSkipFanout && ((pNode->nRefs > 3 && pCut->nLeaves > 2) || (pNode->nRefs > 1 && pCut->nLeaves > 3)) )
             continue;
@@ -318,6 +319,10 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
 
         // find the matches for the cut
         Map_MatchNodeCut( p, pNode, pCut, fPhase, fWorstLimit );
+        if (pCut->M[fPhase].pSuperBest != NULL) {
+            // printf("pNode %d, pCut %d, pSuperBest %s \n", pNode->Num, pCut->uTruth, Mio_GateReadName(pCut->M[fPhase].pSuperBest->pRoot)); 
+        }
+        
         if ( pMatch->pSuperBest == NULL || pMatch->tArrive.Worst > fWorstLimit + p->fEpsilon )
             continue;
 
@@ -610,7 +615,9 @@ int Map_MappingMatches( Map_Man_t * p )
     pProgress = Extra_ProgressBarStart( stdout, p->vMapObjs->nSize );
     for ( i = 0; i < p->vMapObjs->nSize; i++ )
     {
+        
         pNode = p->vMapObjs->pArray[i];
+        // printf("pNode(%4d) nRefEst(%.1f, %.1f, %.1f)\n", pNode->Num, pNode->nRefEst[0], pNode->nRefEst[1], pNode->nRefEst[2]);
         if ( Map_NodeIsBuf(pNode) )
         {
             assert( pNode->p2 == NULL );
@@ -631,7 +638,7 @@ int Map_MappingMatches( Map_Man_t * p )
             return 0;
         }
 
-        if (i == 264) {
+        if (i == 26) { // NAND2xp33_ASAP7_75t_R  all phase 0 (26 38 87 105) 
             // match negative phase
             if ( !Map_MatchNodePhase( p, pNode, 0 ) )
             {
@@ -692,8 +699,26 @@ int Map_MappingMatches( Map_Man_t * p )
 
             // update the progress bar
             Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
+
+            
         }
 
+    // printf("pNode %d, pCut %d, pSuperBest %s \n", pNode->Num, pCut->uTruth, 
+    // Mio_GateReadName(pCut->M[fPhase].pSuperBest->pRoot));
+           // get the information about the best cut 
+
+    
+    Map_Cut_t * pCut0, * pCut1;
+    pCut0   = Map_NodeReadCutBest( pNode, 0 );
+    pCut1   = Map_NodeReadCutBest( pNode, 1 );
+    // if (pCut0 != NULL) {
+    //     printf("pSuperBest for phase (0) %s, ", Mio_GateReadName(pCut0->M[0].pSuperBest->pRoot));
+    // }
+    // if (pCut1 != NULL) {
+    //     printf(" phase (1) %s",  Mio_GateReadName(pCut1->M[1].pSuperBest->pRoot) );
+    // }
+    // printf("\n");
+    
     }
     Extra_ProgressBarStop( pProgress );
     return 1;

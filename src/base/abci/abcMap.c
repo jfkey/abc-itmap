@@ -24,6 +24,7 @@
 #include "map/mapper/mapper.h"
 #include "misc/util/utilNam.h"
 #include "map/scl/sclCon.h"
+#include "map/mapper/mapperInt.h"
 
 
 ABC_NAMESPACE_IMPL_START
@@ -43,6 +44,7 @@ static void         Abc_NodeSuperChoice( Abc_Ntk_t * pNtkNew, Abc_Obj_t * pNode 
 static void         Abc_NodeFromMapCutPhase( Abc_Ntk_t * pNtkNew, Map_Cut_t * pCut, int fPhase );
 static Abc_Obj_t *  Abc_NodeFromMapSuperChoice_rec( Abc_Ntk_t * pNtkNew, Map_Super_t * pSuper, Abc_Obj_t * pNodePis[], int nNodePis );
 
+static void         Abc_NtkTaoRefs(Map_Man_t * pMan, Abc_Ntk_t * pNtk); 
  
 ////////////////////////////////////////////////////////////////////////
 ///                     FUNCTION DEFINITIONS                         ///
@@ -137,9 +139,12 @@ Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, 
         vSwitching = Sim_NtkComputeSwitching( pNtk, 4096 );
         pSwitching = (float *)vSwitching->pArray;
     }
-
+ 
     // perform the mapping
     pMan = Abc_NtkToMap( pNtk, DelayTarget, fRecovery, pSwitching, fVerbose );
+    // update tao-order fanouts for the mapped network
+    Abc_NtkTaoRefs(pMan, pNtk);
+
     if ( pSwitching ) Vec_IntFree( vSwitching );
     if ( pMan == NULL )
         return NULL;
@@ -1108,6 +1113,72 @@ void Abc_NtkSetAndGateDelay( Abc_Frame_t * pAbc, float Delay )
         return;
     }
     pNtk->AndGateDelay = Delay;
+}
+
+
+
+
+/**Function*************************************************************
+
+  Synopsis    [compute the tao-order fanout for each node and store them in the mapped network.]
+
+  Description []
+               
+  SideEffects []
+
+  SeeAlso     []
+
+***********************************************************************/
+void Abc_NtkTaoRefs( Map_Man_t * pMan, Abc_Ntk_t * pNtk ) {
+    // Vec_Ptr_t * vNodes; // Map_TaoRefs_t
+    Abc_Obj_t *pNode;
+    int i, j, order;
+    // vNodes = Abc_AigDfs( pNtk, 0, 1); 
+    int **taoRefsArr = malloc(sizeof(int*) *  Abc_NtkObjNumMax(pNtk));
+    for (i = 0; i < Abc_NtkObjNumMax(pNtk); i++) {
+        taoRefsArr[i] = calloc(MAP_TAO, sizeof(int));
+    }
+    
+    // init  1-order fanouts
+    Abc_NtkForEachObj(pNtk, pNode, i) {
+        int nodeId = Abc_ObjId(pNode);
+        if (Abc_ObjIsCo(pNode)) {
+            for (order = 0; order < MAP_TAO; order ++){
+                taoRefsArr[nodeId][order] = 0;
+            } 
+        }
+        else {
+            taoRefsArr[nodeId][0] = Abc_ObjFanoutNum(pNode);
+        } 
+    }
+    
+    // compute k-order fanouts
+    for (order = 1; order < MAP_TAO; order++) {
+        Abc_NtkForEachObj( pNtk, pNode, i ){
+            int nodeId = Abc_ObjId(pNode);
+            Abc_Obj_t *pFanout;
+            Abc_ObjForEachFanout(pNode, pFanout, j) {
+                int fanoutId = Abc_ObjId(pFanout); 
+                taoRefsArr[nodeId][order] += taoRefsArr[fanoutId][order -1];
+            }
+        }
+    }
+    
+
+    // update the k-order fanout for Mapped network 
+    Abc_NtkForEachObj( pNtk,  pNode, i ){ 
+        Map_Node_t * pNodeMap = (Map_Node_t *)pNode->pCopy; 
+        if (pNodeMap != NULL){
+            memcpy(pNodeMap->taoRefs, taoRefsArr[Abc_ObjId(pNode)], sizeof(int) * MAP_TAO);
+            // printf("Node %d: ", pNodeMap->Num);
+            // for (order = 0; order <  MAP_TAO; order++) {
+            //     printf("%d-order degree: %d, ", order, pNodeMap->taoRefs[order]);
+            // }
+            // printf("\n");
+        } 
+        free(taoRefsArr[i]);
+    }
+    free(taoRefsArr);
 }
 
 ////////////////////////////////////////////////////////////////////////

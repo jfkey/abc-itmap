@@ -491,7 +491,7 @@ int Map_LibraryReadFileTreeStr( Map_SuperLib_t * pLib, Mio_Library_t * pGenlib, 
         pGate->tDelaysRLD[i].Rise = pGate->tDelaysRPD[i].Rise = 0.0;
         pGate->tDelaysFLD[i].Fall = pGate->tDelaysFPD[i].Fall = 0.0;
         pGate->tDelaysRTransLD[i].Rise = pGate->tDelaysRTransPD[i].Rise = 0.0;
-        pGate->tDelaysFTransLD[i].Fall = pGate->tDelaysFTransPD[i].Rise = 0.0;
+        pGate->tDelaysFTransLD[i].Fall = pGate->tDelaysFTransPD[i].Fall = 0.0;
         // set the gate
         pLib->ppSupers[i] = pGate;
     }
