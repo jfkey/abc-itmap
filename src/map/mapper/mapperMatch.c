@@ -638,70 +638,37 @@ int Map_MappingMatches( Map_Man_t * p )
             return 0;
         }
 
-        if (i == 26) { // NAND2xp33_ASAP7_75t_R  all phase 0 (26 38 87 105) 
+        // if (i == 26) { // NAND2xp33_ASAP7_75t_R  all phase 0 (26 38 87 105) 
             // match negative phase
-            if ( !Map_MatchNodePhase( p, pNode, 0 ) )
-            {
-                Extra_ProgressBarStop( pProgress );
-                return 0;
-            }
-            // match positive phase
-            if ( !Map_MatchNodePhase( p, pNode, 1 ) )
-            {
-                Extra_ProgressBarStop( pProgress );
-                return 0;
-            }
-            // make sure that at least one phase is mapped
-            if ( pNode->pCutBest[0] == NULL && pNode->pCutBest[1] == NULL )
-            {
-                printf( "\nError: Could not match both phases of AIG node %d.\n", pNode->Num );
-                printf( "Please make sure that the supergate library has equivalents of AND2 or NAND2.\n" );
-                printf( "If such supergates exist in the library, report a bug.\n" );
-                Extra_ProgressBarStop( pProgress );
-                return 0;
-            }
-
-            // if both phases are assigned, check if one of them can be dropped
-            Map_NodeTryDroppingOnePhase( p, pNode );
-            // set the arrival times of the node using the best cuts
-            Map_NodeTransferArrivalTimes( p, pNode );
-
-            // update the progress bar
-            Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
-
-        }else {
-            // match negative phase
-            if ( !Map_MatchNodePhase( p, pNode, 0 ) )
-            {
-                Extra_ProgressBarStop( pProgress );
-                return 0;
-            }
-            // match positive phase
-            if ( !Map_MatchNodePhase( p, pNode, 1 ) )
-            {
-                Extra_ProgressBarStop( pProgress );
-                return 0;
-            }
-            // make sure that at least one phase is mapped
-            if ( pNode->pCutBest[0] == NULL && pNode->pCutBest[1] == NULL )
-            {
-                printf( "\nError: Could not match both phases of AIG node %d.\n", pNode->Num );
-                printf( "Please make sure that the supergate library has equivalents of AND2 or NAND2.\n" );
-                printf( "If such supergates exist in the library, report a bug.\n" );
-                Extra_ProgressBarStop( pProgress );
-                return 0;
-            }
-
-            // if both phases are assigned, check if one of them can be dropped
-            Map_NodeTryDroppingOnePhase( p, pNode );
-            // set the arrival times of the node using the best cuts
-            Map_NodeTransferArrivalTimes( p, pNode );
-
-            // update the progress bar
-            Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
-
-            
+        if ( !Map_MatchNodePhase( p, pNode, 0 ) )
+        {
+            Extra_ProgressBarStop( pProgress );
+            return 0;
         }
+        // match positive phase
+        if ( !Map_MatchNodePhase( p, pNode, 1 ) )
+        {
+            Extra_ProgressBarStop( pProgress );
+            return 0;
+        }
+        // make sure that at least one phase is mapped
+        if ( pNode->pCutBest[0] == NULL && pNode->pCutBest[1] == NULL )
+        {
+            printf( "\nError: Could not match both phases of AIG node %d.\n", pNode->Num );
+            printf( "Please make sure that the supergate library has equivalents of AND2 or NAND2.\n" );
+            printf( "If such supergates exist in the library, report a bug.\n" );
+            Extra_ProgressBarStop( pProgress );
+            return 0;
+        }
+
+        // if both phases are assigned, check if one of them can be dropped
+        Map_NodeTryDroppingOnePhase( p, pNode );
+        // set the arrival times of the node using the best cuts
+        Map_NodeTransferArrivalTimes( p, pNode );
+
+        // update the progress bar
+        Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
+ 
 
     // printf("pNode %d, pCut %d, pSuperBest %s \n", pNode->Num, pCut->uTruth, 
     // Mio_GateReadName(pCut->M[fPhase].pSuperBest->pRoot));

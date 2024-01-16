@@ -25,7 +25,9 @@
 #include "misc/util/utilNam.h"
 #include "map/scl/sclCon.h"
 #include "map/mapper/mapperInt.h"
-
+ 
+#include "bayesopt/bayesopt.h" 
+#include "bayesopt/parameters.h"
 
 ABC_NAMESPACE_IMPL_START
 
@@ -45,7 +47,38 @@ static void         Abc_NodeFromMapCutPhase( Abc_Ntk_t * pNtkNew, Map_Cut_t * pC
 static Abc_Obj_t *  Abc_NodeFromMapSuperChoice_rec( Abc_Ntk_t * pNtkNew, Map_Super_t * pSuper, Abc_Obj_t * pNodePis[], int nNodePis );
 
 static void         Abc_NtkTaoRefs(Map_Man_t * pMan, Abc_Ntk_t * pNtk); 
- 
+
+
+double branin(double x, double y)  {
+    x = x * 15 - 5;
+    y = y * 15;
+    const double pi = 3.14;
+    const double rpi = pi*pi;
+    return (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6) * (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6)+10*(1-1/(8*pi))*cos(x)+10;
+};
+
+
+void test_bayes(){
+    bopt_params params = initialize_parameters_to_default();
+    // set_learning(&params, "L_MCMC");
+    int nDim = 2; 
+    double lb[2] = {0.0, 0.0};  
+    double ub[2] = {1.0, 1.0};  
+    double xpoints[2] = {0.535411, 0.0912871}; 
+    double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
+    int samplesize = 1;
+
+    void * bayesopt = initializeOptimizationIt(nDim, lb, ub, samplesize, xpoints, ypoints, params);
+    for (int i = 0; i < 10; i ++) {
+        double xnext[2];
+        nextPointIt(bayesopt, xnext);
+        double ynext = branin(xnext[0], xnext[1]);
+        printf("xnext: %f, %f, ynext: %f\n", xnext[0], xnext[1], ynext);
+        addSampleIt(bayesopt, nDim, xnext,  ynext, params, i);
+    }
+};
+
+
 ////////////////////////////////////////////////////////////////////////
 ///                     FUNCTION DEFINITIONS                         ///
 ////////////////////////////////////////////////////////////////////////
@@ -62,7 +95,9 @@ static void         Abc_NtkTaoRefs(Map_Man_t * pMan, Abc_Ntk_t * pNtk);
 
 ***********************************************************************/
 Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, double DelayMulti, float LogFan, float Slew, float Gain, int nGatesMin, int fRecovery, int fSwitching, int fSkipFanout, int fUseProfile, int fUseBuffs, int fVerbose )
-{
+{   
+    test_bayes();
+
     static int fUseMulti = 0;
     int fShowSwitching = 1;
     Abc_Ntk_t * pNtkNew;
@@ -156,9 +191,9 @@ clk = Abc_Clock();
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
 
-    if ( !Map_Mapping( pMan ) )
+    // if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
-//     if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
+    if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
     {
         Map_ManFree( pMan );
         return NULL;

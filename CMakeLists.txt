@@ -95,16 +95,28 @@ endfunction()
 
 set(ABC_MAIN_SRC src/base/main/main.c)
 list(REMOVE_ITEM ABC_SRC ${ABC_MAIN_SRC})
+ 
+set(BAYESOPT_LIB_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/lib/libbayesopt.so) # liujf
+ 
+
 
 add_library(libabc EXCLUDE_FROM_ALL ${ABC_SRC})
 abc_properties(libabc PUBLIC)
+target_include_directories(libabc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/bayesopt/include)  #liujf
 set_property(TARGET libabc PROPERTY OUTPUT_NAME abc)
 
 add_executable(abc ${ABC_MAIN_SRC})
 target_link_libraries(abc PRIVATE libabc)
+target_link_libraries(abc PUBLIC ${BAYESOPT_LIB_PATH}) #liujf
+target_include_directories(abc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib/bayesopt/include)  #liujf
+
+
 abc_properties(abc PRIVATE)
 
 add_library(libabc-pic EXCLUDE_FROM_ALL ${ABC_SRC})
 abc_properties(libabc-pic PUBLIC)
 set_property(TARGET libabc-pic PROPERTY POSITION_INDEPENDENT_CODE ON)
 set_property(TARGET libabc-pic PROPERTY OUTPUT_NAME abc-pic)
+target_include_directories(libabc-pic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib/bayesopt/include)  #liujf
+
+
