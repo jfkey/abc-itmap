@@ -168,6 +168,8 @@ struct Map_ManStruct_t_
     // area recovery statistics
     int                 nodeGainArea;
     int                 leavesGainArea;
+    // 
+    double *            delayParams;   // the  parameters of the delay model.
 };
 
 // the supergate library

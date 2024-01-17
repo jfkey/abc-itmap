@@ -23,18 +23,9 @@
 #include "map/mio/mioInt.h"
 //#include "resm.h"
 
-// #include "bayesopt/parameters.hpp"
+#include "bayesopt/bayesopt.h" 
+#include "bayesopt/parameters.h"
  
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// double my_function (unsigned int n, const double *x, double *gradient, void *func_data);
-
-#ifdef __cplusplus
-}
-#endif
-
  
 ABC_NAMESPACE_IMPL_START
 
@@ -272,10 +263,7 @@ ABC_PRT( "Time", Abc_Clock() - clk );
 //         return NULL;
 //     }
 
-void Map_MappingIteratable() 
-{
 
-}
 
 /**Function*************************************************************
 
@@ -763,6 +751,203 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
         Map_MappingPrintOutputArrivals( p );
     return 1;
 }
+
+
+
+int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs)
+{
+    int fShowSwitching         = 0;
+    int fUseAreaFlow           = 1;
+    int fUseExactArea          = !p->fSwitching;
+    int fUseExactAreaWithPhase = !p->fSwitching;
+    abctime clk;
+
+    //////////////////////////////////////////////////////////////////////
+    // perform pre-mapping computations
+    if ( p->fVerbose )
+        Map_MappingReportChoices( p );
+    Map_MappingSetChoiceLevels( p ); // should always be called before mapping!
+//    return 1;
+
+    // compute the cuts of nodes in the DFS order
+    clk = Abc_Clock();
+    Map_MappingCuts( p );
+    p->timeCuts = Abc_Clock() - clk;
+    // derive the truth tables
+    clk = Abc_Clock();
+    Map_MappingTruths( p );
+    p->timeTruth = Abc_Clock() - clk;
+    //////////////////////////////////////////////////////////////////////
+ 
+    // iterate mapping 
+    int itera_num = 1;
+    int para_size = 9; 
+    int samplesize = 1;
+    p->delayParams = malloc(sizeof(double) * para_size);
+    // p->delayParams[0] = 0.5;
+    // p->delayParams[1] = 0.3;
+    // p->delayParams[2] = 0.1;
+    // p->delayParams[3] = 0.5;
+    // p->delayParams[4] = 1.0; 
+    // p->delayParams[5] = 0.3;
+    // p->delayParams[6] = 0.1;
+    // p->delayParams[7] = 0.25;
+    // p->delayParams[8] = 1.0;
+
+    p->delayParams[0] = 0.67;
+    p->delayParams[1] = 0.25;
+    p->delayParams[2] = 0.071;
+    p->delayParams[3] = 0.43;
+    p->delayParams[4] = 1.0; 
+    p->delayParams[5] = 0.34;
+    p->delayParams[6] = 0.22;
+    p->delayParams[7] = 0.27;
+    p->delayParams[8] = 0.97;
+
+
+    bopt_params params = initialize_parameters_to_default();
+    // set_learning(&params, "L_MCMC");
+    double lb[] = {0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5};  
+    double ub[] = {1.0, 0.5, 0.5, 1.0, 2.0, 0.5, 0.5, 1.0, 2.0};  
+    void * bayesopt;
+    
+ 
+    // double xpoints[2] = {0.535411, 0.0912871}; 
+    // double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
+    // int samplesize = 1;
+
+    // void * bayesopt = initializeOptimizationIt(nDim, lb, ub, samplesize, xpoints, ypoints, params);
+    // for (int i = 0; i < 10; i ++) {
+    //     double xnext[2];
+    //     nextPointIt(bayesopt, xnext);
+    //     double ynext = branin(xnext[0], xnext[1]);
+    //     printf("xnext: %f, %f, ynext: %f\n", xnext[0], xnext[1], ynext);
+    //     addSampleIt(bayesopt, nDim, xnext,  ynext, params, i);
+    // }
+
+
+    for (int i  = 0; i < itera_num; i++) {
+        double * xnext = malloc(sizeof(double) * para_size);
+        if (i != 0 ) {
+            nextPointIt(bayesopt, xnext);
+            printf("predict xnext: ");
+            for (int j = 0; j < para_size; j++) {
+                printf("%.3f, ", xnext[j]);
+            }
+            printf("\n"); 
+            // update the delay parameters
+            for (int j = 0; j < para_size; j++) {
+                p->delayParams[j] = xnext[j];
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////// 
+        clk = Abc_Clock();
+        p->fMappingMode = 0;
+        if ( !Map_MappingMatches( p ) )
+            return 0;
+        p->timeMatch = Abc_Clock() - clk;
+        // compute the references and collect the nodes used in the mapping
+        Map_MappingSetRefs( p );
+        
+        p->AreaBase = Map_MappingGetArea( p );
+        if ( p->fVerbose )
+        {
+            printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
+                    fShowSwitching? "Switch" : "Delay",
+                    fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
+                    Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
+            ABC_PRT( "Time", p->timeMatch );
+        }
+        //////////////////////////////////////////////////////////////////////
+    
+
+        // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
+        extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
+        Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
+        if ( Mio_LibraryHasProfile(pLib) )
+                Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
+        // Map_ManFree( p );
+        if ( pNtkMapped == NULL )
+            return 1;
+
+        if ( pNtk->pExdc )
+            pNtkMapped->pExdc = Abc_NtkDup( pNtk->pExdc );
+        // make sure that everything is okay
+        if ( !Abc_NtkCheck( pNtkMapped ) )
+        {
+            printf( "Abc_NtkMap: The network check has failed.\n" );
+            Abc_NtkDelete( pNtkMapped );
+            return 1;
+        }
+         
+        // 2. execute topo command
+        if ( pNtkMapped == NULL )
+        {
+            Abc_Print( -1, "Empty network.\n" );
+            return 1;
+        }
+        if ( !Abc_NtkIsLogic(pNtkMapped) )
+        {
+            Abc_Print( -1, "This command can only be applied to a logic network.\n" );
+            return 1;
+        }
+        // modify the current network
+        Abc_Ntk_t* pNtkTopoed  = Abc_NtkDupDfs( pNtkMapped );
+        if ( pNtkTopoed == NULL )
+        {
+            Abc_Print( -1, "The command has failed.\n" );
+            return 1;
+        }
+            
+        // 3. perform STA
+        int fShowAll      = 0;
+        int fUseWireLoads = 0;
+        int fPrintPath    = 0;
+        int fDumpStats    = 0;
+        int nTreeCRatio   = 0;
+        if ( !Abc_NtkHasMapping(pNtkTopoed) )
+        {
+            Abc_Print(-1, "The current network is not mapped.\n" );
+            return 1;
+        }
+        if ( !Abc_SclCheckNtk(pNtkTopoed, 0) )
+        {
+            Abc_Print(-1, "The current network is not in a topo order (run \"topo\").\n" );
+            return 1;
+        }
+        if ( Abc_FrameReadLibScl() == NULL )
+        {
+            Abc_Print(-1, "There is no Liberty library available.\n" );
+            return 1;
+        }
+        extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
+        Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
+        
+        double curDelay = pNtkTopoed ->MaxDelay; 
+        if (i == 0 ){                               // init bayesopt 
+            double xpoints[] = {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0}; 
+            double ypoints[]  = {curDelay};
+            bayesopt = initializeOptimizationIt(para_size, lb, ub, samplesize, xpoints, ypoints, params);
+        } else {                                   // update bayesopt     
+            addSampleIt(bayesopt, para_size, xnext,  curDelay, params, i);
+        }
+
+    }
+
+   
+    // print the arrival times of the latest outputs
+    if ( p->fVerbose )
+        Map_MappingPrintOutputArrivals( p );
+    return 1;
+
+
+}
+
+
+
+
+
 
 ABC_NAMESPACE_IMPL_END
 

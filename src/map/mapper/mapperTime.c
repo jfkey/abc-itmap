@@ -160,6 +160,7 @@ float Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPh
     Map_Time_t * ptArrIn;
     int fPinPhase;
     float tDelay, tExtra;
+    float fanoutEffortCap, fanoutEffortTrans, estCapDelay, estTransDelay;
     int i;
 
     tExtra = pNode->p->pNodeDelays ? pNode->p->pNodeDelays[pNode->Num] : 0;
@@ -187,9 +188,28 @@ float Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPh
         // get the rise of the output due to rise of the inputs
         if ( pSuper->tDelaysR[i].Rise > 0 )
         {
+            // pNode->p->delayParams[0] -> (0.0, 1.0) :  weight for delay induced by transition                         default: 0.5
+            // pNode->p->delayParams[1] -> (0.0, 0.5) :  weight for 2-order fanouts contributing to LD of transition    default: 0.3
+            // pNode->p->delayParams[2] -> (0.0, 0.5) :  weight for constant fanouts contributing to LD of transition   default: 0.1
+            // pNode->p->delayParams[3] -> (0.0, 1.0) :  weight for all fanouts contributing to LD of transition        default: 0.5
+            // pNode->p->delayParams[4] -> (0.5, 2.0) :  weight for PD of transition                                    default: 1.0   
+
+            // 1- pNode->p->delayParams[0] -> (0.0, 1.0) :   weight for delay induced by capacitance                    default: 0.5
+            // pNode->p->delayParams[5] -> (0.0, 0.5) :  weight for 2-order fanouts contributing to LD of cap           default: 0.3
+            // pNode->p->delayParams[6] -> (0.0, 0.5) :  weight for constant fanouts contributing to LD of cap          default: 0.1
+            // pNode->p->delayParams[7] -> (0.0, 1.0) :  weight for all fanouts contributing to LD of  cap              default: 0.25
+            // pNode->p->delayParams[8] -> (0.5, 2.0) :  weight for PD of cap                                           default: 1.0
+
             // tDelay = ptArrIn->Rise + pSuper->tDelaysR[i].Rise + tExtra;
-            estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase] + 1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysRTransLD[i].Rise * 5 +  pSuper->tDelaysRTransPD[i].Rise ) +
-                    0.5 * ( (pNode->nRefEst[fPhase]+1 + pNode->taoRefs[1]* 0.3) * pSuper->tDelaysRLD[i].Rise * 2.5 + pSuper->tDelaysRPD[i].Rise);
+            // estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase] + 1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysRTransLD[i].Rise * 5 +  pSuper->tDelaysRTransPD[i].Rise ) +
+            //         0.5 * ( (pNode->nRefEst[fPhase]+1 + pNode->taoRefs[1]* 0.3) * pSuper->tDelaysRLD[i].Rise * 2.5 + pSuper->tDelaysRPD[i].Rise);
+
+
+            fanoutEffortTrans  = pCut->ppLeaves[i]->nRefEst[fPhase] + pCut->ppLeaves[i]->taoRefs[1] * pNode->p->delayParams[1] + 10* pNode->p->delayParams[2];
+            estTransDelay = pNode->p->delayParams[0] * (fanoutEffortTrans * pSuper->tDelaysRTransLD[i].Rise * 10 * pNode->p->delayParams[3]+ pSuper->tDelaysRTransPD[i].Rise * pNode->p->delayParams[4]);
+            fanoutEffortCap = pNode->nRefEst[fPhase] + pNode->taoRefs[1]* pNode->p->delayParams[5] + 10 * pNode->p->delayParams[6];
+            estCapDelay =  (1-pNode->p->delayParams[0]) * (fanoutEffortCap * pSuper->tDelaysRLD[i].Rise * 10* pNode->p->delayParams[7] + pSuper->tDelaysRPD[i].Rise * pNode->p->delayParams[8]);
+            estDelay = estCapDelay + estTransDelay;
 
             tDelay = ptArrIn->Rise + estDelay + tExtra;
             if ( tDelay > tWorstLimit )
@@ -202,8 +222,14 @@ float Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPh
         if ( pSuper->tDelaysR[i].Fall > 0 )
         {
             // tDelay = ptArrIn->Fall + pSuper->tDelaysR[i].Fall + tExtra;
-            estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase]+1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysRTransLD[i].Fall * 5 + pSuper->tDelaysRTransPD[i].Fall ) +
-                       0.5 * ( (pNode->nRefEst[fPhase] +1 + pNode->taoRefs[1]*0.3) * pSuper->tDelaysRLD[i].Fall * 2.5 + pSuper->tDelaysRPD[i].Fall);
+            // estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase]+1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysRTransLD[i].Fall * 5 + pSuper->tDelaysRTransPD[i].Fall ) +
+            //            0.5 * ( (pNode->nRefEst[fPhase] +1 + pNode->taoRefs[1]*0.3) * pSuper->tDelaysRLD[i].Fall * 2.5 + pSuper->tDelaysRPD[i].Fall);
+            fanoutEffortTrans  = pCut->ppLeaves[i]->nRefEst[fPhase] + pCut->ppLeaves[i]->taoRefs[1] * pNode->p->delayParams[1] + 10* pNode->p->delayParams[2];
+            estTransDelay = pNode->p->delayParams[0] * (fanoutEffortTrans * pSuper->tDelaysRTransLD[i].Fall * 10 * pNode->p->delayParams[3]+ pSuper->tDelaysRTransPD[i].Fall * pNode->p->delayParams[4]);
+            fanoutEffortCap = pNode->nRefEst[fPhase] + pNode->taoRefs[1]* pNode->p->delayParams[5] + 10 * pNode->p->delayParams[6];
+            estCapDelay =  (1-pNode->p->delayParams[0]) * (fanoutEffortCap * pSuper->tDelaysRLD[i].Fall * 10* pNode->p->delayParams[7] + pSuper->tDelaysRPD[i].Fall * pNode->p->delayParams[8]);
+            estDelay = estCapDelay + estTransDelay;
+            
             tDelay = ptArrIn->Fall + estDelay + tExtra;
             if ( tDelay > tWorstLimit )
                 return MAP_FLOAT_LARGE;
@@ -215,8 +241,14 @@ float Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPh
         if ( pSuper->tDelaysF[i].Rise > 0 )
         {
             // tDelay = ptArrIn->Rise + pSuper->tDelaysF[i].Rise + tExtra;
-            estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase]+1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysFTransLD[i].Rise * 5 + pSuper->tDelaysFTransPD[i].Rise ) +
-                       0.5 * ( (pNode->nRefEst[fPhase] +1 + pNode->taoRefs[1]*0.3) * pSuper->tDelaysFLD[i].Rise * 2.5 + pSuper->tDelaysFPD[i].Rise);
+            // estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase]+1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysFTransLD[i].Rise * 5 + pSuper->tDelaysFTransPD[i].Rise ) +
+            //           0.5 * ( (pNode->nRefEst[fPhase] +1 + pNode->taoRefs[1]*0.3) * pSuper->tDelaysFLD[i].Rise * 2.5 + pSuper->tDelaysFPD[i].Rise);
+
+            fanoutEffortTrans  = pCut->ppLeaves[i]->nRefEst[fPhase] + pCut->ppLeaves[i]->taoRefs[1] * pNode->p->delayParams[1] + 10* pNode->p->delayParams[2];
+            estTransDelay = pNode->p->delayParams[0] * (fanoutEffortTrans * pSuper->tDelaysFTransLD[i].Rise * 10 * pNode->p->delayParams[3]+ pSuper->tDelaysFTransPD[i].Rise * pNode->p->delayParams[4]);
+            fanoutEffortCap = pNode->nRefEst[fPhase] + pNode->taoRefs[1]* pNode->p->delayParams[5] + 10 * pNode->p->delayParams[6];
+            estCapDelay =  (1-pNode->p->delayParams[0]) * (fanoutEffortCap * pSuper->tDelaysFLD[i].Rise * 10* pNode->p->delayParams[7] + pSuper->tDelaysFPD[i].Rise * pNode->p->delayParams[8]);
+            estDelay = estCapDelay + estTransDelay;
 
             tDelay = ptArrIn->Rise + estDelay + tExtra;
             if ( tDelay > tWorstLimit )
@@ -230,9 +262,15 @@ float Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPh
         {
             // tDelay = ptArrIn->Fall + pSuper->tDelaysF[i].Fall + tExtra;
 //            estDelay = 0.7 * pSuper->tDelaysFLD[i].Fall  * (0.9 * pNode->nRefEst[fPhase] + 0.2 * sqrt(maxFaninD)) + 0.6 * pSuper->tDelaysFPD[i].Fall + 5;
-
-            estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase] +1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3)* pSuper->tDelaysFTransLD[i].Fall * 5 + pSuper->tDelaysFTransPD[i].Fall ) +
-                       0.5 * ( (pNode->nRefEst[fPhase]+1 + pNode->taoRefs[1]*0.3)* pSuper->tDelaysFLD[i].Fall * 2.5 + pSuper->tDelaysFPD[i].Fall);
+            // estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase] +1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3)* pSuper->tDelaysFTransLD[i].Fall * 5 + pSuper->tDelaysFTransPD[i].Fall ) +
+            //            0.5 * ( (pNode->nRefEst[fPhase]+1 + pNode->taoRefs[1]*0.3)* pSuper->tDelaysFLD[i].Fall * 2.5 + pSuper->tDelaysFPD[i].Fall);
+            
+            fanoutEffortTrans = pCut->ppLeaves[i]->nRefEst[fPhase] + pCut->ppLeaves[i]->taoRefs[1] * pNode->p->delayParams[1] + 10* pNode->p->delayParams[2];
+            estTransDelay= pNode->p->delayParams[0] * (fanoutEffortTrans * pSuper->tDelaysFTransLD[i].Fall * 10 * pNode->p->delayParams[3]+ pSuper->tDelaysFTransPD[i].Fall * pNode->p->delayParams[4]);
+            fanoutEffortCap  = pNode->nRefEst[fPhase] + pNode->taoRefs[1]* pNode->p->delayParams[5] + 10 * pNode->p->delayParams[6];
+            estCapDelay  =  (1-pNode->p->delayParams[0]) * (fanoutEffortCap * pSuper->tDelaysFLD[i].Fall * 10* pNode->p->delayParams[7] + pSuper->tDelaysFPD[i].Fall * pNode->p->delayParams[8]);
+            estDelay = estCapDelay + estTransDelay;
+        
             tDelay = ptArrIn->Fall + estDelay + tExtra;
             if ( tDelay > tWorstLimit )
                 return MAP_FLOAT_LARGE;
