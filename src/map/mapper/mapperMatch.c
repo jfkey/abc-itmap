@@ -165,6 +165,9 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
     Map_Match_t MatchBest, * pMatch = pCut->M + fPhase;
     Map_Super_t * pSuper;
     int i, Counter;
+    // if (pNode->Num == 1001) {
+    //     printf("mapperMatch 169, %.3f, %.3f, %.3f\n", pMatch->tArrive.Rise,  pMatch->tArrive.Fall,  pMatch->tArrive.Worst );
+    // }
 
     // save the current match of the cut
     MatchBest = *pMatch;
@@ -307,6 +310,9 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
  
     // select the new best cut
     fWorstLimit = pNode->tRequired[fPhase].Worst;
+    // if (pNode->Num == 1001) {
+    //     printf("mapperMatch 311: fWorstLimit %.3f, arrive time %.3f, required time %.3f \n", fWorstLimit, pNode->tArrival[0].Rise, pNode->tRequired[0].Rise);
+    // }
     for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext )
     {
         
@@ -319,9 +325,9 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
 
         // find the matches for the cut
         Map_MatchNodeCut( p, pNode, pCut, fPhase, fWorstLimit );
-        if (pCut->M[fPhase].pSuperBest != NULL) {
-            // printf("pNode %d, pCut %d, pSuperBest %s \n", pNode->Num, pCut->uTruth, Mio_GateReadName(pCut->M[fPhase].pSuperBest->pRoot)); 
-        }
+        // if (pCut->M[fPhase].pSuperBest != NULL) {
+        //     // printf("pNode %d, pCut %d, pSuperBest %s \n", pNode->Num, pCut->uTruth, Mio_GateReadName(pCut->M[fPhase].pSuperBest->pRoot)); 
+        // }
         
         if ( pMatch->pSuperBest == NULL || pMatch->tArrive.Worst > fWorstLimit + p->fEpsilon )
             continue;
@@ -660,7 +666,8 @@ int Map_MappingMatches( Map_Man_t * p )
             Extra_ProgressBarStop( pProgress );
             return 0;
         }
-
+        
+        // TODO: for iterative mapping
         // if both phases are assigned, check if one of them can be dropped
         Map_NodeTryDroppingOnePhase( p, pNode );
         // set the arrival times of the node using the best cuts

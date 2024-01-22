@@ -46,7 +46,7 @@ static void         Abc_NodeSuperChoice( Abc_Ntk_t * pNtkNew, Abc_Obj_t * pNode 
 static void         Abc_NodeFromMapCutPhase( Abc_Ntk_t * pNtkNew, Map_Cut_t * pCut, int fPhase );
 static Abc_Obj_t *  Abc_NodeFromMapSuperChoice_rec( Abc_Ntk_t * pNtkNew, Map_Super_t * pSuper, Abc_Obj_t * pNodePis[], int nNodePis );
 
-static void         Abc_NtkTaoRefs(Map_Man_t * pMan, Abc_Ntk_t * pNtk); 
+extern void         Abc_NtkTaoRefs(Map_Man_t * pMan, Abc_Ntk_t * pNtk); 
 
 
 double branin(double x, double y)  {
@@ -54,7 +54,8 @@ double branin(double x, double y)  {
     y = y * 15;
     const double pi = 3.14;
     const double rpi = pi*pi;
-    return (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6) * (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6)+10*(1-1/(8*pi))*cos(x)+10;
+    double res =  (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6) * (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6)+10*(1-1/(8*pi))*cos(x)+10;
+    return res; 
 };
 
 
@@ -64,7 +65,8 @@ void test_bayes(){
     int nDim = 2; 
     double lb[2] = {0.0, 0.0};  
     double ub[2] = {1.0, 1.0};  
-    double xpoints[2] = {0.535411, 0.0912871}; 
+    // double xpoints[2] = {0.535411, 0.0912871}; 
+    double xpoints[2] = {0.6, 0.1}; 
     double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
     int samplesize = 1;
 
@@ -78,6 +80,35 @@ void test_bayes(){
     }
 };
 
+
+void test_bayes2(){
+    bopt_params params = initialize_parameters_to_default();
+    // set_learning(&params, "L_MCMC");
+    int nDim = 2; 
+    double lb[2] = {0.0, 0.0};  
+    double ub[2] = {1.0, 1.0};  
+    // double xpoints[2] = {0.535411, 0.0912871}; 
+    
+    int samplesize = 1;
+
+    void * bayesopt; 
+    for (int i = 0; i < 20; i ++) {
+        double xnext[2];
+        double ynext;
+        if (i != 0 ) {
+            nextPointIt(bayesopt, xnext);
+            ynext = branin(xnext[0], xnext[1]);
+            printf("xnext: %f, %f, ynext: %f\n", xnext[0], xnext[1], ynext);
+        } 
+        if (i == 0) {
+            double xpoints[2] = {0.6, 0.1}; 
+            double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
+            bayesopt  = initializeOptimizationIt(nDim, lb, ub, samplesize, xpoints, ypoints, params);
+        } else {
+            addSampleIt(bayesopt, nDim, xnext,  ynext, params, i);
+        } 
+    }
+};
 
 ////////////////////////////////////////////////////////////////////////
 ///                     FUNCTION DEFINITIONS                         ///
@@ -96,7 +127,7 @@ void test_bayes(){
 ***********************************************************************/
 Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, double DelayMulti, float LogFan, float Slew, float Gain, int nGatesMin, int fRecovery, int fSwitching, int fSkipFanout, int fUseProfile, int fUseBuffs, int fVerbose )
 {   
-    // test_bayes();
+    // test_bayes2();
 
     static int fUseMulti = 0;
     int fShowSwitching = 1;

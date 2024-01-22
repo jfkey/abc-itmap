@@ -752,7 +752,14 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     return 1;
 }
 
-
+double branintest(double x, double y)  { 
+    x = x * 15 - 5;
+    y = y * 15;
+    const double pi = 3.14;
+    const double rpi = pi*pi;
+    double res =  (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6) * (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6)+10*(1-1/(8*pi))*cos(x)+10;
+    return res; 
+};
 
 int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs)
 {
@@ -780,7 +787,7 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
     //////////////////////////////////////////////////////////////////////
  
     // iterate mapping 
-    int itera_num = 1;
+    int itera_num = 10;
     int para_size = 9; 
     int samplesize = 1;
     p->delayParams = malloc(sizeof(double) * para_size);
@@ -794,52 +801,121 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
     // p->delayParams[7] = 0.25;
     // p->delayParams[8] = 1.0;
 
-    p->delayParams[0] = 0.67;
-    p->delayParams[1] = 0.25;
-    p->delayParams[2] = 0.071;
-    p->delayParams[3] = 0.43;
-    p->delayParams[4] = 1.0; 
-    p->delayParams[5] = 0.34;
-    p->delayParams[6] = 0.22;
-    p->delayParams[7] = 0.27;
-    p->delayParams[8] = 0.97;
+    // p->delayParams[0] = 0.67;
+    // p->delayParams[1] = 0.25;
+    // p->delayParams[2] = 0.071;
+    // p->delayParams[3] = 0.43;
+    // p->delayParams[4] = 1.0; 
+    // p->delayParams[5] = 0.34;
+    // p->delayParams[6] = 0.22;
+    // p->delayParams[7] = 0.27;
+    // p->delayParams[8] = 0.97;
+
+    // p->delayParams[0] = 0.986;
+    // p->delayParams[1] = 0.660;
+    // p->delayParams[2] = 0.57;
+    // p->delayParams[3] = 0.056;
+    // p->delayParams[4] = 0.527;
+    // p->delayParams[5] = 0.443;
+    // p->delayParams[6] = 0.986;
+    // p->delayParams[7] = 0.986;
+    // p->delayParams[8] = 0.833;
+    // // 4536, 2442.79 有问题？ 
+
+
+    // p->delayParams[0] = 0.499;
+    // p->delayParams[1] = 0.298;
+    // p->delayParams[2] = 0.100;
+    // p->delayParams[3] = 0.500;
+    // p->delayParams[4] = 1.000;
+    // p->delayParams[5] = 0.300;
+    // p->delayParams[6] = 0.101;
+    // p->delayParams[7] = 0.176;
+    // p->delayParams[8] = 1.000;
+
+    // predict xnext: 0.499, 0.298, 0.100, 0.500, 1.000, 0.300, 0.101, 0.176, 1.000, 
+    // WireLoad = "none"  Gates =   3395 ( 13.7 %)   Cap =  1.0 ff (  2.5 %)   Area =     4894.45 ( 86.3 %)   Delay =  2735.33 ps  ( 20.8 %)
+ 
+    // p->delayParams[0] = 0.428;
+    // p->delayParams[1] = 0.458;
+    // p->delayParams[2] = 0.481;
+    // p->delayParams[3] = 0.833;
+    // p->delayParams[4] = 0.819;
+    // p->delayParams[5] = 0.537;
+    // p->delayParams[6] = 0.455;
+    // p->delayParams[7] = 0.456;
+    // p->delayParams[8] = 0.444; 
+    //     edict xnext: 0.428, 0.458, 0.481, 0.833, 0.819, 0.537, 0.455, 0.456, 0.444, 
+    // WireLoad = "none"  Gates =   3398 ( 30.0 %)   Cap =  0.9 ff (  5.5 %)   Area =     5538.30 ( 70.0 %)   Delay =  3688.86 ps  ( 22.7 %)         
+    
+    // p->delayParams[0] = 0.920;
+    // p->delayParams[1] = 0.389;
+    // p->delayParams[2] = 0.338;
+    // p->delayParams[3] = 0.639;
+    // p->delayParams[4] = 0.639;
+    // p->delayParams[5] = 0.431;
+    // p->delayParams[6] = 0.611;
+    // p->delayParams[7] = 0.389;
+    // p->delayParams[8] = 0.505;
+
+    // predict xnext: 0.920, 0.389, 0.338, 0.639, 0.639, 0.431, 0.611, 0.389, 0.505, 
+    // WireLoad = "none"  Gates =   3473 ( 19.5 %)   Cap =  0.9 ff (  3.5 %)   Area =     5064.51 ( 80.5 %)   Delay =  3359.09 ps  ( 19.2 %)
+    // 有问题。    
+
+// p->delayParams[0] = 0.168;
+// p->delayParams[1] = 0.844;
+// p->delayParams[2] = 0.000;
+// p->delayParams[3] = 0.000;
+// p->delayParams[4] = 0.278;
+// p->delayParams[5] = 0.634;
+// p->delayParams[6] = 0.687;
+// p->delayParams[7] = 1.000;
+// p->delayParams[8] = 0.000;  
+//     predict xnext: 0.168, 0.844, 0.000, 0.000, 0.278, 0.634, 0.687, 1.000, 0.000, 
+// square 有问题， WireLoad = "none"  Gates =  27658 ( 29.7 %)   Cap =  0.9 ff (  5.4 %)   Area =    42234.41 ( 70.3 %)   Delay =  4172.78 ps  (  1.2 %)               
+
+
+// predict xnext: 0.922, 0.388, 0.339, 0.638, 0.640, 0.431, 0.612, 0.389, 0.755, 
+// WireLoad = "none"  Gates =  24266 (  1.7 %)   Cap =  1.3 ff (  0.3 %)   Area =    42070.41 ( 98.3 %)   Delay =  3681.78 ps  (  0.6 %)               
+// p->delayParams[0] = 0.195;
+// p->delayParams[1] = 0.409;
+// p->delayParams[2] = 0.000;
+// p->delayParams[3] = 0.013;
+// p->delayParams[4] = 0.312;
+// p->delayParams[5] = 0.531;
+// p->delayParams[6] = 0.005;
+// p->delayParams[7] = 0.652;
+// p->delayParams[8] = 0.000; 
+// predict xnext: 0.195, 0.409, 0.000, 0.013, 0.312, 0.531, 0.005, 0.652, 0.000, 
+// WireLoad = "none"  Gates =  30210 ( 10.0 %)   Cap =  1.1 ff (  1.8 %)   Area =    53012.41 ( 90.0 %)   Delay =  3926.36 ps  (  0.5 %)               
+// predict xnext: 0.912, 0.000, 0.338, 0.651, 0.637, 0.433, 0.612, 0.389, 0.299, 
+// WireLoad = "none"  Gates =  24859 (  1.1 %)   Cap =  1.3 ff (  0.2 %)   Area =    44405.32 ( 98.9 %)   Delay =  3695.11 ps  (  0.6 %)               
+
 
 
     bopt_params params = initialize_parameters_to_default();
     // set_learning(&params, "L_MCMC");
     double lb[] = {0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5};  
-    double ub[] = {1.0, 0.5, 0.5, 1.0, 2.0, 0.5, 0.5, 1.0, 2.0};  
+    double ub[] = {1.0, 0.5, 0.5, 1.0, 2.0, 0.5, 0.5, 1.0, 2.0};   
+    // double *xpoints = malloc(sizeof(double) * (para_size * samplesize)) ; 
+    // double *ypoints  = malloc(sizeof(double) * (samplesize)) ;
     void * bayesopt;
-    
- 
-    // double xpoints[2] = {0.535411, 0.0912871}; 
-    // double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
-    // int samplesize = 1;
-
-    // void * bayesopt = initializeOptimizationIt(nDim, lb, ub, samplesize, xpoints, ypoints, params);
-    // for (int i = 0; i < 10; i ++) {
-    //     double xnext[2];
-    //     nextPointIt(bayesopt, xnext);
-    //     double ynext = branin(xnext[0], xnext[1]);
-    //     printf("xnext: %f, %f, ynext: %f\n", xnext[0], xnext[1], ynext);
-    //     addSampleIt(bayesopt, nDim, xnext,  ynext, params, i);
-    // }
-
-
+      
     for (int i  = 0; i < itera_num; i++) {
         double * xnext = malloc(sizeof(double) * para_size);
+        double curDelay = 0.0;
+        
         if (i != 0 ) {
             nextPointIt(bayesopt, xnext);
             printf("predict xnext: ");
-            for (int j = 0; j < para_size; j++) {
-                printf("%.3f, ", xnext[j]);
-            }
-            printf("\n"); 
             // update the delay parameters
             for (int j = 0; j < para_size; j++) {
-                p->delayParams[j] = xnext[j];
-            }
+                p->delayParams[j] = xnext[j]; 
+                printf("%.3f, ", xnext[j]);
+            } 
+            printf("\n");  
         }
+       
 
         ////////////////////////////////////////////////////////////////////// 
         clk = Abc_Clock();
@@ -900,7 +976,7 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
             return 1;
         }
             
-        // 3. perform STA
+         // 3. perform STA
         int fShowAll      = 0;
         int fUseWireLoads = 0;
         int fPrintPath    = 0;
@@ -924,14 +1000,79 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
         extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
         Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
         
-        double curDelay = pNtkTopoed ->MaxDelay; 
-        if (i == 0 ){                               // init bayesopt 
-            double xpoints[] = {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0}; 
+        curDelay = pNtkTopoed ->MaxDelay; 
+        if (i  == 0 ){                               // init bayesopt 
+            // double xpoints[] = {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0}; 
+            double xpoints[] = {0.920, 0.389, 0.338, 0.639, 0.639, 0.431, 0.611, 0.389, 0.505};
             double ypoints[]  = {curDelay};
             bayesopt = initializeOptimizationIt(para_size, lb, ub, samplesize, xpoints, ypoints, params);
         } else {                                   // update bayesopt     
             addSampleIt(bayesopt, para_size, xnext,  curDelay, params, i);
-        }
+        } 
+
+        // 4. clean best matches of the mapped network
+        if (i  < itera_num - 1) {
+            Map_Node_t * pNode;
+            Map_Cut_t * pCut;
+            for (int j = 0; j < p->vMapObjs->nSize; j++ ) { 
+                pNode = p->vMapObjs->pArray[j];
+                if ( Map_NodeIsBuf(pNode) )
+                {
+                    assert( pNode->p2 == NULL );
+                    pNode->tArrival[0] = Map_Regular(pNode->p1)->tArrival[ Map_IsComplement(pNode->p1)];
+                    pNode->tArrival[1] = Map_Regular(pNode->p1)->tArrival[!Map_IsComplement(pNode->p1)];
+                    continue;
+                }
+
+                // skip primary inputs and secondary nodes if mapping with choices
+                if ( !Map_NodeIsAnd( pNode ) || pNode->pRepr )
+                    continue;
+
+                // make sure that at least one non-trival cut is present
+                if ( pNode->pCuts->pNext == NULL )
+                {
+                    // Extra_ProgressBarStop( pProgress );
+                    printf( "\nError: A node in the mapping graph does not have feasible cuts.\n" );
+                    return 0;
+                }
+                pNode->pCutBest[0] = NULL;
+                pNode->pCutBest[1] = NULL;
+ 
+                pNode->tArrival[0].Rise = 0.0;
+                pNode->tArrival[0].Fall = 0.0;
+                pNode->tArrival[0].Worst = 0.0; 
+                pNode->tArrival[1].Rise = 0.0;
+                pNode->tArrival[1].Fall = 0.0;
+                pNode->tArrival[1].Worst = 0.0; 
+
+                pNode->tRequired[0].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Fall = MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Worst =  MAP_FLOAT_LARGE; 
+                pNode->tRequired[1].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Fall =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Worst =  MAP_FLOAT_LARGE;
+                  
+                for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext ) { 
+                    Map_Match_t * pMatch =  pCut->M + 0;
+                    if (pMatch->pSuperBest) {
+                        pMatch->pSuperBest = NULL; 
+                    }
+                    pMatch->tArrive.Rise = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
+                    pMatch->AreaFlow = MAP_FLOAT_LARGE;
+                    
+                    pMatch =  pCut->M + 1;
+                    if (pMatch->pSuperBest) {
+                        pMatch->pSuperBest = NULL;
+                    }
+                    pMatch->tArrive.Rise = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
+                    pMatch->AreaFlow = MAP_FLOAT_LARGE;
+                } 
+            }
+        } 
 
     }
 
