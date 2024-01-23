@@ -311,8 +311,22 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     // select the new best cut
     fWorstLimit = pNode->tRequired[fPhase].Worst;
     // if (pNode->Num == 1001) {
-    //     printf("mapperMatch 311: fWorstLimit %.3f, arrive time %.3f, required time %.3f \n", fWorstLimit, pNode->tArrival[0].Rise, pNode->tRequired[0].Rise);
+        // printf("mapperMatch 311: fWorstLimit %.3f, arrive time %.3f, required time %.3f \n", fWorstLimit, pNode->tArrival[0].Rise, pNode->tRequired[0].Rise);
+        // printf("mapperMatch 315, act nrefs %d, %d, %d\n", pNode->nRefAct[0], pNode->nRefAct[1], pNode->nRefAct[2]);
+        // printf("mapperMatch 316, est nrefs %.3f, %.3f, %.3f\n", pNode->nRefEst[0], pNode->nRefEst[1], pNode->nRefEst[2]);
+        // if(pCutBest) {
+        //     printf("mapperMatch 318, pNode->pCutBest->M %.3f, %.3f, %.3f \n", pNode->pCutBest[fPhase]->M[fPhase].tArrive.Rise, pNode->pCutBest[fPhase]->M[fPhase].tArrive.Fall, pNode->pCutBest[fPhase]->M[fPhase].tArrive.Worst);
+        // }
+        // pCut = pNode->pCuts->pNext; 
+        // printf("mapperMatch 320, pCut->M %.3f, %.3f, %.3f \n", pCut->M[fPhase].tArrive.Rise, pCut->M[fPhase].tArrive.Fall, pCut->M[fPhase].tArrive.Worst);
+        // printf("mapperMatch 321 pCut->delay[0] %.3f, %.3f, \n", pCut->delay[0], pCut->delay[1]);
+        // printf("mapperMatch 322 pCut->nLeaves %d, %d, \n", pCut->nLeaves, pCut->nVolume);
+    //     if (pCut->M[fPhase].pSuperBest != NULL) {
+    //         printf("pCut->M[fPhase].pSuperBest->Area: %.3f\n", pCut->M[fPhase].pSuperBest->Area);
+    //     } 
+    //     printf("mapperMatch area, uPhase, uPhaseBest %.3f, %d, %d \n", pCut->M[fPhase].AreaFlow, pCut->M[fPhase].uPhase, pCut->M[fPhase].uPhaseBest);
     // }
+
     for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext )
     {
         

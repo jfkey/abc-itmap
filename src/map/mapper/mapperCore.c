@@ -308,6 +308,29 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     //////////////////////////////////////////////////////////////////////
 //ABC_PRT( "Truths", Abc_Clock() - clk );
 
+    int para_size = 9;
+    p->delayParams = malloc(sizeof(double) * para_size);
+
+    p->delayParams[0] = 0.5;
+    p->delayParams[1] = 0.3;
+    p->delayParams[2] = 0.1;
+    p->delayParams[3] = 0.5;
+    p->delayParams[4] = 1.0; 
+    p->delayParams[5] = 0.3;
+    p->delayParams[6] = 0.1;
+    p->delayParams[7] = 0.25;
+    p->delayParams[8] = 1.0;
+
+    // p->delayParams[0] = 0.67;
+    // p->delayParams[1] = 0.25;
+    // p->delayParams[2] = 0.071;
+    // p->delayParams[3] = 0.43;
+    // p->delayParams[4] = 1.0; 
+    // p->delayParams[5] = 0.34;
+    // p->delayParams[6] = 0.22;
+    // p->delayParams[7] = 0.27;
+    // p->delayParams[8] = 0.97;
+
     //////////////////////////////////////////////////////////////////////
     // compute the minimum-delay mapping
     clk = Abc_Clock();
@@ -620,7 +643,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
 //    //////////////////////////////////////////////////////////////////////
 
 
-/*
+ 
     //////////////////////////////////////////////////////////////////////
 
     // perform area recovery using area flow
@@ -744,7 +767,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     p->timeArea += Abc_Clock() - clk;
     //////////////////////////////////////////////////////////////////////
 
-*/
+ 
 
     // print the arrival times of the latest outputs
     if ( p->fVerbose )
@@ -752,14 +775,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     return 1;
 }
 
-double branintest(double x, double y)  { 
-    x = x * 15 - 5;
-    y = y * 15;
-    const double pi = 3.14;
-    const double rpi = pi*pi;
-    double res =  (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6) * (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6)+10*(1-1/(8*pi))*cos(x)+10;
-    return res; 
-};
+ 
 
 int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs)
 {
@@ -787,7 +803,7 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
     //////////////////////////////////////////////////////////////////////
  
     // iterate mapping 
-    int itera_num = 10;
+    int itera_num = 1;
     int para_size = 9; 
     int samplesize = 1;
     p->delayParams = malloc(sizeof(double) * para_size);
@@ -820,34 +836,7 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
     // p->delayParams[6] = 0.986;
     // p->delayParams[7] = 0.986;
     // p->delayParams[8] = 0.833;
-    // // 4536, 2442.79 有问题？ 
-
-
-    // p->delayParams[0] = 0.499;
-    // p->delayParams[1] = 0.298;
-    // p->delayParams[2] = 0.100;
-    // p->delayParams[3] = 0.500;
-    // p->delayParams[4] = 1.000;
-    // p->delayParams[5] = 0.300;
-    // p->delayParams[6] = 0.101;
-    // p->delayParams[7] = 0.176;
-    // p->delayParams[8] = 1.000;
-
-    // predict xnext: 0.499, 0.298, 0.100, 0.500, 1.000, 0.300, 0.101, 0.176, 1.000, 
-    // WireLoad = "none"  Gates =   3395 ( 13.7 %)   Cap =  1.0 ff (  2.5 %)   Area =     4894.45 ( 86.3 %)   Delay =  2735.33 ps  ( 20.8 %)
- 
-    // p->delayParams[0] = 0.428;
-    // p->delayParams[1] = 0.458;
-    // p->delayParams[2] = 0.481;
-    // p->delayParams[3] = 0.833;
-    // p->delayParams[4] = 0.819;
-    // p->delayParams[5] = 0.537;
-    // p->delayParams[6] = 0.455;
-    // p->delayParams[7] = 0.456;
-    // p->delayParams[8] = 0.444; 
-    //     edict xnext: 0.428, 0.458, 0.481, 0.833, 0.819, 0.537, 0.455, 0.456, 0.444, 
-    // WireLoad = "none"  Gates =   3398 ( 30.0 %)   Cap =  0.9 ff (  5.5 %)   Area =     5538.30 ( 70.0 %)   Delay =  3688.86 ps  ( 22.7 %)         
-    
+     
     // p->delayParams[0] = 0.920;
     // p->delayParams[1] = 0.389;
     // p->delayParams[2] = 0.338;
@@ -857,55 +846,40 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
     // p->delayParams[6] = 0.611;
     // p->delayParams[7] = 0.389;
     // p->delayParams[8] = 0.505;
+ 
 
-    // predict xnext: 0.920, 0.389, 0.338, 0.639, 0.639, 0.431, 0.611, 0.389, 0.505, 
-    // WireLoad = "none"  Gates =   3473 ( 19.5 %)   Cap =  0.9 ff (  3.5 %)   Area =     5064.51 ( 80.5 %)   Delay =  3359.09 ps  ( 19.2 %)
-    // 有问题。    
-
-// p->delayParams[0] = 0.168;
-// p->delayParams[1] = 0.844;
-// p->delayParams[2] = 0.000;
-// p->delayParams[3] = 0.000;
-// p->delayParams[4] = 0.278;
-// p->delayParams[5] = 0.634;
-// p->delayParams[6] = 0.687;
-// p->delayParams[7] = 1.000;
-// p->delayParams[8] = 0.000;  
-//     predict xnext: 0.168, 0.844, 0.000, 0.000, 0.278, 0.634, 0.687, 1.000, 0.000, 
-// square 有问题， WireLoad = "none"  Gates =  27658 ( 29.7 %)   Cap =  0.9 ff (  5.4 %)   Area =    42234.41 ( 70.3 %)   Delay =  4172.78 ps  (  1.2 %)               
-
-
-// predict xnext: 0.922, 0.388, 0.339, 0.638, 0.640, 0.431, 0.612, 0.389, 0.755, 
-// WireLoad = "none"  Gates =  24266 (  1.7 %)   Cap =  1.3 ff (  0.3 %)   Area =    42070.41 ( 98.3 %)   Delay =  3681.78 ps  (  0.6 %)               
-// p->delayParams[0] = 0.195;
-// p->delayParams[1] = 0.409;
-// p->delayParams[2] = 0.000;
-// p->delayParams[3] = 0.013;
-// p->delayParams[4] = 0.312;
-// p->delayParams[5] = 0.531;
-// p->delayParams[6] = 0.005;
-// p->delayParams[7] = 0.652;
-// p->delayParams[8] = 0.000; 
-// predict xnext: 0.195, 0.409, 0.000, 0.013, 0.312, 0.531, 0.005, 0.652, 0.000, 
-// WireLoad = "none"  Gates =  30210 ( 10.0 %)   Cap =  1.1 ff (  1.8 %)   Area =    53012.41 ( 90.0 %)   Delay =  3926.36 ps  (  0.5 %)               
-// predict xnext: 0.912, 0.000, 0.338, 0.651, 0.637, 0.433, 0.612, 0.389, 0.299, 
-// WireLoad = "none"  Gates =  24859 (  1.1 %)   Cap =  1.3 ff (  0.2 %)   Area =    44405.32 ( 98.9 %)   Delay =  3695.11 ps  (  0.6 %)               
-
-
-
+    // p->delayParams[0] = 0.565;
+    // p->delayParams[1] = 0.000;
+    // p->delayParams[2] = 0.668;
+    // p->delayParams[3] = 0.579;
+    // p->delayParams[4] = 0.803;
+    // p->delayParams[5] = 0.000;
+    // p->delayParams[6] = 0.127;
+    // p->delayParams[7] = 0.052;
+    // p->delayParams[8] = 0.448;
+ 
     bopt_params params = initialize_parameters_to_default();
     // set_learning(&params, "L_MCMC");
     double lb[] = {0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5};  
     double ub[] = {1.0, 0.5, 0.5, 1.0, 2.0, 0.5, 0.5, 1.0, 2.0};   
-    // double *xpoints = malloc(sizeof(double) * (para_size * samplesize)) ; 
-    // double *ypoints  = malloc(sizeof(double) * (samplesize)) ;
+    double *xpoints = malloc(sizeof(double) * (para_size * samplesize)) ; 
+    double *ypoints  = malloc(sizeof(double) * (samplesize)) ;
     void * bayesopt;
       
     for (int i  = 0; i < itera_num; i++) {
         double * xnext = malloc(sizeof(double) * para_size);
         double curDelay = 0.0;
         
-        if (i != 0 ) {
+        if ( i < samplesize ) {
+            double randMax = 4294967295; 
+            for (int j = 0; j < para_size; j++) {
+                double randPV = fabs((double)Abc_Random(0));
+                double norm = randPV / randMax;
+                p->delayParams[j] = lb[j] + norm * (ub[j] - lb[j]);
+                printf("%.3f, ", p->delayParams[j]);
+            } 
+            printf("\n");
+        } else {
             nextPointIt(bayesopt, xnext);
             printf("predict xnext: ");
             // update the delay parameters
@@ -915,7 +889,6 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
             } 
             printf("\n");  
         }
-       
 
         ////////////////////////////////////////////////////////////////////// 
         clk = Abc_Clock();
@@ -924,17 +897,17 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
             return 0;
         p->timeMatch = Abc_Clock() - clk;
         // compute the references and collect the nodes used in the mapping
-        Map_MappingSetRefs( p );
+        // Map_MappingSetRefs( p );
         
-        p->AreaBase = Map_MappingGetArea( p );
-        if ( p->fVerbose )
-        {
-            printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-                    fShowSwitching? "Switch" : "Delay",
-                    fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-                    Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
-            ABC_PRT( "Time", p->timeMatch );
-        }
+        // p->AreaBase = Map_MappingGetArea( p );
+        // if ( p->fVerbose )
+        // {
+        //     printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
+        //             fShowSwitching? "Switch" : "Delay",
+        //             fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
+        //             Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
+        //     ABC_PRT( "Time", p->timeMatch );
+        // }
         //////////////////////////////////////////////////////////////////////
     
 
@@ -1001,12 +974,20 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
         Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
         
         curDelay = pNtkTopoed ->MaxDelay; 
-        if (i  == 0 ){                               // init bayesopt 
+        printf("+++++++++++++++++curDelay: %f\n", curDelay);    
+        if (i  < samplesize ){                               // init bayesopt 
             // double xpoints[] = {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0}; 
-            double xpoints[] = {0.920, 0.389, 0.338, 0.639, 0.639, 0.431, 0.611, 0.389, 0.505};
-            double ypoints[]  = {curDelay};
-            bayesopt = initializeOptimizationIt(para_size, lb, ub, samplesize, xpoints, ypoints, params);
-        } else {                                   // update bayesopt     
+            // double xpoints[] = {0.920, 0.389, 0.338, 0.639, 0.639, 0.431, 0.611, 0.389, 0.505};
+            // double ypoints[]  = {curDelay};
+
+            for (int j = 0; j < para_size; j++) {
+                xpoints[i * para_size + j] = p->delayParams[j];
+            }
+            ypoints[i] = curDelay;
+            if (i == samplesize -1)
+                bayesopt = initializeOptimizationIt(para_size, lb, ub, samplesize, xpoints, ypoints, params);
+        } 
+        else {                                   // update bayesopt     
             addSampleIt(bayesopt, para_size, xnext,  curDelay, params, i);
         } 
 
@@ -1014,6 +995,8 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
         if (i  < itera_num - 1) {
             Map_Node_t * pNode;
             Map_Cut_t * pCut;
+            p->nMatches = 0; 
+            p->nPhases = 0; 
             for (int j = 0; j < p->vMapObjs->nSize; j++ ) { 
                 pNode = p->vMapObjs->pArray[j];
                 if ( Map_NodeIsBuf(pNode) )
@@ -1036,7 +1019,7 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
                     return 0;
                 }
                 pNode->pCutBest[0] = NULL;
-                pNode->pCutBest[1] = NULL;
+                pNode->pCutBest[1] = NULL; 
  
                 pNode->tArrival[0].Rise = 0.0;
                 pNode->tArrival[0].Fall = 0.0;
@@ -1051,6 +1034,8 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
                 pNode->tRequired[1].Rise =  MAP_FLOAT_LARGE;
                 pNode->tRequired[1].Fall =  MAP_FLOAT_LARGE;
                 pNode->tRequired[1].Worst =  MAP_FLOAT_LARGE;
+
+                 
                   
                 for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext ) { 
                     Map_Match_t * pMatch =  pCut->M + 0;
@@ -1061,6 +1046,7 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
                     pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
                     pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
                     pMatch->AreaFlow = MAP_FLOAT_LARGE;
+                    pMatch->uPhaseBest = 286331153; 
                     
                     pMatch =  pCut->M + 1;
                     if (pMatch->pSuperBest) {
@@ -1070,6 +1056,7 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
                     pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
                     pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
                     pMatch->AreaFlow = MAP_FLOAT_LARGE;
+                    pMatch->uPhaseBest = 286331153; 
                 } 
             }
         } 
