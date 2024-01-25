@@ -177,7 +177,8 @@ float Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPh
     }   
     // 0.7 * LD * ( 0.9 * D + 0.2 * sqrt(faninD)) + 0.6 * PD + 5
 //     estDelay = 0.7 * pSuper->tDelayLDMax * ( 0.9 * maxFaninD + 0.2 * sqrt(maxFaninD)) + 0.6 * pSuper->tDelayInv.Fall + 5;
-
+    // ************ TODO: handle the case if the leaf node is a PI ************
+    
     for ( i = pCut->nLeaves - 1; i >= 0; i-- )
     {
         // get the phase of the given pin
@@ -409,7 +410,7 @@ void Map_TimePropagateRequiredPhaseIt( Map_Man_t * p, Map_Node_t * pNode, int fP
 //                ptArrOut->Rise = ptArrIn->Rise + pSuper->tDelaysR[i].Rise;
         if ( pSuper->tDelaysR[i].Rise > 0 )
         {
-
+ 
             // estDelay = 0.5 * ( (pCut->ppLeaves[i]->nRefEst[fPhase] + 1 + pCut->ppLeaves[i]->taoRefs[1] * 0.3) * pSuper->tDelaysRTransLD[i].Rise * 5 +  pSuper->tDelaysRTransPD[i].Rise ) +
             //         0.5 * ( (pNode->nRefEst[fPhase]+1 + pNode->taoRefs[1]* 0.3) * pSuper->tDelaysRLD[i].Rise * 2.5 + pSuper->tDelaysRPD[i].Rise);
 

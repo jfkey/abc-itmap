@@ -20,6 +20,9 @@
 
 #include "misc/util/utilNam.h"
 #include "map/scl/sclCon.h"
+#include "map/mapper/mapper.h"
+#include "map/mio/mio.h"
+#include "map/mio/mioInt.h"
 
 ABC_NAMESPACE_IMPL_START
 
@@ -401,7 +404,12 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
 
 ***********************************************************************/
 void Map_MappingSetPiArrivalTimes( Map_Man_t * p )
-{
+{   
+    Mio_Gate_t * pInvGate = p->pSuperLib->pGateInv;  
+    Mio_Pin_t * pInvPin =  pInvGate ->pPins;
+    //double maxInvLD = 2.5 * MAP_MAX(pInvPin->dDelayLDRise, pInvPin->dDelayLDFall);
+    // double maxInvPD = 2.5 * MAP_MAX(pInvPin->dDelayPDRise, pInvPin->dDelayPDFall);
+    double maxD0 =0, maxD1 = 0; 
     Map_Node_t * pNode;
     int i;
     for ( i = 0; i < p->nInputs; i++ )
@@ -421,10 +429,25 @@ void Map_MappingSetPiArrivalTimes( Map_Man_t * p )
         pNode->tArrival[1].Fall  += p->pNodeDelays ? p->pNodeDelays[pNode->Num] : 0;
         pNode->tArrival[1].Worst += p->pNodeDelays ? p->pNodeDelays[pNode->Num] : 0;
         // set the arrival time of the negative phase
-        pNode->tArrival[0].Rise  = pNode->tArrival[1].Fall + p->pSuperLib->tDelayInv.Rise;
-        pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + p->pSuperLib->tDelayInv.Fall;
+        // pNode->tArrival[0].Rise  = pNode->tArrival[1].Fall + p->pSuperLib->tDelayInv.Rise;
+        // pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + p->pSuperLib->tDelayInv.Fall;
+        // pNode->tArrival[0].Worst = MAP_MAX(pNode->tArrival[0].Rise, pNode->tArrival[0].Fall);
+        // handle for inverters
+        pNode->tArrival[1].Rise += pInvPin->dDelayLDRise * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDRise;
+        pNode->tArrival[1].Fall += pInvPin->dDelayLDFall * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDFall;
+        pNode->tArrival[1].Worst = MAP_MAX(pNode->tArrival[1].Rise, pNode->tArrival[1].Fall);
+
+        pNode->tArrival[0].Rise  = pNode->tArrival[1].Fall + pInvPin->dDelayLDRise * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDRise;
+        pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + pInvPin->dDelayLDFall * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDFall;
         pNode->tArrival[0].Worst = MAP_MAX(pNode->tArrival[0].Rise, pNode->tArrival[0].Fall);
+        if (pNode->tArrival[1].Worst > maxD1) {
+            maxD1 = pNode->tArrival[1].Worst;
+        }
+        if (pNode->tArrival[0].Worst > maxD0) {
+            maxD0 = pNode->tArrival[0].Worst;
+        }
     }
+    printf("max D0: %.3f, max D1: %.3f \n", maxD0, maxD1);
 }
 
 /**function*************************************************************
@@ -621,6 +644,7 @@ int Map_MappingMatches( Map_Man_t * p )
     assert( p->fMappingMode >= 0 && p->fMappingMode <= 5 );
 
     // use the externally given PI arrival times
+    // handle inverters 
     if ( p->fMappingMode == 0 )
         Map_MappingSetPiArrivalTimes( p );
 

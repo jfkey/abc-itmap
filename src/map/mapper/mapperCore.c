@@ -351,12 +351,12 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     }
     //////////////////////////////////////////////////////////////////////
 
-    // if ( !p->fAreaRecovery )
-    // {
-    //     if ( p->fVerbose )
-    //         Map_MappingPrintOutputArrivals( p );
-    //     return 1;
-    // }
+    if ( !p->fAreaRecovery )
+    {
+        if ( p->fVerbose )
+            Map_MappingPrintOutputArrivals( p );
+        return 1;
+    }
 
     
    /* perform STA,  update the load-dependent delay for the cut
@@ -697,6 +697,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     p->timeArea += Abc_Clock() - clk;
     //////////////////////////////////////////////////////////////////////
 
+/*
     //////////////////////////////////////////////////////////////////////
     // perform area recovery using exact area
     clk = Abc_Clock();
@@ -766,7 +767,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     }
     p->timeArea += Abc_Clock() - clk;
     //////////////////////////////////////////////////////////////////////
-
+*/
  
 
     // print the arrival times of the latest outputs

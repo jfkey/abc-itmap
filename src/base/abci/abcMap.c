@@ -246,7 +246,7 @@ if ( fVerbose )
 {
 ABC_PRT( "Total runtime", Abc_Clock() - clkTotal );
 }
-
+printf("the number of inverters: %d\n", pNtkNew->mappedInvs);
     // make sure that everything is okay
     if ( !Abc_NtkCheck( pNtkNew ) )
     {
@@ -254,7 +254,7 @@ ABC_PRT( "Total runtime", Abc_Clock() - clkTotal );
         Abc_NtkDelete( pNtkNew );
         return NULL;
     }
-
+    
         // print the mapped_network
 //    int i =0;
 //    Abc_Obj_t * pNode;
@@ -588,6 +588,7 @@ Abc_Obj_t * Abc_NodeFromMap_rec( Abc_Ntk_t * pNtkNew, Map_Node_t * pNodeMap, int
     pNodeInv = Abc_NtkCreateNode( pNtkNew );
     Abc_ObjAddFanin( pNodeInv, pNodeNew );
     pNodeInv->pData = Mio_LibraryReadInv((Mio_Library_t *)Abc_FrameReadLibGen());
+    pNtkNew->mappedInvs++;
 
     // set the inverter
     Map_NodeSetData( pNodeMap, fPhase, (char *)pNodeInv );
@@ -604,6 +605,7 @@ Abc_Ntk_t * Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs )
     assert( Map_ManReadBufNum(pMan) == pNtk->nBarBufs );
     // create the new network
     pNtkNew = Abc_NtkStartFrom( pNtk, ABC_NTK_LOGIC, ABC_FUNC_MAP );
+    pNtkNew->mappedInvs = 0; 
     // make the mapper point to the new network
     Map_ManCleanData( pMan );
     Abc_NtkForEachCi( pNtk, pNode, i )
