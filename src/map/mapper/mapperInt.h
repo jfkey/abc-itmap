@@ -443,7 +443,7 @@ extern void              Map_SuperTableSortSupergates( Map_HashTable_t * p, int 
 extern void              Map_SuperTableSortSupergatesByDelay( Map_HashTable_t * p, int nSupersMax );
 /*=== mapperTime.c =============================================================*/
 extern float             Map_TimeCutComputeArrival( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhase, float tWorstCaseLimit );
-extern float             Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhase, float tWorstCaseLimit );
+extern float             Map_TimeCutComputeArrivalIt( Map_Node_t * pNode, Map_Cut_t * pCut, int fPhase, float tWorstCaseLimit, Map_SuperLib_t * pLib);
 extern float             Map_TimeComputeArrivalMax( Map_Man_t * p );
 extern void              Map_TimeComputeRequiredGlobal( Map_Man_t * p );
 /*=== mapperTruth.c ===============================================================*/

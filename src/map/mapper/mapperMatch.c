@@ -196,7 +196,7 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
             if ( p->fMappingMode == 0 )
             {
                 // get the arrival time
-                Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, fWorstLimit );
+                Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, fWorstLimit, p->pSuperLib );
                 // skip the cut if the arrival times exceed the required times
                 if ( pMatch->tArrive.Worst > fWorstLimit + p->fEpsilon )
                     continue;
@@ -216,7 +216,7 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
                 if ( pMatch->AreaFlow > MatchBest.AreaFlow + p->fEpsilon )
                     continue;
                 // get the arrival time
-                Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, fWorstLimit );
+                Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, fWorstLimit, p->pSuperLib);
                 // skip the cut if the arrival times exceed the required times
                 if ( pMatch->tArrive.Worst > fWorstLimit + p->fEpsilon )
                     continue;
@@ -238,7 +238,7 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
     // recompute the arrival time and area (area flow) of this cut
     if ( pMatch->pSuperBest )
     {
-        Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, MAP_FLOAT_LARGE );
+        Map_TimeCutComputeArrivalIt( pNode, pCut, fPhase, MAP_FLOAT_LARGE, p->pSuperLib );
         if ( p->fMappingMode == 2 || p->fMappingMode == 3 )
             pMatch->AreaFlow = Map_CutGetAreaDerefed( pCut, fPhase );
         else if ( p->fMappingMode == 4 )
@@ -277,7 +277,7 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     // as a result of remapping fanins in the topological order
     if ( p->fMappingMode != 0 && p->fMappingMode != 5 )
     {
-        Map_TimeCutComputeArrivalIt( pNode, pCutBest, fPhase, MAP_FLOAT_LARGE );
+        Map_TimeCutComputeArrivalIt( pNode, pCutBest, fPhase, MAP_FLOAT_LARGE, p->pSuperLib );
         // make sure that the required times are met
 //        assert( pCutBest->M[fPhase].tArrive.Rise < pNode->tRequired[fPhase].Rise + p->fEpsilon );
 //        assert( pCutBest->M[fPhase].tArrive.Fall < pNode->tRequired[fPhase].Fall + p->fEpsilon );
@@ -433,12 +433,14 @@ void Map_MappingSetPiArrivalTimes( Map_Man_t * p )
         // pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + p->pSuperLib->tDelayInv.Fall;
         // pNode->tArrival[0].Worst = MAP_MAX(pNode->tArrival[0].Rise, pNode->tArrival[0].Fall);
         // handle for inverters
-        pNode->tArrival[1].Rise += pInvPin->dDelayLDRise * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDRise;
-        pNode->tArrival[1].Fall += pInvPin->dDelayLDFall * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDFall;
-        pNode->tArrival[1].Worst = MAP_MAX(pNode->tArrival[1].Rise, pNode->tArrival[1].Fall);
+        // pNode->tArrival[1].Rise += pInvPin->dDelayLDRise * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDRise;
+        // pNode->tArrival[1].Fall += pInvPin->dDelayLDFall * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDFall;
+        // pNode->tArrival[1].Worst = MAP_MAX(pNode->tArrival[1].Rise, pNode->tArrival[1].Fall);
+        
 
-        pNode->tArrival[0].Rise  = pNode->tArrival[1].Fall + pInvPin->dDelayLDRise * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDRise;
-        pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + pInvPin->dDelayLDFall * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDFall;
+        // + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]
+        pNode->tArrival[0].Rise  = pNode->tArrival[1].Fall + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise;
+        pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + pInvPin->dDelayLDFall * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDFall;
         pNode->tArrival[0].Worst = MAP_MAX(pNode->tArrival[0].Rise, pNode->tArrival[0].Fall);
         if (pNode->tArrival[1].Worst > maxD1) {
             maxD1 = pNode->tArrival[1].Worst;
@@ -461,13 +463,23 @@ void Map_MappingSetPiArrivalTimes( Map_Man_t * p )
   seealso     []
 
 ***********************************************************************/
-float Map_TimeMatchWithInverter( Map_Man_t * p, Map_Match_t * pMatch )
+float Map_TimeMatchWithInverter( Map_Man_t * p, Map_Match_t * pMatch, Map_Node_t * pNode)
 {
+    Map_Time_t tArrInv; 
+    Mio_Gate_t * pInvGate = p->pSuperLib->pGateInv;  
+    Mio_Pin_t * pInvPin =  pInvGate ->pPins;  
+    tArrInv.Fall = pMatch->tArrive.Rise + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise;
+    tArrInv.Rise  = pMatch->tArrive.Fall + + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise;
+    tArrInv.Worst = MAP_MAX( tArrInv.Rise, tArrInv.Fall ); 
+    return tArrInv.Worst;
+
+/*
     Map_Time_t tArrInv;
     tArrInv.Fall  = pMatch->tArrive.Rise + p->pSuperLib->tDelayInv.Fall;
     tArrInv.Rise  = pMatch->tArrive.Fall + p->pSuperLib->tDelayInv.Rise;
     tArrInv.Worst = MAP_MAX( tArrInv.Rise, tArrInv.Fall ); 
     return tArrInv.Worst;
+*/
 }
 
 /**Function*************************************************************
@@ -503,8 +515,8 @@ void Map_NodeTryDroppingOnePhase( Map_Man_t * p, Map_Node_t * pNode )
 
     // get the worst arrival times of each phase
     // implemented using the other phase with inverter added
-    tWorst0Using1 = Map_TimeMatchWithInverter( p, pMatchBest1 );
-    tWorst1Using0 = Map_TimeMatchWithInverter( p, pMatchBest0 );
+    tWorst0Using1 = Map_TimeMatchWithInverter( p, pMatchBest1, pNode );
+    tWorst1Using0 = Map_TimeMatchWithInverter( p, pMatchBest0, pNode );
 
     // consider the case of mapping for delay
     if ( p->fMappingMode == 0 && p->DelayTarget < ABC_INFINITY )
@@ -654,6 +666,8 @@ int Map_MappingMatches( Map_Man_t * p )
     else if ( p->fMappingMode == 1 || p->fMappingMode == 5)
         Map_MappingEstimateRefs( p );
 
+    double md = 0.0;
+
     // the PI cuts are matched in the cut computation package
     // in the loop below we match the internal nodes
     pProgress = Extra_ProgressBarStart( stdout, p->vMapObjs->nSize );
@@ -713,7 +727,9 @@ int Map_MappingMatches( Map_Man_t * p )
 
         // update the progress bar
         Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
- 
+        if (md < pNode->tArrival[0].Worst) {
+            md = pNode->tArrival[0].Worst;
+        }
 
     // printf("pNode %d, pCut %d, pSuperBest %s \n", pNode->Num, pCut->uTruth, 
     // Mio_GateReadName(pCut->M[fPhase].pSuperBest->pRoot));
@@ -733,6 +749,7 @@ int Map_MappingMatches( Map_Man_t * p )
     
     }
     Extra_ProgressBarStop( pProgress );
+    printf("max delay: %.3f\n", md);
     return 1;
 }
 

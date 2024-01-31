@@ -308,7 +308,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     //////////////////////////////////////////////////////////////////////
 //ABC_PRT( "Truths", Abc_Clock() - clk );
 
-    int para_size = 9;
+    int para_size = 10;
     p->delayParams = malloc(sizeof(double) * para_size);
 
     p->delayParams[0] = 0.5;
@@ -320,6 +320,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     p->delayParams[6] = 0.1;
     p->delayParams[7] = 0.25;
     p->delayParams[8] = 1.0;
+    p->delayParams[9] = 0.5;
 
     // p->delayParams[0] = 0.67;
     // p->delayParams[1] = 0.25;
@@ -330,6 +331,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     // p->delayParams[6] = 0.22;
     // p->delayParams[7] = 0.27;
     // p->delayParams[8] = 0.97;
+
 
     //////////////////////////////////////////////////////////////////////
     // compute the minimum-delay mapping
@@ -696,8 +698,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     }
     p->timeArea += Abc_Clock() - clk;
     //////////////////////////////////////////////////////////////////////
-
-/*
+ 
     //////////////////////////////////////////////////////////////////////
     // perform area recovery using exact area
     clk = Abc_Clock();
@@ -767,7 +768,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     }
     p->timeArea += Abc_Clock() - clk;
     //////////////////////////////////////////////////////////////////////
-*/
+ 
  
 
     // print the arrival times of the latest outputs
@@ -805,7 +806,7 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
  
     // iterate mapping 
     int itera_num = 1;
-    int para_size = 9; 
+    int para_size = 10; 
     int samplesize = 1;
     p->delayParams = malloc(sizeof(double) * para_size);
     // p->delayParams[0] = 0.5;

@@ -238,7 +238,7 @@ clk = Abc_Clock();
         Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
     Map_ManFree( pMan );
     if ( pNtkNew == NULL )
-        return NULL;
+        return NULL;  
 
     if ( pNtk->pExdc )
         pNtkNew->pExdc = Abc_NtkDup( pNtk->pExdc );
@@ -246,7 +246,7 @@ if ( fVerbose )
 {
 ABC_PRT( "Total runtime", Abc_Clock() - clkTotal );
 }
-printf("the number of inverters: %d\n", pNtkNew->mappedInvs);
+// printf("the number of inverters: %d\n", pNtkNew->mappedInvs);
     // make sure that everything is okay
     if ( !Abc_NtkCheck( pNtkNew ) )
     {
