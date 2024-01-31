@@ -743,6 +743,14 @@ void Map_TimeComputeRequiredGlobal( Map_Man_t * p )
     }
     // visit nodes in the reverse topological order
     Map_TimePropagateRequired( p );
+    
+    // print arrival time and required time 
+    // for ( i = 0; i < p->vMapObjs->nSize; i++ )
+    // {    
+    //     printf("node id %d, arrival time: %.3f %.3f, required time: %.3f %.3f\n", p->vMapObjs->pArray[i]->Num, 
+    //     p->vMapObjs->pArray[i]->tArrival[0].Rise, p->vMapObjs->pArray[i]->tArrival[0].Fall, p->vMapObjs->pArray[i]->tRequired[0].Rise, p->vMapObjs->pArray[i]->tRequired[0].Fall);
+    // }
+
 }
 
 ////////////////////////////////////////////////////////////////////////

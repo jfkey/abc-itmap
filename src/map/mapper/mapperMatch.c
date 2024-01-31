@@ -269,18 +269,22 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
 
     // skip the cuts that have been unassigned during area recovery
     pCutBest = pNode->pCutBest[fPhase];
-    if ( p->fMappingMode != 0 && pCutBest == NULL  && p->fMappingMode != 5)
+    if ( p->fMappingMode != 0 && pCutBest == NULL)
         return 1;
 
     // recompute the arrival times of the current best match 
     // because the arrival times of the fanins may have changed 
     // as a result of remapping fanins in the topological order
-    if ( p->fMappingMode != 0 && p->fMappingMode != 5 )
+    // NOTE: the arrival time may larger than the required time, due to the updated ``nRefEst[fPhase]''  
+    if ( p->fMappingMode != 0 )
     {
         Map_TimeCutComputeArrivalIt( pNode, pCutBest, fPhase, MAP_FLOAT_LARGE, p->pSuperLib );
         // make sure that the required times are met
-//        assert( pCutBest->M[fPhase].tArrive.Rise < pNode->tRequired[fPhase].Rise + p->fEpsilon );
-//        assert( pCutBest->M[fPhase].tArrive.Fall < pNode->tRequired[fPhase].Fall + p->fEpsilon );
+        // if ( pCutBest->M[fPhase].tArrive.Worst - pNode->tRequired[fPhase].Worst > p->fEpsilon) {
+        //     printf("worst arrive time %.3f, required time %.3f \n", pCutBest->M[fPhase].tArrive.Worst, pNode->tRequired[fPhase].Worst);
+        // }
+    //    assert( pCutBest->M[fPhase].tArrive.Rise < pNode->tRequired[fPhase].Rise + p->fEpsilon );
+    //    assert( pCutBest->M[fPhase].tArrive.Fall < pNode->tRequired[fPhase].Fall + p->fEpsilon );
     }
 
     // recompute the exact area of the current best match
@@ -374,7 +378,7 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     pCutBest->M[fPhase]     = MatchBest;
 
     // reference the new cut if it used
-    if ( p->fMappingMode >= 2 && p->fMappingMode != 5 && (pNode->nRefAct[fPhase] > 0 || 
+    if ( p->fMappingMode >= 2 &&  (pNode->nRefAct[fPhase] > 0 || 
          (pNode->pCutBest[!fPhase] == NULL && pNode->nRefAct[!fPhase] > 0)) )
     {
         if ( p->fMappingMode == 2 || p->fMappingMode == 3 )
@@ -463,23 +467,31 @@ void Map_MappingSetPiArrivalTimes( Map_Man_t * p )
   seealso     []
 
 ***********************************************************************/
-float Map_TimeMatchWithInverter( Map_Man_t * p, Map_Match_t * pMatch, Map_Node_t * pNode)
-{
+float Map_TimeMatchWithInverter( Map_Man_t * p, Map_Match_t * pMatch, Map_Node_t * pNode, int phase)
+{ 
     Map_Time_t tArrInv; 
     Mio_Gate_t * pInvGate = p->pSuperLib->pGateInv;  
     Mio_Pin_t * pInvPin =  pInvGate ->pPins;  
-    tArrInv.Fall = pMatch->tArrive.Rise + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise;
-    tArrInv.Rise  = pMatch->tArrive.Fall + + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise;
+    // tArrInv.Fall = pMatch->tArrive.Rise + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise;
+    // tArrInv.Rise  = pMatch->tArrive.Fall + + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise; 
+    int maxLeavesFanout = 0; 
+    Map_Cut_t * pCut = pNode->pCutBest[phase];
+    for (int i = 0; i < pCut->nLeaves; i++) {
+        Map_Node_t * pFanin = pCut->ppLeaves[i];
+        if (maxLeavesFanout < pFanin->nRefEst[0]) {
+            maxLeavesFanout = pFanin->nRefEst[0];
+        }
+    }
+    tArrInv.Fall = pMatch->tArrive.Rise + pInvPin->dDelayLDRise * 2 * (sqrt(maxLeavesFanout) +1 ) + pInvPin->dDelayPDRise;
+    tArrInv.Rise  = pMatch->tArrive.Fall + + pInvPin->dDelayLDRise *2 * (sqrt(maxLeavesFanout) +1 ) + pInvPin->dDelayPDRise; 
     tArrInv.Worst = MAP_MAX( tArrInv.Rise, tArrInv.Fall ); 
-    return tArrInv.Worst;
+    return tArrInv.Worst; 
+    // Map_Time_t tArrInv;
+    // tArrInv.Fall  = pMatch->tArrive.Rise + p->pSuperLib->tDelayInv.Fall;
+    // tArrInv.Rise  = pMatch->tArrive.Fall + p->pSuperLib->tDelayInv.Rise;
+    // tArrInv.Worst = MAP_MAX( tArrInv.Rise, tArrInv.Fall ); 
+    // return tArrInv.Worst;
 
-/*
-    Map_Time_t tArrInv;
-    tArrInv.Fall  = pMatch->tArrive.Rise + p->pSuperLib->tDelayInv.Fall;
-    tArrInv.Rise  = pMatch->tArrive.Fall + p->pSuperLib->tDelayInv.Rise;
-    tArrInv.Worst = MAP_MAX( tArrInv.Rise, tArrInv.Fall ); 
-    return tArrInv.Worst;
-*/
 }
 
 /**Function*************************************************************
@@ -515,8 +527,8 @@ void Map_NodeTryDroppingOnePhase( Map_Man_t * p, Map_Node_t * pNode )
 
     // get the worst arrival times of each phase
     // implemented using the other phase with inverter added
-    tWorst0Using1 = Map_TimeMatchWithInverter( p, pMatchBest1, pNode );
-    tWorst1Using0 = Map_TimeMatchWithInverter( p, pMatchBest0, pNode );
+    tWorst0Using1 = Map_TimeMatchWithInverter( p, pMatchBest1, pNode, 1 );
+    tWorst1Using0 = Map_TimeMatchWithInverter( p, pMatchBest0, pNode, 0 );
 
     // consider the case of mapping for delay
     if ( p->fMappingMode == 0 && p->DelayTarget < ABC_INFINITY )
@@ -653,7 +665,7 @@ int Map_MappingMatches( Map_Man_t * p )
     Map_Node_t * pNode;
     int i;
 
-    assert( p->fMappingMode >= 0 && p->fMappingMode <= 5 );
+    assert( p->fMappingMode >= 0 && p->fMappingMode <= 4);
 
     // use the externally given PI arrival times
     // handle inverters 
@@ -663,7 +675,7 @@ int Map_MappingMatches( Map_Man_t * p )
     // estimate the fanouts
     if ( p->fMappingMode == 0 )
         Map_MappingEstimateRefsInit( p );
-    else if ( p->fMappingMode == 1 || p->fMappingMode == 5)
+    else if ( p->fMappingMode >= 1)
         Map_MappingEstimateRefs( p );
 
     double md = 0.0;
@@ -734,11 +746,10 @@ int Map_MappingMatches( Map_Man_t * p )
     // printf("pNode %d, pCut %d, pSuperBest %s \n", pNode->Num, pCut->uTruth, 
     // Mio_GateReadName(pCut->M[fPhase].pSuperBest->pRoot));
            // get the information about the best cut 
-
-    
-    Map_Cut_t * pCut0, * pCut1;
-    pCut0   = Map_NodeReadCutBest( pNode, 0 );
-    pCut1   = Map_NodeReadCutBest( pNode, 1 );
+ 
+    // Map_Cut_t * pCut0, * pCut1;
+    // pCut0   = Map_NodeReadCutBest( pNode, 0 );
+    // pCut1   = Map_NodeReadCutBest( pNode, 1 );
     // if (pCut0 != NULL) {
     //     printf("pSuperBest for phase (0) %s, ", Mio_GateReadName(pCut0->M[0].pSuperBest->pRoot));
     // }

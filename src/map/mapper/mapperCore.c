@@ -672,7 +672,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     }
     p->timeArea += Abc_Clock() - clk;
     //////////////////////////////////////////////////////////////////////
-
+ 
     //////////////////////////////////////////////////////////////////////
     // perform area recovery using exact area
     clk = Abc_Clock();

@@ -132,7 +132,7 @@ void Map_MappingEstimateRefsInit( Map_Man_t * p )
         pNode = p->vMapObjs->pArray[i];
 //        pNode->nRefEst[0] = pNode->nRefEst[1] = ((float)pNode->nRefs)*(float)2.0;
         // pNode->nRefEst[0] = pNode->nRefEst[1] = pNode->nRefEst[2] = ((float)pNode->nRefs);
-        pNode->nRefEst[0] = pNode->nRefEst[1] = pNode->nRefEst[2] = ((float) (3.0 * pNode->nRefs + 2.0 * pNode->taoRefs[1] + 1.0 * pNode->taoRefs[2] )/6);  
+        pNode->nRefEst[0] = pNode->nRefEst[1] = pNode->nRefEst[2] = ((float) (3.0 * pNode->nRefs + 2.0 * pNode->taoRefs[1] + 1.0 * pNode->taoRefs[2] )/6);   
     }
 }
 
@@ -159,9 +159,13 @@ void Map_MappingEstimateRefs( Map_Man_t * p )
     //    pNode->nRefEst[0] = (float)((2.0 * pNode->nRefEst[0] + 1.0 * pNode->nRefAct[0]) / 3.0);
     //    pNode->nRefEst[1] = (float)((2.0 * pNode->nRefEst[1] + 1.0 * pNode->nRefAct[1]) / 3.0);
     //    pNode->nRefEst[2] = (float)((2.0 * pNode->nRefEst[2] + 1.0 * pNode->nRefAct[2]) / 3.0);
-        pNode->nRefEst[0] = (float)((3.0 * pNode->nRefEst[0] + 1.0 * pNode->nRefAct[0]) / 4.0);
-        pNode->nRefEst[1] = (float)((3.0 * pNode->nRefEst[1] + 1.0 * pNode->nRefAct[1]) / 4.0);
-        pNode->nRefEst[2] = (float)((3.0 * pNode->nRefEst[2] + 1.0 * pNode->nRefAct[2]) / 4.0);
+        // pNode->nRefEst[0] = (float)((3.0 * pNode->nRefEst[0] + 1.0 * pNode->nRefAct[0]) / 4.0);
+        // pNode->nRefEst[1] = (float)((3.0 * pNode->nRefEst[1] + 1.0 * pNode->nRefAct[1]) / 4.0);
+        // pNode->nRefEst[2] = (float)((3.0 * pNode->nRefEst[2] + 1.0 * pNode->nRefAct[2]) / 4.0);
+
+        pNode->nRefEst[0] = (float)((4.0 * pNode->nRefEst[0] + 1.0 * pNode->nRefAct[0]) / 5.0);
+        pNode->nRefEst[1] = (float)((4.0 * pNode->nRefEst[1] + 1.0 * pNode->nRefAct[1]) / 5.0);
+        pNode->nRefEst[2] = (float)((4.0 * pNode->nRefEst[2] + 1.0 * pNode->nRefAct[2]) / 5.0);
          
     }
 }

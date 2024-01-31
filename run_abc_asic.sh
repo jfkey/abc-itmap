@@ -20,7 +20,7 @@ files=$(find "$2" -name "*.aig")
 for element in ${files[@]}
 do
     echo "process $element"
-    command="read_lib $4 ;read_aiger $element; map -r -v ;  print_stats; topo;  stime";
+    command="read_lib $4 ;read_aiger $element; map -v ;  print_stats; topo;  stime";
     outputs=$(timeout $3 $1 -c "$command";)
     echo $outputs >> $log
 
