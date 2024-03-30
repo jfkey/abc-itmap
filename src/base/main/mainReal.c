@@ -114,6 +114,10 @@ int Abc_RealMain( int argc, char * argv[] )
     pAbc = Abc_FrameGetGlobalFrame();
     pAbc->sBinary = argv[0];
 
+    // init python env
+    if (!Py_IsInitialized()) 
+        Py_Initialize();
+
     // default options
     fBatch      = INTERACTIVE;
     fInitSource = 1;
@@ -373,6 +377,10 @@ int Abc_RealMain( int argc, char * argv[] )
                 break;
         }
     }
+
+    // close python env
+    if (Py_IsInitialized()) 
+        Py_Finalize();
 
     // if the memory should be freed, quit packages
 //    if ( fStatus < 0 ) 

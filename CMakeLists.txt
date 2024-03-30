@@ -120,3 +120,23 @@ set_property(TARGET libabc-pic PROPERTY OUTPUT_NAME abc-pic)
 target_include_directories(libabc-pic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib/bayesopt/include)  #liujf
 
 
+# config python  
+find_package (Python 3.10 COMPONENTS Interpreter Development REQUIRED)
+target_include_directories(libabc PRIVATE ${Python_INCLUDE_DIRS})
+target_include_directories(abc PRIVATE ${Python_INCLUDE_DIRS})
+target_include_directories(libabc-pic PRIVATE ${Python_INCLUDE_DIRS}) 
+target_link_libraries(abc PRIVATE ${Python_LIBRARIES} "-lutil")
+set(CMAKE_MODULE_LINKER_FLAGS "-lutil")
+
+message(STATUS "###Python include dirs: ${Python_INCLUDE_DIRS}") 
+message(STATUS "###Python libraries: ${Python_LIBRARIES}") 
+
+# Find where to install Python libs
+execute_process ( COMMAND 
+         python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+         OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+INSTALL(
+    FILES src/map/mapper/hebo_opt.py
+    DESTINATION ${PYTHON_SITE_PACKAGES}
+)
+message(STATUS "###Python site packages: ${PYTHON_SITE_PACKAGES}")  

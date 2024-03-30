@@ -410,6 +410,7 @@ extern Map_SuperLib_t *  Map_SuperLibCreate( Mio_Library_t * pGenlib, Vec_Str_t 
 extern void              Map_SuperLibFree( Map_SuperLib_t * p );
 /*=== mapperMatch.c ===============================================================*/
 extern int               Map_MappingMatches( Map_Man_t * p );
+extern int               Map_MappingMatches2( Map_Man_t * p, double *maxD );
 /*=== mapperRefs.c =============================================================*/
 extern void              Map_MappingEstimateRefsInit( Map_Man_t * p );
 extern void              Map_MappingEstimateRefs( Map_Man_t * p );

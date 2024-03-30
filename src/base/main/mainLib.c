@@ -20,6 +20,7 @@
 
 #include "base/abc/abc.h"
 #include "mainInt.h"
+#include <Python.h>
 
 ABC_NAMESPACE_IMPL_START
 

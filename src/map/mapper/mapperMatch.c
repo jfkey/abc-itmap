@@ -318,16 +318,16 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     // select the new best cut
     fWorstLimit = pNode->tRequired[fPhase].Worst;
     // if (pNode->Num == 1001) {
-        // printf("mapperMatch 311: fWorstLimit %.3f, arrive time %.3f, required time %.3f \n", fWorstLimit, pNode->tArrival[0].Rise, pNode->tRequired[0].Rise);
-        // printf("mapperMatch 315, act nrefs %d, %d, %d\n", pNode->nRefAct[0], pNode->nRefAct[1], pNode->nRefAct[2]);
-        // printf("mapperMatch 316, est nrefs %.3f, %.3f, %.3f\n", pNode->nRefEst[0], pNode->nRefEst[1], pNode->nRefEst[2]);
-        // if(pCutBest) {
-        //     printf("mapperMatch 318, pNode->pCutBest->M %.3f, %.3f, %.3f \n", pNode->pCutBest[fPhase]->M[fPhase].tArrive.Rise, pNode->pCutBest[fPhase]->M[fPhase].tArrive.Fall, pNode->pCutBest[fPhase]->M[fPhase].tArrive.Worst);
-        // }
-        // pCut = pNode->pCuts->pNext; 
-        // printf("mapperMatch 320, pCut->M %.3f, %.3f, %.3f \n", pCut->M[fPhase].tArrive.Rise, pCut->M[fPhase].tArrive.Fall, pCut->M[fPhase].tArrive.Worst);
-        // printf("mapperMatch 321 pCut->delay[0] %.3f, %.3f, \n", pCut->delay[0], pCut->delay[1]);
-        // printf("mapperMatch 322 pCut->nLeaves %d, %d, \n", pCut->nLeaves, pCut->nVolume);
+    //     printf("mapperMatch 311: fWorstLimit %.3f, arrive time %.3f, required time %.3f \n", fWorstLimit, pNode->tArrival[0].Rise, pNode->tRequired[0].Rise);
+    //     printf("mapperMatch 315, act nrefs %d, %d, %d\n", pNode->nRefAct[0], pNode->nRefAct[1], pNode->nRefAct[2]);
+    //     printf("mapperMatch 316, est nrefs %.3f, %.3f, %.3f\n", pNode->nRefEst[0], pNode->nRefEst[1], pNode->nRefEst[2]);
+    //     if(pCutBest) {
+    //         printf("mapperMatch 318, pNode->pCutBest->M %.3f, %.3f, %.3f \n", pNode->pCutBest[fPhase]->M[fPhase].tArrive.Rise, pNode->pCutBest[fPhase]->M[fPhase].tArrive.Fall, pNode->pCutBest[fPhase]->M[fPhase].tArrive.Worst);
+    //     }
+    //     pCut = pNode->pCuts->pNext; 
+    //     printf("mapperMatch 320, pCut->M %.3f, %.3f, %.3f \n", pCut->M[fPhase].tArrive.Rise, pCut->M[fPhase].tArrive.Fall, pCut->M[fPhase].tArrive.Worst);
+    //     printf("mapperMatch 321 pCut->delay[0] %.3f, %.3f, \n", pCut->delay[0], pCut->delay[1]);
+    //     printf("mapperMatch 322 pCut->nLeaves %d, %d, \n", pCut->nLeaves, pCut->nVolume);
     //     if (pCut->M[fPhase].pSuperBest != NULL) {
     //         printf("pCut->M[fPhase].pSuperBest->Area: %.3f\n", pCut->M[fPhase].pSuperBest->Area);
     //     } 
@@ -763,6 +763,115 @@ int Map_MappingMatches( Map_Man_t * p )
     printf("max delay: %.3f\n", md);
     return 1;
 }
+
+
+int Map_MappingMatches2( Map_Man_t * p, double *maxD)
+{
+    ProgressBar * pProgress;
+    Map_Node_t * pNode;
+    int i;
+
+    assert( p->fMappingMode >= 0 && p->fMappingMode <= 4);
+
+    // use the externally given PI arrival times
+    // handle inverters 
+    if ( p->fMappingMode == 0 )
+        Map_MappingSetPiArrivalTimes( p );
+
+    // estimate the fanouts
+    if ( p->fMappingMode == 0 )
+        Map_MappingEstimateRefsInit( p );
+    else if ( p->fMappingMode >= 1)
+        Map_MappingEstimateRefs( p );
+
+    *maxD = 0.0; 
+
+    // the PI cuts are matched in the cut computation package
+    // in the loop below we match the internal nodes
+    pProgress = Extra_ProgressBarStart( stdout, p->vMapObjs->nSize );
+    for ( i = 0; i < p->vMapObjs->nSize; i++ )
+    {
+        
+        pNode = p->vMapObjs->pArray[i];
+        // printf("pNode(%4d) nRefEst(%.1f, %.1f, %.1f)\n", pNode->Num, pNode->nRefEst[0], pNode->nRefEst[1], pNode->nRefEst[2]);
+        if ( Map_NodeIsBuf(pNode) )
+        {
+            assert( pNode->p2 == NULL );
+            pNode->tArrival[0] = Map_Regular(pNode->p1)->tArrival[ Map_IsComplement(pNode->p1)];
+            pNode->tArrival[1] = Map_Regular(pNode->p1)->tArrival[!Map_IsComplement(pNode->p1)];
+            continue;
+        }
+
+        // skip primary inputs and secondary nodes if mapping with choices
+        if ( !Map_NodeIsAnd( pNode ) || pNode->pRepr )
+            continue;
+
+        // make sure that at least one non-trival cut is present
+        if ( pNode->pCuts->pNext == NULL )
+        {
+            Extra_ProgressBarStop( pProgress );
+            printf( "\nError: A node in the mapping graph does not have feasible cuts.\n" );
+            return 0;
+        }
+
+        // if (i == 26) { // NAND2xp33_ASAP7_75t_R  all phase 0 (26 38 87 105) 
+            // match negative phase
+        if ( !Map_MatchNodePhase( p, pNode, 0 ) )
+        {
+            Extra_ProgressBarStop( pProgress );
+            return 0;
+        }
+        // match positive phase
+        if ( !Map_MatchNodePhase( p, pNode, 1 ) )
+        {
+            Extra_ProgressBarStop( pProgress );
+            return 0;
+        }
+        // make sure that at least one phase is mapped
+        if ( pNode->pCutBest[0] == NULL && pNode->pCutBest[1] == NULL )
+        {
+            printf( "\nError: Could not match both phases of AIG node %d.\n", pNode->Num );
+            printf( "Please make sure that the supergate library has equivalents of AND2 or NAND2.\n" );
+            printf( "If such supergates exist in the library, report a bug.\n" );
+            Extra_ProgressBarStop( pProgress );
+            return 0;
+        }
+        
+        // TODO: for iterative mapping
+        // if both phases are assigned, check if one of them can be dropped
+        Map_NodeTryDroppingOnePhase( p, pNode );
+        // set the arrival times of the node using the best cuts
+        Map_NodeTransferArrivalTimes( p, pNode );
+
+        // update the progress bar
+        Extra_ProgressBarUpdate( pProgress, i, "Matches ..." );
+        if (*maxD < pNode->tArrival[0].Worst) {
+            *maxD = pNode->tArrival[0].Worst;
+        }
+        
+       
+    // printf("pNode %d, pCut %d, pSuperBest %s \n", pNode->Num, pCut->uTruth, 
+    // Mio_GateReadName(pCut->M[fPhase].pSuperBest->pRoot));
+           // get the information about the best cut 
+ 
+    // Map_Cut_t * pCut0, * pCut1;
+    // pCut0   = Map_NodeReadCutBest( pNode, 0 );
+    // pCut1   = Map_NodeReadCutBest( pNode, 1 );
+    // if (pCut0 != NULL) {
+    //     printf("pSuperBest for phase (0) %s, ", Mio_GateReadName(pCut0->M[0].pSuperBest->pRoot));
+    // }
+    // if (pCut1 != NULL) {
+    //     printf(" phase (1) %s",  Mio_GateReadName(pCut1->M[1].pSuperBest->pRoot) );
+    // }
+    // printf("\n");
+    
+    }
+  
+    Extra_ProgressBarStop( pProgress );
+    printf("max delay: %.3f\n", *maxD);
+    return 1;
+}
+
 
 ////////////////////////////////////////////////////////////////////////
 ///                       END OF FILE                                ///

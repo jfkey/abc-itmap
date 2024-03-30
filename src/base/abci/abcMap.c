@@ -25,9 +25,10 @@
 #include "misc/util/utilNam.h"
 #include "map/scl/sclCon.h"
 #include "map/mapper/mapperInt.h"
- 
-#include "bayesopt/bayesopt.h" 
-#include "bayesopt/parameters.h"
+
+#include <Python.h>
+// #include "python3.8/pyconfig.h"
+
 
 ABC_NAMESPACE_IMPL_START
 
@@ -49,65 +50,191 @@ static Abc_Obj_t *  Abc_NodeFromMapSuperChoice_rec( Abc_Ntk_t * pNtkNew, Map_Sup
 extern void         Abc_NtkTaoRefs(Map_Man_t * pMan, Abc_Ntk_t * pNtk); 
 
 
-double branin(double x, double y)  {
-    x = x * 15 - 5;
-    y = y * 15;
-    const double pi = 3.14;
-    const double rpi = pi*pi;
-    double res =  (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6) * (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6)+10*(1-1/(8*pi))*cos(x)+10;
-    return res; 
-};
+// double branin(double x, double y)  {
+//     x = x * 15 - 5;
+//     y = y * 15;
+//     const double pi = 3.14;
+//     const double rpi = pi*pi;
+//     double res =  (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6) * (y-(5.1/(4*rpi))*(x)*(x) + 5*x/pi-6)+10*(1-1/(8*pi))*cos(x)+10;
+//     return res; 
+// };
 
 
-void test_bayes(){
-    bopt_params params = initialize_parameters_to_default();
-    // set_learning(&params, "L_MCMC");
-    int nDim = 2; 
-    double lb[2] = {0.0, 0.0};  
-    double ub[2] = {1.0, 1.0};  
-    // double xpoints[2] = {0.535411, 0.0912871}; 
-    double xpoints[2] = {0.6, 0.1}; 
-    double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
-    int samplesize = 1;
+// void test_bayes(){
+//     bopt_params params = initialize_parameters_to_default();
+//     // set_learning(&params, "L_MCMC");
+//     int nDim = 2; 
+//     double lb[2] = {0.0, 0.0};  
+//     double ub[2] = {1.0, 1.0};  
+//     // double xpoints[2] = {0.535411, 0.0912871}; 
+//     double xpoints[2] = {0.6, 0.1}; 
+//     double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
+//     int samplesize = 1;
 
-    void * bayesopt = initializeOptimizationIt(nDim, lb, ub, samplesize, xpoints, ypoints, params);
-    for (int i = 0; i < 10; i ++) {
-        double xnext[2];
-        nextPointIt(bayesopt, xnext);
-        double ynext = branin(xnext[0], xnext[1]);
-        printf("xnext: %f, %f, ynext: %f\n", xnext[0], xnext[1], ynext);
-        addSampleIt(bayesopt, nDim, xnext,  ynext, params, i);
-    }
-};
+//     void * bayesopt = initializeOptimizationIt(nDim, lb, ub, samplesize, xpoints, ypoints, params);
+//     for (int i = 0; i < 10; i ++) {
+//         double xnext[2];
+//         nextPointIt(bayesopt, xnext);
+//         double ynext = branin(xnext[0], xnext[1]);
+//         printf("xnext: %f, %f, ynext: %f\n", xnext[0], xnext[1], ynext);
+//         addSampleIt(bayesopt, nDim, xnext,  ynext, params, i);
+//     }
+// };
 
 
-void test_bayes2(){
-    bopt_params params = initialize_parameters_to_default();
-    // set_learning(&params, "L_MCMC");
-    int nDim = 2; 
-    double lb[2] = {0.0, 0.0};  
-    double ub[2] = {1.0, 1.0};  
-    // double xpoints[2] = {0.535411, 0.0912871}; 
+// void test_bayes2(){
+//     bopt_params params = initialize_parameters_to_default();
+//     // set_learning(&params, "L_MCMC");
+//     int nDim = 2; 
+//     double lb[2] = {0.0, 0.0};  
+//     double ub[2] = {1.0, 1.0};  
+//     // double xpoints[2] = {0.535411, 0.0912871}; 
     
-    int samplesize = 1;
+//     int samplesize = 1;
 
-    void * bayesopt; 
-    for (int i = 0; i < 100; i ++) {
-        double xnext[2];
-        double ynext;
-        if (i != 0 ) {
-            nextPointIt(bayesopt, xnext);
-            ynext = branin(xnext[0], xnext[1]);
-            printf("xnext: %f, %f, ynext: %f\n", xnext[0], xnext[1], ynext);
-        } 
-        if (i == 0) {
-            double xpoints[2] = {0.6, 0.1}; 
-            double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
-            bayesopt  = initializeOptimizationIt(nDim, lb, ub, samplesize, xpoints, ypoints, params);
-        } else {
-            addSampleIt(bayesopt, nDim, xnext,  ynext, params, i);
-        } 
+//     void * bayesopt; 
+//     for (int i = 0; i < 100; i ++) {
+//         double xnext[2];
+//         double ynext;
+//         if (i != 0 ) {
+//             nextPointIt(bayesopt, xnext);
+//             ynext = branin(xnext[0], xnext[1]);
+//             printf("xnext: %f, %f, ynext: %f\n", xnext[0], xnext[1], ynext);
+//         } 
+//         if (i == 0) {
+//             double xpoints[2] = {0.6, 0.1}; 
+//             double ypoints[1]  = {branin(xpoints[0], xpoints[1])};
+//             bayesopt  = initializeOptimizationIt(nDim, lb, ub, samplesize, xpoints, ypoints, params);
+//         } else {
+//             addSampleIt(bayesopt, nDim, xnext,  ynext, params, i);
+//         } 
+//     }
+// };
+double obj (double *rec_x, int para_size) {
+    double res = 0;
+    for (int i = 0;i < para_size; i++ )
+        res +=  (rec_x[i]-0.5)*(rec_x[i]-0.5);
+    return  res; 
+}
+
+void call_python(){
+
+    PyRun_SimpleString("import sys");
+    PyRun_SimpleString("sys.path.append('/workspaces/abc-itmap/src/map/mapper/')");
+
+    PyObject* pModule = NULL;
+    PyObject* pFuncInit = NULL, *pFuncIterate = NULL;
+      
+    pModule = PyImport_ImportModule("hebo_opt");
+    if (!pModule) {
+        printf("can't find hebo_opt.py\n");
+        Py_Finalize();
+        return;
+    } 
+    pFuncInit = PyObject_GetAttrString(pModule, "init_opt");
+    if (!pFuncInit) {
+        printf("can't find function init_opt\n");
+        Py_DECREF(pModule);
+        Py_Finalize();
+        return;
     }
+    pFuncIterate = PyObject_GetAttrString(pModule, "iterate_opt");
+    if (!pFuncIterate) {
+        printf("can't find function iterate_opt\n");
+        Py_DECREF(pFuncInit);
+        Py_DECREF(pModule);
+        Py_Finalize();
+        return;
+    }
+
+    PyObject* pOpt = PyObject_CallObject(pFuncInit, NULL);
+    if (!pOpt) {
+        printf("init_opt failed to initialize\n");
+        Py_DECREF(pFuncIterate);
+        Py_DECREF(pFuncInit);
+        Py_DECREF(pModule);
+        Py_Finalize();
+        return;
+    }
+
+    int para_size = 10; 
+    int rec_y_size = 1;
+    double * rec_x = (double *)malloc(para_size * sizeof(double));
+    double * rec_y = (double *)malloc(rec_y_size * sizeof(double));
+    memset(rec_x, 0, para_size * sizeof(double));
+    memset(rec_y, 0, rec_y_size * sizeof(double));
+     
+    for (int i = 0; i < 5; i ++ ) {
+        // create args for iterate_opt
+        // 1. the first one: opt
+        PyObject* pArgs = PyTuple_New(4);
+        PyTuple_SetItem(pArgs, 0, pOpt);  
+        Py_INCREF(pOpt); // Increase ref count because PyTuple_SetItem steals a reference
+        
+        // 2. the second one: iteration number
+        PyTuple_SetItem(pArgs, 1, Py_BuildValue("i", i)); 
+        
+        // 3. the third one: rec_x
+        PyObject* pListX = PyList_New(para_size); 
+        for (int j = 0; j < para_size; j++) 
+            PyList_SetItem(pListX, j, PyFloat_FromDouble(rec_x[j]));
+        PyTuple_SetItem(pArgs, 2, pListX);
+
+        // 4. the fourth one: rec_y
+        PyObject* pListY = PyList_New(rec_y_size);
+        PyList_SetItem(pListY, 0, PyFloat_FromDouble(rec_y[0]));
+        PyTuple_SetItem(pArgs, 3, pListY);
+
+        PyObject* pReturn = PyObject_CallObject(pFuncIterate, pArgs);
+        Py_DECREF(pArgs); // Decrease ref count after calling the function
+        Py_DECREF(pListX);
+        Py_DECREF(pListY);
+
+        // parse the return values 
+        if (pReturn != NULL && PyTuple_Check(pReturn)) {
+            PyObject* pNewOpt;
+            PyObject* pNewListX;
+            if (PyArg_ParseTuple(pReturn, "OO", &pNewOpt, &pNewListX)) {
+                Py_INCREF(pNewOpt); // ParseTuple does not increase ref count
+                Py_DECREF(pOpt); // Replace the old opt object
+                pOpt = pNewOpt;
+                
+                int x_size = PyList_Size(pNewListX);
+                if (x_size == para_size) {
+                    for (int k = 0; k < x_size; k++) {
+                        PyObject* pItem = PyList_GetItem(pNewListX, k); // Borrowed reference, no need to DECREF
+                        if (PyFloat_Check(pItem)) {
+                            rec_x[k] = PyFloat_AsDouble(pItem);
+                            // printf("para[%d]=%.3f, ", k, rec_x[k]);
+                        } else {
+                            printf("List item is not a float!\n");
+                        }
+                    }
+                } else {
+                    printf("Returned list size does not match expected size\n");
+                }
+                printf("\n");
+            } else {
+                printf("Failed to parse return value\n");
+            }
+
+            Py_DECREF(pReturn);
+
+        } else {
+            printf("Function call failed or returned NULL\n");
+        }
+ 
+        // call obj with bayesian estimated parameters
+        rec_y[0] = obj(rec_x, para_size);
+        printf("value of obj: %.3f\n", rec_y[0]);
+    }
+    free(rec_x);
+    free(rec_y);
+    Py_DECREF(pOpt);
+    Py_DECREF(pFuncIterate);
+    Py_DECREF(pFuncInit);
+    Py_DECREF(pModule);
+     
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -128,7 +255,7 @@ void test_bayes2(){
 Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, double DelayMulti, float LogFan, float Slew, float Gain, int nGatesMin, int fRecovery, int fSwitching, int fSkipFanout, int fUseProfile, int fUseBuffs, int fVerbose )
 {   
     // test_bayes2();
-     
+    // call_python(); 
     static int fUseMulti = 0;
     int fShowSwitching = 1;
     Abc_Ntk_t * pNtkNew;
@@ -224,12 +351,14 @@ clk = Abc_Clock();
 
     // if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
-    if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
+    // if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
+    if ( !Map_MappingHeboIt( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
     // if ( !Map_MappingIteratable( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
     {
         Map_ManFree( pMan );
         return NULL;
     }
+    
 //    Map_ManPrintStatsToFile( pNtk->pSpec, Map_ManReadAreaFinal(pMan), Map_ManReadRequiredGlo(pMan), Abc_Clock()-clk );
 
     // reconstruct the network after mapping (use buffers when user requested or in the area mode)
