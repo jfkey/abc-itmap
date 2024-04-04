@@ -266,6 +266,7 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     Map_Cut_t * pCut, * pCutBest;
     float Area1 = 0.0; // Suppress "might be used uninitialized
     float Area2, fWorstLimit;
+    float AreaMode1 = 0.0;
 
     // skip the cuts that have been unassigned during area recovery
     pCutBest = pNode->pCutBest[fPhase];
@@ -279,6 +280,7 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
     if ( p->fMappingMode != 0 )
     {
         Map_TimeCutComputeArrivalIt( pNode, pCutBest, fPhase, MAP_FLOAT_LARGE, p->pSuperLib );
+        AreaMode1 = pCutBest->M[fPhase].AreaFlow;
         // make sure that the required times are met
         // if ( pCutBest->M[fPhase].tArrive.Worst - pNode->tRequired[fPhase].Worst > p->fEpsilon) {
         //     printf("worst arrive time %.3f, required time %.3f \n", pCutBest->M[fPhase].tArrive.Worst, pNode->tRequired[fPhase].Worst);
@@ -367,6 +369,7 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
             // if we are mapping for delay, the worst-case limit should be tightened
             if ( p->fMappingMode == 0 )
                 fWorstLimit = MatchBest.tArrive.Worst;
+           
         }
     }
 
@@ -388,6 +391,17 @@ int Map_MatchNodePhase( Map_Man_t * p, Map_Node_t * pNode, int fPhase )
         else 
             assert( 0 );
 //        assert( Area2 < Area1 + p->fEpsilon );
+    }
+
+    // the statistics of area recovery 
+    if  (p->fMappingMode == 1 && AreaMode1 != MatchBest.AreaFlow) {
+        p->mode1Num += 1; 
+    } 
+    if (p->fMappingMode == 2 && Area1 != Area2) {
+        p->mode2Num += 1; 
+    }
+    if ( p->fMappingMode == 3 && Area1 != Area2) {
+        p->mode3Num += 1; 
     }
 
     // make sure that the requited times are met
@@ -679,6 +693,7 @@ int Map_MappingMatches( Map_Man_t * p )
         Map_MappingEstimateRefs( p );
 
     double md = 0.0;
+    p->mode1Num = p->mode2Num  = p->mode3Num  = 0.0;
 
     // the PI cuts are matched in the cut computation package
     // in the loop below we match the internal nodes
@@ -707,14 +722,14 @@ int Map_MappingMatches( Map_Man_t * p )
             printf( "\nError: A node in the mapping graph does not have feasible cuts.\n" );
             return 0;
         }
-
-        // if (i == 26) { // NAND2xp33_ASAP7_75t_R  all phase 0 (26 38 87 105) 
-            // match negative phase
+          
+        // match negative phase        
         if ( !Map_MatchNodePhase( p, pNode, 0 ) )
         {
             Extra_ProgressBarStop( pProgress );
             return 0;
         }
+  
         // match positive phase
         if ( !Map_MatchNodePhase( p, pNode, 1 ) )
         {
@@ -730,6 +745,7 @@ int Map_MappingMatches( Map_Man_t * p )
             Extra_ProgressBarStop( pProgress );
             return 0;
         }
+        
         
         // TODO: for iterative mapping
         // if both phases are assigned, check if one of them can be dropped
@@ -761,6 +777,7 @@ int Map_MappingMatches( Map_Man_t * p )
     }
     Extra_ProgressBarStop( pProgress );
     printf("max delay: %.3f\n", md);
+    // printf("num of mode1, mode2, mode3: %f, %f, %f\n", (p->mode1Num*1.0)/(i*1.0), (p->mode2Num*1.0)/(i*1.0), (p->mode3Num*1.0)/(i*1.0));
     return 1;
 }
 

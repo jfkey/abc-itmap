@@ -478,10 +478,10 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
 
     // sin  Area =     5624.61 ( 77.8 %)   Delay =  2898.05 ps
     // Area =    13472.62 ( 97.6 %)   Delay =  3689.19 ps
-    // double para[10] = {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252};
-    // for(int i = 0; i < para_size; i++) {
-    //         p->delayParams[i] = para[i];
-    //  } 
+    double para[10] = {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252};
+    for(int i = 0; i < para_size; i++) {
+            p->delayParams[i] = para[i];
+     } 
 
 
     
@@ -1238,7 +1238,8 @@ int Map_MappingIteratable(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, i
 
 
 int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs)
-{
+{   
+    // the parameters for default `map` operator 
     int fShowSwitching         = 0;
     int fUseAreaFlow           = 1;
     int fUseExactArea          = !p->fSwitching;
@@ -1250,7 +1251,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     if ( p->fVerbose )
         Map_MappingReportChoices( p );
     Map_MappingSetChoiceLevels( p ); // should always be called before mapping!
-//    return 1;
+    //    return 1;
 
     // compute the cuts of nodes in the DFS order
     clk = Abc_Clock();
@@ -1262,74 +1263,33 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     p->timeTruth = Abc_Clock() - clk;
     //////////////////////////////////////////////////////////////////////
  
-    // iterate mapping 
+    // parameters for iteration 
     int itera_num = 10;
     int para_size = 10; 
     int rec_y_size = 1;
     p->delayParams = malloc(sizeof(double) * para_size);
-    p->delayParams[0] = 0.5;
-    p->delayParams[1] = 0.3;
-    p->delayParams[2] = 0.1;
-    p->delayParams[3] = 0.5;
-    p->delayParams[4] = 1.0; 
-    p->delayParams[5] = 0.3;
-    p->delayParams[6] = 0.1;
-    p->delayParams[7] = 0.25;
-    p->delayParams[8] = 1.0;
-    p->delayParams[9] = 0.5; 
-    double firstDelay = 0.0, firstArea = 0.0, firstLevel = 0.0; 
+    // some good delay parameters for both delay- and area- oriented mapping  
+    double goodPara[2][10] = {
+        {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252},
+        {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0, 0.5}
+    };
+    int good_itera_num = 2; 
+      
+    // for recording the delay parameters and the corresponding delay
+    double * rec_x = (double *)malloc(para_size * sizeof(double));
+    double * rec_y = (double *)malloc(rec_y_size * sizeof(double));
+    memset(rec_x, 0, para_size * sizeof(double));
+    memset(rec_y, 0, rec_y_size * sizeof(double));
 
-    // p->delayParams[0] = 0.67;
-    // p->delayParams[1] = 0.25;
-    // p->delayParams[2] = 0.071;
-    // p->delayParams[3] = 0.43;
-    // p->delayParams[4] = 1.0; 
-    // p->delayParams[5] = 0.34;
-    // p->delayParams[6] = 0.22;
-    // p->delayParams[7] = 0.27;
-    // p->delayParams[8] = 0.97;
-
-    // p->delayParams[0] = 0.986;
-    // p->delayParams[1] = 0.660;
-    // p->delayParams[2] = 0.57;
-    // p->delayParams[3] = 0.056;
-    // p->delayParams[4] = 0.527;
-    // p->delayParams[5] = 0.443;
-    // p->delayParams[6] = 0.986;
-    // p->delayParams[7] = 0.986;
-    // p->delayParams[8] = 0.833;
+    // parameters for recording the best results
+    ItResults* itRes = (ItResults*)malloc((itera_num+ good_itera_num) * sizeof(ItResults));
+    double min_Y = MAP_FLOAT_LARGE;
+    double *min_rec_x = NULL; 
      
-    // p->delayParams[0] = 0.920;
-    // p->delayParams[1] = 0.389;
-    // p->delayParams[2] = 0.338;
-    // p->delayParams[3] = 0.639;
-    // p->delayParams[4] = 0.639;
-    // p->delayParams[5] = 0.431;
-    // p->delayParams[6] = 0.611;
-    // p->delayParams[7] = 0.389;
-    // p->delayParams[8] = 0.505;
- 
-
-    // p->delayParams[0] = 0.565;
-    // p->delayParams[1] = 0.000;
-    // p->delayParams[2] = 0.668;
-    // p->delayParams[3] = 0.579;
-    // p->delayParams[4] = 0.803;
-    // p->delayParams[5] = 0.000;
-    // p->delayParams[6] = 0.127;
-    // p->delayParams[7] = 0.052;
-    // p->delayParams[8] = 0.448;
-
-
-    // bopt_params params = initialize_parameters_to_default();
-    // // set_learning(&params, "L_MCMC");
-    // double lb[] = {0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5, 0.0};  
-    // double ub[] = {1.0, 0.5, 0.5, 1.0, 2.0, 0.5, 0.5, 1.0, 2.0, 1.0};   
-    // double *xpoints = malloc(sizeof(double) * (para_size * samplesize)) ; 
-    // double *ypoints  = malloc(sizeof(double) * (samplesize)) ;
-    // void * bayesopt;
-
-    
+    // parameters for iteration parameters
+    double firstDelay = 0.0, firstArea = 0.0, firstLevel = 0.0; 
+    double curDelay = 0.0;
+  
     PyRun_SimpleString("import sys");
     PyRun_SimpleString("sys.path.append('/workspaces/abc-itmap/src/map/mapper/')");
 
@@ -1368,21 +1328,242 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         return;
     }
     
+    /////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    // init samples using some ``good delay parameters''
+    for (int i = 0; i < good_itera_num; i++ ) {
+        // update the parameters for p->delayParas
+        for (int j = 0; j < para_size; j++)  p->delayParams[j] = goodPara[i][j];
 
-    // int para_size = 10; 
-    // int rec_y_size = 1;
-    double curDelay = 0.0;
-    double * rec_x = (double *)malloc(para_size * sizeof(double));
-    double * rec_y = (double *)malloc(rec_y_size * sizeof(double));
+        double estDepth = 0.0; 
+
+        ////////////////////////////////////////////////////////////////////// 
+        clk = Abc_Clock();
+        p->fMappingMode = 0;
+        if ( !Map_MappingMatches2( p, &estDepth) )
+            return 0;
+        p->timeMatch = Abc_Clock() - clk;
+        // compute the references and collect the nodes used in the mapping
+        Map_MappingSetRefs( p ); 
+        //////////////////////////////////////////////////////////////////////
+ 
+        // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
+        extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
+        Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
+        if ( Mio_LibraryHasProfile(pLib) )
+                Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
+        // Map_ManFree( p );
+        if ( pNtkMapped == NULL )
+            return 1;
+
+        if ( pNtk->pExdc )
+            pNtkMapped->pExdc = Abc_NtkDup( pNtk->pExdc );
+        // make sure that everything is okay
+        if ( !Abc_NtkCheck( pNtkMapped ) )
+        {
+            printf( "Abc_NtkMap: The network check has failed.\n" );
+            Abc_NtkDelete( pNtkMapped );
+            return 1;
+        }
+         
+        // 2. execute topo command
+        if ( pNtkMapped == NULL )
+        {
+            Abc_Print( -1, "Empty network.\n" );
+            return 1;
+        }
+        if ( !Abc_NtkIsLogic(pNtkMapped) )
+        {
+            Abc_Print( -1, "This command can only be applied to a logic network.\n" );
+            return 1;
+        }
+        // modify the current network
+        Abc_Ntk_t* pNtkTopoed  = Abc_NtkDupDfs( pNtkMapped );
+        if ( pNtkTopoed == NULL )
+        {
+            Abc_Print( -1, "The command has failed.\n" );
+            return 1;
+        }
+            
+         // 3. perform STA
+        int fShowAll      = 0;
+        int fUseWireLoads = 0;
+        int fPrintPath    = 0;
+        int fDumpStats    = 0;
+        int nTreeCRatio   = 0;
+        if ( !Abc_NtkHasMapping(pNtkTopoed) )
+        {
+            Abc_Print(-1, "The current network is not mapped.\n" );
+            return 1;
+        }
+        if ( !Abc_SclCheckNtk(pNtkTopoed, 0) )
+        {
+            Abc_Print(-1, "The current network is not in a topo order (run \"topo\").\n" );
+            return 1;
+        }
+        if ( Abc_FrameReadLibScl() == NULL )
+        {
+            Abc_Print(-1, "There is no Liberty library available.\n" );
+            return 1;
+        }
+        extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
+        Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
+        
+        curDelay = pNtkTopoed ->MaxDelay;
+        double estArea = Map_MappingGetArea( p );
+        // double estArea = p->AreaFinal;  
+
+        if ( i == 0) {
+            firstDelay = curDelay; 
+            firstArea = estArea;
+            firstLevel = Abc_NtkLevel(pNtkTopoed);
+        }
+        // double gapDelay = Abc_AbsFloat( estDepth - curDelay)/curDelay;
+        double estLevel = Abc_NtkLevel(pNtkTopoed); 
+        
+        // rec_y[0] = curDelay/firstDelay + estArea/firstArea + (estLevel - firstLevel) * 0.05;
+        rec_y[0] = curDelay/firstDelay + estArea/firstArea;
+        printf("+++++curDelay: %f, #####estDepth: %f, -----estArea:%f, record_y:%f, level:%.2f\n", curDelay, estDepth, estArea, rec_y[0], estLevel);    
+ 
+        double* tmpParas = (double*)malloc(para_size * sizeof(double)); 
+        memcpy(tmpParas, p->delayParams, para_size * sizeof(double));
+        itRes[i].rec_x = tmpParas;
+        itRes[i].rec_y = rec_y[0];
+
+        if (itRes[i].rec_y < min_Y) {
+            min_Y = itRes[i].rec_y;
+            min_rec_x = itRes[i].rec_x;
+        }
+
+        // 4. clean best matches of the mapped network
+        if (i  <= good_itera_num - 1) {
+            Map_Node_t * pNode;
+            Map_Cut_t * pCut;
+            p->nMatches = 0; 
+            p->nPhases = 0; 
+            for (int j = 0; j < p->vMapObjs->nSize; j++ ) { 
+                pNode = p->vMapObjs->pArray[j];
+
+                pNode->nRefAct[0] = pNode->nRefAct[1] = pNode->nRefAct[2] = 0;
+                pNode->nRefEst[0] = pNode->nRefEst[1] = pNode->nRefEst[2] = 0;
+                
+                if ( Map_NodeIsBuf(pNode) )
+                {
+                    assert( pNode->p2 == NULL );
+                    pNode->tArrival[0] = Map_Regular(pNode->p1)->tArrival[ Map_IsComplement(pNode->p1)];
+                    pNode->tArrival[1] = Map_Regular(pNode->p1)->tArrival[!Map_IsComplement(pNode->p1)];
+                    continue;
+                }
+
+                // skip primary inputs and secondary nodes if mapping with choices
+                if ( !Map_NodeIsAnd( pNode ) || pNode->pRepr )
+                    continue;
+
+                // make sure that at least one non-trival cut is present
+                if ( pNode->pCuts->pNext == NULL )
+                {
+                    // Extra_ProgressBarStop( pProgress );
+                    printf( "\nError: A node in the mapping graph does not have feasible cuts.\n" );
+                    return 0;
+                }
+                pNode->pCutBest[0] = NULL;
+                pNode->pCutBest[1] = NULL; 
+ 
+                pNode->tArrival[0].Rise = 0.0;
+                pNode->tArrival[0].Fall = 0.0;
+                pNode->tArrival[0].Worst = 0.0; 
+                pNode->tArrival[1].Rise = 0.0;
+                pNode->tArrival[1].Fall = 0.0;
+                pNode->tArrival[1].Worst = 0.0; 
+
+                pNode->tRequired[0].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Fall = MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Worst =  MAP_FLOAT_LARGE; 
+                pNode->tRequired[1].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Fall =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Worst =  MAP_FLOAT_LARGE;
+
+                  
+                for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext ) { 
+                    Map_Match_t * pMatch =  pCut->M + 0;
+                    if (pMatch->pSuperBest) {
+                        pMatch->pSuperBest = NULL; 
+                    }
+                    pMatch->tArrive.Rise = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
+                    pMatch->AreaFlow = MAP_FLOAT_LARGE;
+                    pMatch->uPhaseBest = 286331153; 
+                    
+                    pMatch =  pCut->M + 1;
+                    if (pMatch->pSuperBest) {
+                        pMatch->pSuperBest = NULL;
+                    }
+                    pMatch->tArrive.Rise = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
+                    pMatch->AreaFlow = MAP_FLOAT_LARGE;
+                    pMatch->uPhaseBest = 286331153; 
+                } 
+            }
+        } 
+ 
+
+        // create args for iterate_opt: 
+        // def iterate_opt(opt, i_iter,  given_rec_x : List[float], given_rec_y : List[float]):
+
+        // 1. the first one: opt
+        PyObject* pArgs = PyTuple_New(4);
+        PyTuple_SetItem(pArgs, 0, pOpt);  
+        Py_INCREF(pOpt); // Increase ref count because PyTuple_SetItem steals a reference
+        
+        // 2. the second one: iteration number -1 stands for only calling opt.oberserve
+        PyTuple_SetItem(pArgs, 1, Py_BuildValue("i", -1)); 
+        
+        // 3. the third one: rec_x
+        PyObject* pListX = PyList_New(para_size); 
+        for (int j = 0; j < para_size; j++) 
+            PyList_SetItem(pListX, j, PyFloat_FromDouble(p->delayParams[j]));
+        PyTuple_SetItem(pArgs, 2, pListX);
+
+        // 4. the fourth one: rec_y
+        PyObject* pListY = PyList_New(rec_y_size);
+        PyList_SetItem(pListY, 0, PyFloat_FromDouble(rec_y[0]));
+        PyTuple_SetItem(pArgs, 3, pListY);
+
+        PyObject* pReturn = PyObject_CallObject(pFuncIterate, pArgs);
+        Py_DECREF(pArgs); // Decrease ref count after calling the function
+        Py_DECREF(pListX);
+        Py_DECREF(pListY);
+
+        // parse the return values 
+        if (pReturn != NULL && PyTuple_Check(pReturn)) {
+            PyObject* pNewOpt;
+            PyObject* pNewListX;
+            if (PyArg_ParseTuple(pReturn, "OO", &pNewOpt, &pNewListX)) {
+                Py_INCREF(pNewOpt); // ParseTuple does not increase ref count
+                Py_DECREF(pOpt); // Replace the old opt object
+                pOpt = pNewOpt; 
+            } else {
+                printf("Failed to parse return value\n");
+            }
+
+            Py_DECREF(pReturn);
+
+        } else {
+            printf("Function call failed or returned NULL\n");
+        } 
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
     memset(rec_x, 0, para_size * sizeof(double));
     memset(rec_y, 0, rec_y_size * sizeof(double));
-
-    ItResults* itRes = (ItResults*)malloc(itera_num * sizeof(ItResults));
-    double min_Y = MAP_FLOAT_LARGE;
-    double *min_rec_x = NULL; 
-
+    // fit models using GP Kernel 
     for (int i = 0; i <  itera_num; i ++ ) {
-        // create args for iterate_opt
+        // create args for iterate_opt: 
+        // def iterate_opt(opt, i_iter,  given_rec_x : List[float], given_rec_y : List[float]):
+
         // 1. the first one: opt
         PyObject* pArgs = PyTuple_New(4);
         PyTuple_SetItem(pArgs, 0, pOpt);  
@@ -1456,7 +1637,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
          
         //////////////////////////////////////////////////////////////////////
 
-        /* area oriented mapping. */
+        /* area oriented mapping. 
         //////////////////////////////////////////////////////////////////////
         // perform area recovery using area flow 
         // compute the required times
@@ -1493,7 +1674,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         Map_MappingSetRefs( p );
         p->AreaFinal = Map_MappingGetArea( p );
         //////////////////////////////////////////////////////////////////////
-        
+        */
 
         // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
         extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
@@ -1561,12 +1742,12 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         double estArea = Map_MappingGetArea( p );
         // double estArea = p->AreaFinal;  
 
-        if ( i == 0) {
-            firstDelay = curDelay; 
-            firstArea = estArea;
-            firstLevel = Abc_NtkLevel(pNtkTopoed);
-        }
-        double gapDelay = Abc_AbsFloat( estDepth - curDelay)/curDelay;
+        // if ( i == 0) {
+        //     firstDelay = curDelay; 
+        //     firstArea = estArea;
+        //     firstLevel = Abc_NtkLevel(pNtkTopoed);
+        // }
+        // double gapDelay = Abc_AbsFloat( estDepth - curDelay)/curDelay;
         double estLevel = Abc_NtkLevel(pNtkTopoed); 
         
         // rec_y[0] = curDelay/firstDelay + estArea/firstArea + (estLevel - firstLevel) * 0.05;
@@ -1576,12 +1757,12 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
        
         double* tmpParas = (double*)malloc(para_size * sizeof(double)); 
         memcpy(tmpParas, p->delayParams, para_size * sizeof(double));
-        itRes[i].rec_x = tmpParas;
-        itRes[i].rec_y = rec_y[0];
+        itRes[i+good_itera_num].rec_x = tmpParas;
+        itRes[i+good_itera_num].rec_y = rec_y[0];
 
-        if (itRes[i].rec_y < min_Y) {
-            min_Y = itRes[i].rec_y;
-            min_rec_x = itRes[i].rec_x;
+        if (itRes[i+good_itera_num].rec_y < min_Y) {
+            min_Y = itRes[i+good_itera_num].rec_y;
+            min_rec_x = itRes[i+good_itera_num].rec_x;
         }
 
         // 4. clean best matches of the mapped network
@@ -1658,7 +1839,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         } 
        
     }
-
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // set parameters for the best iteration
     for (int j = 0; j < para_size; j++){
@@ -1689,7 +1870,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     Map_MappingSetRefs( p );
     p->AreaFinal = Map_MappingGetArea( p );
 
-
+ 
     //////////////////////////////////////////////////////////////////////
     // perform area recovery using exact area 
     // compute the required times
@@ -1714,8 +1895,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     Map_MappingSetRefs( p );
     p->AreaFinal = Map_MappingGetArea( p );
     //////////////////////////////////////////////////////////////////////
-
-
+ 
 
      
     // print the arrival times of the latest outputs

@@ -3,7 +3,10 @@ from hebo.optimizers.hebo import HEBO
 import numpy as np
 import pandas as pd 
 from typing import List
+import torch 
 
+np.random.seed(42)
+torch.manual_seed(42)
   
 def obj(params : pd.DataFrame) -> np.ndarray:
     return ((params.values - 0.50)**2).sum(axis = 1).reshape(-1, 1)
@@ -23,13 +26,19 @@ def init_opt():
     ]
     space = DesignSpace().parse(params)
     #space.sample(5)
-    opt = HEBO(space, model_name='gp', rand_sample= None )
+    opt = HEBO(space, model_name='gp', rand_sample= 5 )
     return opt
- 
+
  
 
 def iterate_opt(opt, i_iter,  given_rec_x : List[float], given_rec_y : List[float]):
-    if (i_iter ==0):
+    if (i_iter == -1): 
+        column_names = [f'delay_para{i}' for i in range(len(given_rec_x))]
+        initial_points = pd.DataFrame([given_rec_x], columns=column_names)
+        initial_evaluations = np.array(given_rec_y) 
+        opt.observe(initial_points, initial_evaluations)
+        return opt, given_rec_x 
+    elif (i_iter ==0):
         rec_x = opt.suggest(n_suggestions = 1)
         rec_x_list = rec_x.values.tolist()[0] 
         return opt, rec_x_list
@@ -59,24 +68,30 @@ def best_y(opt):
 # given_rec_x = rec_x
 # given_rec_y = obj(pd.DataFrame([given_rec_x])) 
 
- 
+# rec_x1 = [0.356135,0.548158,0.554104,0.592865,0.52982,0.56736,0.590789,0.571867,0.702422,0.915102]
+# rec_x2 = [0.356135,0.148158,0.454104,0.792865,0.762982,0.046736,0.390789,0.171867,0.702422,0.915102]
+# rec_y1 = [0.2666859]
+# rec_y2 = [0.8398567]
+
+
 # opt = init_opt() 
 # given_rec_x = []
 # given_rec_y = []
-# max_iter = 15
-# for i in range(0, max_iter):  
-#     if (i == 0):
-#         rec_x = [0.356135,0.148158,0.454104,0.792865,0.762982,0.046736,0.390789,0.171867,0.702422,0.915102]
-#         given_rec_x = rec_x
-#         given_rec_y = obj(pd.DataFrame([rec_x]))
-#         opt, rec_x =  iterate_opt(opt, -1, given_rec_x, given_rec_y)
-        
-#     else:
+# max_iter = 10
+# # init points
+# opt, _ = iterate_opt(opt, -1, rec_x1, rec_y1)
+# opt, _ = iterate_opt(opt, -1, rec_x2, rec_y2)
 
-#         opt, rec_x = iterate_opt(opt, i, given_rec_x, given_rec_y)
-#         given_rec_x = rec_x
-#         given_rec_y = obj(pd.DataFrame([rec_x])) 
-#         print("i {}, y {}".format(i,given_rec_y))
+
+# for i in range(0, max_iter):  
+#     opt, rec_x = iterate_opt(opt, i, given_rec_x, given_rec_y)
+#     given_rec_x = rec_x
+#     given_rec_y = obj(pd.DataFrame([rec_x])) 
+#     print("i {}, y {}".format(i,given_rec_y))
+#     # opt, rec_x = iterate_opt(opt, i, given_rec_x, given_rec_y)
+#     # given_rec_x = rec_x
+#     # given_rec_y = obj(pd.DataFrame([rec_x])) 
+#     # print("i {}, y {}".format(i,given_rec_y))
    
   
 # conv_hebo_seq = np.minimum.accumulate(opt.y) 
