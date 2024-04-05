@@ -26,7 +26,15 @@ def init_opt():
     ]
     space = DesignSpace().parse(params)
     #space.sample(5)
-    opt = HEBO(space, model_name='gp', rand_sample= 5 )
+    # cfg = {
+    #                     'lr'           : 0.01,
+    #                     'num_epochs'   : 100,
+    #                     'verbose'      : False,
+    #                     'noise_lb'     : 8e-2, 
+    #                     'pred_likeli'  : False
+    #                     }
+    # opt = HEBO(space, model_name='gpy', rand_sample= 8, model_config=cfg )
+    opt = HEBO(space, model_name='rf', rand_sample= 5)
     return opt
 
  

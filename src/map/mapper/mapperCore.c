@@ -1269,11 +1269,15 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     int rec_y_size = 1;
     p->delayParams = malloc(sizeof(double) * para_size);
     // some good delay parameters for both delay- and area- oriented mapping  
-    double goodPara[2][10] = {
+    double goodPara[3][10] = {
         {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252},
-        {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0, 0.5}
+        {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0, 0.5},  // Expert Design
+        {0.348, 0.061, 0.017, 0.146, 1.832, 0.411, 0.260, 0.050, 1.954, 0.782}, // best result for bar
+        // {0.506, 0.070, 0.315, 0.413, 1.800, 0.004, 0.122, 0.118, 0.989, 0.558},
+        // {0.581, 0.129, 0.082, 0.251, 0.890, 0.297, 0.099, 0.114, 1.028, 0.546} 
+
     };
-    int good_itera_num = 2; 
+    int good_itera_num = 3; 
       
     // for recording the delay parameters and the corresponding delay
     double * rec_x = (double *)malloc(para_size * sizeof(double));
@@ -1345,7 +1349,46 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         // compute the references and collect the nodes used in the mapping
         Map_MappingSetRefs( p ); 
         //////////////////////////////////////////////////////////////////////
+
+        /* area oriented mapping. 
+        //////////////////////////////////////////////////////////////////////
+        // perform area recovery using area flow 
+        // compute the required times
+        Map_TimeComputeRequiredGlobal( p );
+        // recover area flow
+        p->fMappingMode = 1;
+        Map_MappingMatches( p );
+        // compute the references and collect the nodes used in the mapping
+        Map_MappingSetRefs( p );
+        p->AreaFinal = Map_MappingGetArea( p );
  
+
+        //////////////////////////////////////////////////////////////////////
+        // perform area recovery using exact area 
+        // compute the required times
+        Map_TimeComputeRequiredGlobal( p );
+        // recover area
+        p->fMappingMode = 2;
+        Map_MappingMatches( p );
+        // compute the references and collect the nodes used in the mapping
+        Map_MappingSetRefs( p );
+        p->AreaFinal = Map_MappingGetArea( p );
+
+        //////////////////////////////////////////////////////////////////////
+
+        //////////////////////////////////////////////////////////////////////
+        // perform area recovery using exact area
+        // compute the required times
+        Map_TimeComputeRequiredGlobal( p );
+        // recover area
+        p->fMappingMode = 3;
+        Map_MappingMatches( p );
+        // compute the references and collect the nodes used in the mapping
+        Map_MappingSetRefs( p );
+        p->AreaFinal = Map_MappingGetArea( p );
+        //////////////////////////////////////////////////////////////////////
+        */
+
         // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
         extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
         Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
