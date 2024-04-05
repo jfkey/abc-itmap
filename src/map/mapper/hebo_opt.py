@@ -5,13 +5,14 @@ import pandas as pd
 from typing import List
 import torch 
 
-np.random.seed(42)
-torch.manual_seed(42)
+
   
 def obj(params : pd.DataFrame) -> np.ndarray:
     return ((params.values - 0.50)**2).sum(axis = 1).reshape(-1, 1)
 
 def init_opt():
+    np.random.seed(42)
+    torch.manual_seed(42)
     params = [
         {'name' : 'delay_para0', 'type' : 'num', 'lb' : 0.0, 'ub' : 1.0},
         {'name' : 'delay_para1', 'type' : 'num', 'lb' : 0.0, 'ub' : 0.5},
@@ -67,40 +68,43 @@ def best_y(opt):
     return opt.best_y
   
   
-# opt = init_opt() 
-# given_rec_x = [0.356135,0.148158,0.454104,0.792865,0.762982,0.046736,0.390789,0.171867,0.702422,0.915102]
-# given_rec_y = obj(pd.DataFrame([given_rec_x])) 
-# opt, rec_x =  iterate_opt(opt, -1, given_rec_x, given_rec_y)
-# print("given_rec_y",given_rec_y)
+# def fun_a(): 
 
-# given_rec_x = rec_x
-# given_rec_y = obj(pd.DataFrame([given_rec_x])) 
-
-# rec_x1 = [0.356135,0.548158,0.554104,0.592865,0.52982,0.56736,0.590789,0.571867,0.702422,0.915102]
-# rec_x2 = [0.356135,0.148158,0.454104,0.792865,0.762982,0.046736,0.390789,0.171867,0.702422,0.915102]
-# rec_y1 = [0.2666859]
-# rec_y2 = [0.8398567]
+#     rec_x1 = [0.356135,0.548158,0.554104,0.592865,0.52982,0.56736,0.590789,0.571867,0.702422,0.915102]
+#     rec_x2 = [0.356135,0.148158,0.454104,0.792865,0.762982,0.046736,0.390789,0.171867,0.702422,0.915102]
+#     rec_y1 = [0.2666859]
+#     rec_y2 = [0.8398567]
 
 
-# opt = init_opt() 
-# given_rec_x = []
-# given_rec_y = []
-# max_iter = 10
-# # init points
-# opt, _ = iterate_opt(opt, -1, rec_x1, rec_y1)
-# opt, _ = iterate_opt(opt, -1, rec_x2, rec_y2)
+#     opt = init_opt() 
+#     given_rec_x = []
+#     given_rec_y = []
+#     max_iter = 10
+#     # init points
+#     opt, _ = iterate_opt(opt, -1, rec_x1, rec_y1)
+#     opt, _ = iterate_opt(opt, -1, rec_x2, rec_y2)
 
 
-# for i in range(0, max_iter):  
-#     opt, rec_x = iterate_opt(opt, i, given_rec_x, given_rec_y)
-#     given_rec_x = rec_x
-#     given_rec_y = obj(pd.DataFrame([rec_x])) 
-#     print("i {}, y {}".format(i,given_rec_y))
-#     # opt, rec_x = iterate_opt(opt, i, given_rec_x, given_rec_y)
-#     # given_rec_x = rec_x
-#     # given_rec_y = obj(pd.DataFrame([rec_x])) 
-#     # print("i {}, y {}".format(i,given_rec_y))
+#     for i in range(0, max_iter):  
+#         opt, rec_x = iterate_opt(opt, i, given_rec_x, given_rec_y)
+#         given_rec_x = rec_x
+#         given_rec_y = obj(pd.DataFrame([rec_x])) 
+#         print("i {}, y {}".format(i,given_rec_y))
+#         # opt, rec_x = iterate_opt(opt, i, given_rec_x, given_rec_y)
+#         # given_rec_x = rec_x
+#         # given_rec_y = obj(pd.DataFrame([rec_x])) 
+#         # print("i {}, y {}".format(i,given_rec_y))
    
-  
+# if __name__ == '__main__':
+#     while True:
+#         user_input = input("Enter 1 to execute fun_a(), 2 to execute fun_a(), anything else to quit:\n")
+#         if user_input == "1":
+#             fun_a()
+#         elif user_input == "2":
+#             fun_a()
+#         else:
+#             print("Exiting.")
+#             break
+
 # conv_hebo_seq = np.minimum.accumulate(opt.y) 
 # print(conv_hebo_seq)
