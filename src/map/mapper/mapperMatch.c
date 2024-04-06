@@ -451,12 +451,12 @@ void Map_MappingSetPiArrivalTimes( Map_Man_t * p )
         // pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + p->pSuperLib->tDelayInv.Fall;
         // pNode->tArrival[0].Worst = MAP_MAX(pNode->tArrival[0].Rise, pNode->tArrival[0].Fall);
         // handle for inverters
-        // pNode->tArrival[1].Rise += pInvPin->dDelayLDRise * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDRise;
-        // pNode->tArrival[1].Fall += pInvPin->dDelayLDFall * 2.5 * (pNode->nRefs + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]) + pInvPin->dDelayPDFall;
+        // pNode->tArrival[1].Rise += pInvPin->dDelayLDRise * 2.5 * (pNode->nRefs + 0.5 * pNode->tauRefs[1] + 0.2 * pNode->tauRefs[1]) + pInvPin->dDelayPDRise;
+        // pNode->tArrival[1].Fall += pInvPin->dDelayLDFall * 2.5 * (pNode->nRefs + 0.5 * pNode->tauRefs[1] + 0.2 * pNode->tauRefs[1]) + pInvPin->dDelayPDFall;
         // pNode->tArrival[1].Worst = MAP_MAX(pNode->tArrival[1].Rise, pNode->tArrival[1].Fall);
         
 
-        // + 0.5 * pNode->taoRefs[1] + 0.2 * pNode->taoRefs[1]
+        // + 0.5 * pNode->tauRefs[1] + 0.2 * pNode->tauRefs[1]
         pNode->tArrival[0].Rise  = pNode->tArrival[1].Fall + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise;
         pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + pInvPin->dDelayLDFall * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDFall;
         pNode->tArrival[0].Worst = MAP_MAX(pNode->tArrival[0].Rise, pNode->tArrival[0].Fall);

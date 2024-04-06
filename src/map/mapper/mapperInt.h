@@ -231,7 +231,7 @@ struct Map_NodeStruct_t_
     float               nRefEst[3];    // actual fanout for previous covering phase, neg and pos and sum
     float               Switching;     // the probability of switching
 
-    int                 taoRefs[MAP_TAO]; // tao-order degrees, for each node
+    int                 tauRefs[MAP_TAO]; // tau-order degrees, for each node
 
     // connectivity
     Map_Node_t *        p1;            // the first child
