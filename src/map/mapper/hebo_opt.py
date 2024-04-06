@@ -36,6 +36,7 @@ def init_opt():
     #                     }
     # opt = HEBO(space, model_name='gpy', rand_sample= 8, model_config=cfg )
     opt = HEBO(space, model_name='rf', rand_sample= 5)
+  
     return opt
 
  

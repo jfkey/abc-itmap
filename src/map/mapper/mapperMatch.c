@@ -689,7 +689,7 @@ int Map_MappingMatches( Map_Man_t * p )
     // estimate the fanouts
     if ( p->fMappingMode == 0 )
         Map_MappingEstimateRefsInit( p );
-    else if ( p->fMappingMode >= 1)
+    else if ( p->fMappingMode >= 1)     // use >= 1 rather than == 1 to improve the QoR
         Map_MappingEstimateRefs( p );
 
     double md = 0.0;
