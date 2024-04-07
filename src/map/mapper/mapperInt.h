@@ -232,6 +232,7 @@ struct Map_NodeStruct_t_
     float               Switching;     // the probability of switching
 
     int                 tauRefs[MAP_TAO]; // tau-order degrees, for each node
+    double              bestDelay; 
 
     // connectivity
     Map_Node_t *        p1;            // the first child

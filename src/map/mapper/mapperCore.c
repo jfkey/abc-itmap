@@ -634,10 +634,34 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
    Abc_Obj_t * pObj;
    Map_Node_t * pNodeMap;
    Map_Cut_t * pCutBest;
-   Map_Super_t *       pSuperBest;
-   Mio_Gate_t * pRoot;
+   Map_Super_t *       pSuperBest; 
    int i,  mappingID, fPhase;
    float gateDelay;
+   
+   double *grad = malloc(sizeof(double) * MAP_TAO);
+   memset(grad, 0, sizeof(double) * MAP_TAO);
+   int gate_params_size = 5;
+   double *gateParams = malloc(sizeof(double) * gate_params_size);
+   memset(gateParams, 0, sizeof(double) * gate_params_size);
+   
+   
+    Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){  
+        mappingID = Abc_ObjMapNtkId(pObj);
+        fPhase =  Abc_ObjMapNtkPhase(pObj);
+        gateDelay = Abc_ObjMapNtkTime(pObj);
+        pNodeMap = p->vMapObjs->pArray[mappingID];
+        // update the tauRef using gradient descent
+        // skip the node that has no cut
+        if ( Map_NodeReadCutBest(pNodeMap, fPhase) == NULL ) 
+            continue; 
+        pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);    
+        pSuperBest = pCutBest->M[fPhase].pSuperBest;
+
+        Map_MappingGradient(p, pCutBest,  pSuperBest, fPhase, grad, gateParams);
+        Map_MappingUpdateTauRef(p, pNodeMap, pCutBest, pSuperBest, fPhase, gateDelay, grad, gateParams);
+        // pNodeMap->tauRefs[1],
+    }
+
 
    /*
    Abc_NtkForEachCi( pNtkTopoed, pObj, i ){
@@ -650,66 +674,77 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
        printf("Co node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
    }
    */
-   Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){
-       mappingID = Abc_ObjMapNtkId(pObj);
-       fPhase =  Abc_ObjMapNtkPhase(pObj);
-       gateDelay = Abc_ObjMapNtkTime(pObj);
-       pNodeMap = p->vMapObjs->pArray[mappingID];
-       int num = Map_NodeReadNum(pNodeMap);
-       // printf("%d,",  num);
-       if ( Map_NodeReadCutBest(pNodeMap, fPhase) != NULL ) {
-           pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);
-           pCutBest->delay[fPhase] = gateDelay;
-           pSuperBest = pCutBest->M[fPhase].pSuperBest;
-           pRoot = Map_SuperReadRoot(pSuperBest);
-           /*
-           printf("%24s, ",               Mio_GateReadName(pRoot));
-           printf("%4d, ",              mappingID );
-           printf("%4d, ",              fPhase );
-           printf("%4.2f, ",            gateDelay);
-           Abc_Obj_t * pObj2;
-           int k = 0;
-           int maxFaninDegree = 0;
-           Abc_ObjForEachFanin( pObj, pObj2, k ) {
-               if (maxFaninDegree < Abc_ObjFanoutNum(pObj2))
-                   maxFaninDegree = Abc_ObjFanoutNum(pObj2);
-           }
-           printf( "%4d, ",             maxFaninDegree);
-           printf( "%4d, ",             Abc_ObjFanoutNum(pObj) );
-           printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayLDMax.Rise, pSuperBest->tDelayLDMax.Fall));
-           printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayPDMax.Rise, pSuperBest->tDelayPDMax.Fall));
-           printf("\n");*/
-       } else {
-           /*
-           // inveter
-           Mio_Gate_t * inveter =  (Mio_Gate_t *)pObj->pData;
-           printf("%24s, ",               Mio_GateReadName(inveter));
-           printf("%4d, ",              mappingID );
-           printf("%4d, ",              fPhase );
-           printf("%6.2f, ",            gateDelay);
-           Abc_Obj_t * pObj2;
-           int k = 0;
-           int maxFaninDegree = 0;
-           Abc_ObjForEachFanin( pObj, pObj2, k ) {
-               if (maxFaninDegree < Abc_ObjFanoutNum(pObj2))
-                   maxFaninDegree = Abc_ObjFanoutNum(pObj2);
-           }
-           printf( "%4d, ",             maxFaninDegree);
-           printf( "%4d, ",             Abc_ObjFanoutNum(pObj) );
 
-           printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayLDRise, inveter->pPins->dDelayLDFall));
-           printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayPDRise, inveter->pPins->dDelayPDFall));
-           printf("\n");*/
-       }
-   }
+
+//    Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){ 
+//        if (i < 1000 || i > 1030) continue;
+//        mappingID = Abc_ObjMapNtkId(pObj);
+//        fPhase =  Abc_ObjMapNtkPhase(pObj);
+//        gateDelay = Abc_ObjMapNtkTime(pObj);
+//        pNodeMap = p->vMapObjs->pArray[mappingID];
+//        // pNodeMap->bestDelay= gateDelay;
+//        // pNodeMap->delay[fPhase] = gateDelay;
+//     //    int num = Map_NodeReadNum(pNodeMap);
+//     //    printf("%d,",  num);
+//        if ( Map_NodeReadCutBest(pNodeMap, fPhase) != NULL ) {
+//            pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);
+//            pCutBest->delay[fPhase] = gateDelay;
+//            pSuperBest = pCutBest->M[fPhase].pSuperBest;
+//            pRoot = Map_SuperReadRoot(pSuperBest);
+ 
+//         //    printf("name(%s), mappingID(%d), phase(%d), delay(%4.4f), ", Mio_GateReadName(pRoot), mappingID, fPhase, gateDelay);
+ 
+//            printf("%24s, ",             Mio_GateReadName(pRoot));
+//            printf("%4d, ",              mappingID );
+            
+//            printf("%4d, ",              fPhase );
+//            printf("%4.2f, ",            gateDelay);
+//            Abc_Obj_t * pObj2;
+//            int k = 0;
+//            int maxFaninDegree = 0;
+//            Abc_ObjForEachFanin( pObj, pObj2, k ) {
+//                if (maxFaninDegree < Abc_ObjFanoutNum(pObj2))
+//                    maxFaninDegree = Abc_ObjFanoutNum(pObj2);
+//            }
+//            printf( "%4d, ",             maxFaninDegree);
+//            printf( "%4d, ",             Abc_ObjFanoutNum(pObj) );
+//            printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayLDMax.Rise, pSuperBest->tDelayLDMax.Fall));
+//            printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayPDMax.Rise, pSuperBest->tDelayPDMax.Fall));
+//            printf("\n"); 
+//        } else {
+           
+//            // inveter
+//            Mio_Gate_t * inveter =  (Mio_Gate_t *)pObj->pData; 
+//            printf("%24s, ",               Mio_GateReadName(inveter));
+//            printf("%4d, ",              mappingID ); 
+//            printf("%4d, ",              fPhase );
+//            printf("%6.2f, ",            gateDelay);
+//            Abc_Obj_t * pObj2;
+//            int k = 0;
+//            int maxFaninDegree = 0;
+//            Abc_ObjForEachFanin( pObj, pObj2, k ) {
+//                if (maxFaninDegree < Abc_ObjFanoutNum(pObj2))
+//                    maxFaninDegree = Abc_ObjFanoutNum(pObj2);
+//            }
+//            printf( "%4d, ",             maxFaninDegree);
+//            printf( "%4d, ",             Abc_ObjFanoutNum(pObj) );
+
+//            printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayLDRise, inveter->pPins->dDelayLDFall));
+//            printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayPDRise, inveter->pPins->dDelayPDFall));
+//            printf("\n"); 
+//        }
+//    }
+//    printf("number nodes of topo network(%6d), itera num (%6d) \n", Abc_NtkNodeNum(pNtkTopoed), i);
    // LD, PD, faninD, D b
    // 2.4  1.1  -0.01   2.1  -10.9
    // 2.4 * 2.5 + 1.1 * 7.6 - 0.01*6 + 2.1 * 2 -10.9
    // 0.7 * LD * ( 0.9 * D + 0.2 * sqrt(faninD)) + 0.6 * PD + 5
 
-//    // 5. update the new delay of the mapped network
-//    // print the nRef of the mapping network
-//    /*
+
+
+   // 5. update the new delay of the mapped network
+   // print the nRef of the mapping network
+   
 //    printf("the number of fanout of the mapping network \n");
 //    Map_Node_t * pNodeM;
 //    for ( i = 0; i < p->vMapObjs->nSize; i++ )
@@ -717,9 +752,9 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
 //        pNodeM = p->vMapObjs->pArray[i];
 //        if ( Map_NodeIsBuf(pNodeM) )
 //            continue;
-//        printf("node(%d), nRefs(%d), nRefAct(%d, %d), nRefEst(%2.2f, %2.2f) \n", Map_NodeReadNum(pNodeM), pNodeM->nRefs, pNodeM->nRefAct[0], pNodeM->nRefAct[1], pNodeM->nRefEst[0], pNodeM->nRefEst[1]);
+//        printf("node(%d),  nRefs(%d), nRefAct(%d, %d), nRefEst(%2.2f, %2.2f) \n", Map_NodeReadNum(pNodeM), pNodeM->nRefs, pNodeM->nRefAct[0], pNodeM->nRefAct[1], pNodeM->nRefEst[0], pNodeM->nRefEst[1]);
 //    }
-//    */
+   
 //
 //    //////////////////////////////////////////////////////////////////////
 //    // delay-depenpent mapping
@@ -1949,6 +1984,97 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
 
 }
 
+
+void  Map_MappingGradient(Map_Man_t * p,  Map_Cut_t *pCut,  Map_Super_t *pSuper, int  fPhase,  double * grad, double *gatePara){
+     /*
+     fanoutEffortTrans  = pCut->ppLeaves[i]->nRefEst[fPhase] + pCut->ppLeaves[i]->tauRefs[1] * pNode->p->delayParams[1] + pCut->ppLeaves[i]->tauRefs[2] * 0.2 * pNode->p->delayParams[1] + 10* pNode->p->delayParams[2];
+            estTransDelay = pNode->p->delayParams[0] * (fanoutEffortTrans * pSuper->tDelaysRTransLD[i].Rise * 10 * pNode->p->delayParams[3]+ pSuper->tDelaysRTransPD[i].Rise * pNode->p->delayParams[4]);
+            fanoutEffortCap = pNode->nRefEst[fPhase] + pNode->tauRefs[1]* pNode->p->delayParams[5] +  pNode->tauRefs[2]* 0.2* pNode->p->delayParams[5] +  10 * pNode->p->delayParams[6];
+            estCapDelay =  (1-pNode->p->delayParams[0]) * (fanoutEffortCap * pSuper->tDelaysRLD[i].Rise * 10* pNode->p->delayParams[7] + pSuper->tDelaysRPD[i].Rise * pNode->p->delayParams[8]);
+            estDelay = estCapDelay + estTransDelay + tInvDelayRise;
+    */
+
+
+    // compute the gradient of the mapping delay with respect to the delay parameters
+    int nLeaves = pSuper->nFanins; 
+    double avgTLD = 0.0, avgCLD =0.0, avgTPD = 0.0, avgCPD = 0.0;
+    double maxTransEfforts = 0, curTransEfforts = 0; 
+   
+    int pi = 0; 
+
+    for (int i = 0; i < nLeaves; i ++) {
+        curTransEfforts = pCut->ppLeaves[i]->nRefEst[fPhase] + pCut->ppLeaves[i]->tauRefs[1] * p->delayParams[1] + pCut->ppLeaves[i]->tauRefs[2] * 0.2 * p->delayParams[1] + 10* p->delayParams[2];
+        if (maxTransEfforts < curTransEfforts) {
+            maxTransEfforts = curTransEfforts;
+            pi = i;
+        } 
+        avgTLD += pSuper->tDelaysRTransLD[i].Rise + pSuper->tDelaysRTransLD[i].Fall;
+        avgCLD += pSuper->tDelaysRLD[i].Rise + pSuper->tDelaysRLD[i].Fall;
+        avgTPD += pSuper->tDelaysRTransPD[i].Rise + pSuper->tDelaysRTransPD[i].Fall;
+        avgCPD = pSuper->tDelaysRPD[i].Rise + pSuper->tDelaysRPD[i].Fall;        
+    }
+    avgTLD /= nLeaves*2;
+    avgCLD /= nLeaves*2;
+    avgTPD /= nLeaves*2;
+    avgCPD /= nLeaves*2;
+    grad[0] = p->delayParams[0] * avgTLD * 10 * p->delayParams[3];
+    grad[1] = p->delayParams[1] * grad[0];
+    grad[2] = 0.2 * p->delayParams[1] * grad[0];
+    
+    grad[3] = (1-p->delayParams[0]) * avgCLD * 10 * p->delayParams[7];
+    grad[4] = p->delayParams[4] * grad[0];
+    grad[5] = 0.2 * p->delayParams[5] * grad[0];
+
+    // 0: for max cut delay pin
+    gatePara[0] = pi; 
+    gatePara[1] =avgTLD;
+    gatePara[2] =avgCLD;
+    gatePara[3] =avgTPD;
+    gatePara[4] =avgCPD;
+    // return grad;
+}
+
+void  Map_MappingUpdateTauRef(Map_Man_t * p, Map_Node_t *pNode, Map_Cut_t *pCut, Map_Super_t *pSuper, int fPhase, double gateDelay, double * grad, double *gatePara){ 
+    int max_iterations = 3;
+    double lr = 0.05;
+    double tolerance = 3; 
+    int pi = gatePara[0];
+
+    double cutDelay = Map_MappingEstCutDelay(p, pCut, pNode, fPhase, pi, gatePara);
+    double gradDirection = cutDelay - gateDelay > tolerance  ? 1 : - 1;  // TODO:
+
+   
+    for (int iteration = 0; iteration < max_iterations; iteration++) { 
+        pNode->nRefEst[0] = pNode->nRefEst[0] - 2 * lr * gradDirection * grad[3];
+        pNode->nRefEst[1] = pNode->nRefEst[1] - lr * gradDirection * grad[3];
+        pNode->nRefEst[2] = pNode->nRefEst[2] - lr * gradDirection * grad[3];  
+        pNode->tauRefs[1] = pNode->tauRefs[1] - lr * gradDirection * grad[4];
+        pNode->tauRefs[2] = pNode->tauRefs[2] - lr * gradDirection * grad[5];
+
+        pCut->ppLeaves[pi]->nRefEst[0] = pCut->ppLeaves[pi]->nRefEst[0] - 2 * lr * gradDirection * grad[0];
+        pCut->ppLeaves[pi]->nRefEst[1] = pCut->ppLeaves[pi]->nRefEst[1] - lr * gradDirection * grad[0];
+        pCut->ppLeaves[pi]->nRefEst[2] = pCut->ppLeaves[pi]->nRefEst[2] - lr * gradDirection * grad[0];
+        pCut->ppLeaves[pi]->tauRefs[1] = pCut->ppLeaves[pi]->tauRefs[1] - lr * gradDirection * grad[1];
+        pCut->ppLeaves[pi]->tauRefs[2] = pCut->ppLeaves[pi]->tauRefs[2] - lr * gradDirection * grad[2];
+
+        cutDelay = Map_MappingEstCutDelay(p, pCut, pNode, fPhase, pi, gatePara);
+
+        if (fabs(cutDelay- gateDelay ) < tolerance) {
+            printf("Converged after %d iterations.\n", iteration + 1);
+            break;
+        }
+    }
+
+}
+
+double Map_MappingEstCutDelay (Map_Man_t *p, Map_Cut_t *pCut, Map_Node_t *pNode, int fPhase, int pi,  double *gatePara) {
+    double transEfforts = pCut->ppLeaves[pi]->nRefEst[fPhase] + pCut->ppLeaves[pi]->tauRefs[1] * p->delayParams[1] +
+             pCut->ppLeaves[pi]->tauRefs[2] * 0.2 * p->delayParams[1] + 10* p->delayParams[2];
+    double capEfforts = pNode->nRefEst[fPhase] + pNode->tauRefs[1]* p->delayParams[5] + pNode->tauRefs[2]* 0.2* p->delayParams[5] + 10 * p->delayParams[6]; 
+    double cutDelay = p->delayParams[0] * (transEfforts * gatePara[1] * 10 * p->delayParams[3] + gatePara[3] * p->delayParams[4]) + 
+                     (1-p->delayParams[0]) * (capEfforts * gatePara[2] * 10* p->delayParams[7] + gatePara[4] * p->delayParams[8]);
+    return cutDelay;
+}
 
 ABC_NAMESPACE_IMPL_END
 
