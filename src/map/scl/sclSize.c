@@ -114,7 +114,7 @@ Abc_Obj_t * Abc_SclFindMostCriticalFanin( SC_Man * p, int * pfRise, Abc_Obj_t * 
   SeeAlso     []
 
 ***********************************************************************/
-static inline void Abc_SclTimeNodePrint( SC_Man * p, Abc_Obj_t * pObj, int fRise, int Length, float maxDelay )
+static inline void Abc_SclTimeNodePrint( SC_Man * p, Abc_Obj_t * pObj, int fRise, int Length, float maxDelay)
 {
     SC_Cell * pCell = Abc_ObjIsNode(pObj) ? Abc_SclObjCell(pObj) : NULL;
     printf("%8d : ",            Abc_ObjId(pObj) );
@@ -135,6 +135,16 @@ static inline void Abc_SclTimeNodePrint( SC_Man * p, Abc_Obj_t * pObj, int fRise
     printf( "G =%5d  ",         pCell ? (int)(100.0 * Abc_SclObjLoadAve(p, pObj) / SC_CellPinCapAve(pCell)) : 0 );
 //    printf( "SL =%6.1f ps",     Abc_SclObjSlackMax(p, pObj, p->MaxDelay0) );
     printf( "\n" );
+
+   
+    // fprintf(fp, "%d, %-*s, %d, %.3f \n",  
+    // Abc_ObjId(pObj), 
+    // Length, pCell ? pCell->pName : "pi",  
+    // Abc_ObjFanoutNum(pObj),  
+    // (double)(Abc_SclObjTimeMax(p, pObj)  - Abc_SclGetMaxDelayNodeFanins(p, pObj))
+    // );    
+
+
 }
 void Abc_SclTimeNtkPrint( SC_Man * p, int fShowAll, int fPrintPath )
 {
@@ -195,10 +205,13 @@ void Abc_SclTimeNtkPrint( SC_Man * p, int fShowAll, int fPrintPath )
         Abc_NtkForEachNodeReverse( p->pNtk, pObj, i )
             if ( Abc_ObjFaninNum(pObj) > 0 )
                 nLength = Abc_MaxInt( nLength, strlen(Abc_SclObjCell(pObj)->pName) );
+        //  FILE* fp;
+        // fp = fopen("timing.txt", "w");
         // print timing
         Abc_NtkForEachNodeReverse( p->pNtk, pObj, i )
             if ( Abc_ObjFaninNum(pObj) > 0 )
-                Abc_SclTimeNodePrint( p, pObj, -1, nLength, maxDelay );
+                Abc_SclTimeNodePrint( p, pObj, -1, nLength, maxDelay);
+        // fclose(fp);
     }
     if ( fPrintPath )
     {

@@ -233,6 +233,7 @@ struct Map_NodeStruct_t_
 
     int                 tauRefs[MAP_TAO]; // tau-order degrees, for each node
     double              bestDelay; 
+    int                 nRefFirst; 
 
     // connectivity
     Map_Node_t *        p1;            // the first child

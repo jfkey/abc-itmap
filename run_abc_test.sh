@@ -14,7 +14,7 @@
 binary=$(echo "$1" | awk -F "/" '{print $NF}')
 timestamp=$(date +%Y%m%d%H%M%S)
 #csv="${timestamp}_$binary.map_r.csv"
-log="${timestamp}_$binary.donot.estref.log"
+log="${timestamp}_$binary.flow.log"
 #touch "$csv"
 touch "$log"
 #echo "name, command, input, output, lat, gates, edge, area, delay, lev, stime_gates, stime_gates%, stime_cap(ff), stime_cap%, stime_Area, stime_Area%, stime_Delay(ps), stime_Delay%, cut_time, delay_time, total_time" >> $csv

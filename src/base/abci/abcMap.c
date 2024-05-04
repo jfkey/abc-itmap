@@ -338,6 +338,18 @@ Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, 
     // update tau-order fanouts for the mapped network
     Abc_NtkTauRefs(pMan, pNtk);
 
+    // // update 
+    // int i;
+    // Map_Node_t* pNode; 
+    // for ( i = 0; i < pMan->vMapObjs->nSize; i++ )
+    // {
+    //     pNode = pMan->vMapObjs->pArray[i];
+    //     if ( Map_NodeIsAnd(pNode) )
+    //         pNode->nRefFirst = pNode->nRefEst[0];
+    //     // pNode->nRefTao = pNode->nRefAct[0] + pNode->nRefAct[1];
+    // }
+    
+
     if ( pSwitching ) Vec_IntFree( vSwitching );
     if ( pMan == NULL )
         return NULL;
@@ -351,9 +363,8 @@ clk = Abc_Clock();
 
     // if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
-    if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
-    // if ( !Map_MappingHeboIt( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
-    // if ( !Map_MappingIteratable( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
+    // if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
+    if ( !Map_MappingHeboIt( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
     {
         Map_ManFree( pMan );
         return NULL;

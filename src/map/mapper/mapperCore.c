@@ -640,11 +640,11 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
    
    double *grad = malloc(sizeof(double) * MAP_TAO);
    memset(grad, 0, sizeof(double) * MAP_TAO);
-   int gate_params_size = 5;
+   int gate_params_size = 6;
    double *gateParams = malloc(sizeof(double) * gate_params_size);
    memset(gateParams, 0, sizeof(double) * gate_params_size);
-   
-   
+    int updatedNode = 0; 
+    
     Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){  
         mappingID = Abc_ObjMapNtkId(pObj);
         fPhase =  Abc_ObjMapNtkPhase(pObj);
@@ -658,10 +658,12 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
         pSuperBest = pCutBest->M[fPhase].pSuperBest;
 
         Map_MappingGradient(p, pCutBest,  pSuperBest, fPhase, grad, gateParams);
-        Map_MappingUpdateTauRef(p, pNodeMap, pCutBest, pSuperBest, fPhase, gateDelay, grad, gateParams);
+        if (Map_MappingUpdateTauRef(p, pNodeMap, pCutBest, pSuperBest, fPhase, gateDelay, grad, gateParams)) {
+            updatedNode += 1; 
+        }
         // pNodeMap->tauRefs[1],
     }
-
+    printf("Updated nodes(%.3f) \n", (updatedNode*1.0)/i);
 
    /*
    Abc_NtkForEachCi( pNtkTopoed, pObj, i ){
@@ -1501,15 +1503,16 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         // rec_y[0] = curDelay/firstDelay + estArea/firstArea + (estLevel - firstLevel) * 0.05;
         rec_y[0] = curDelay/firstDelay + estArea/firstArea;
         printf("+++++curDelay: %f, #####estDepth: %f, -----estArea:%f, record_y:%f, level:%.2f\n", curDelay, estDepth, estArea, rec_y[0], estLevel);    
- 
+    
         double* tmpParas = (double*)malloc(para_size * sizeof(double)); 
         memcpy(tmpParas, p->delayParams, para_size * sizeof(double));
         itRes[i].rec_x = tmpParas;
         itRes[i].rec_y = rec_y[0];
 
         if (itRes[i].rec_y < min_Y) {
+            // record better delay parameters and its results
             min_Y = itRes[i].rec_y;
-            min_rec_x = itRes[i].rec_x;
+            min_rec_x = itRes[i].rec_x; 
         }
 
         // 4. clean best matches of the mapped network
@@ -1841,6 +1844,44 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         if (itRes[i+good_itera_num].rec_y < min_Y) {
             min_Y = itRes[i+good_itera_num].rec_y;
             min_rec_x = itRes[i+good_itera_num].rec_x;
+
+             // update local References. 
+            Abc_Obj_t * pObj;
+            Map_Node_t * pNodeMap;
+            Map_Cut_t * pCutBest;
+            Map_Super_t *  pSuperBest; 
+            int ni,  mappingID, fPhase;
+            float gateDelay;
+            
+            double *grad = malloc(sizeof(double) * (MAP_TAO*2));
+            memset(grad, 0, sizeof(double) * (MAP_TAO*2));
+            int gate_params_size = 6;
+            double *gateParams = malloc(sizeof(double) * gate_params_size);
+            memset(gateParams, 0, sizeof(double) * gate_params_size);
+            
+            int updatedNode = 0; 
+                
+            Abc_NtkForEachNode1( pNtkTopoed, pObj, ni ){  
+                mappingID = Abc_ObjMapNtkId(pObj);
+                fPhase =  Abc_ObjMapNtkPhase(pObj);
+                gateDelay = Abc_ObjMapNtkTime(pObj);
+                pNodeMap = p->vMapObjs->pArray[mappingID];
+                // update the tauRef using gradient descent
+                // skip the node that has no cut
+                if ( Map_NodeReadCutBest(pNodeMap, fPhase) == NULL ) 
+                    continue; 
+                pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);    
+                pSuperBest = pCutBest->M[fPhase].pSuperBest;
+
+                Map_MappingGradient(p, pCutBest,  pSuperBest, fPhase, grad, gateParams);
+                if (Map_MappingUpdateTauRef(p, pNodeMap, pCutBest, pSuperBest, fPhase, gateDelay, grad, gateParams)) {
+                    updatedNode += 1; 
+                }
+                // pNodeMap->tauRefs[1],
+            }
+            printf("Updated nodes(%.3f) \n", (updatedNode*1.0)/ni);
+            free(grad);
+            free(gateParams);
         }
 
         // 4. clean best matches of the mapped network
@@ -1914,8 +1955,28 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                     pMatch->uPhaseBest = 286331153; 
                 } 
             }
+        }
+        if (i == itera_num - 1){
+
+            FILE* fp;
+            fp = fopen("aig_fanouts.txt", "w");
+            // update local References. 
+            Abc_Obj_t * pObj;
+            Map_Node_t * pNodeMap;
+            Map_Cut_t * pCutBest;
+            Map_Super_t *  pSuperBest; 
+            int ni,  mappingID, fPhase;
+            float gateDelay;
+            Abc_NtkForEachNode1( pNtkTopoed, pObj, ni ){  
+                mappingID = Abc_ObjMapNtkId(pObj);
+                fPhase =  Abc_ObjMapNtkPhase(pObj);
+                gateDelay = Abc_ObjMapNtkTime(pObj);
+                pNodeMap = p->vMapObjs->pArray[mappingID];
+                // printf("%d, %d\n",  mappingID, (int)pNodeMap->nRefs); 
+                fprintf(fp, "%d, %d\n",  mappingID, (int)pNodeMap->nRefs);
+            }
+            fclose(fp);
         } 
-       
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1973,7 +2034,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     Map_MappingSetRefs( p );
     p->AreaFinal = Map_MappingGetArea( p );
     //////////////////////////////////////////////////////////////////////
- 
+    
+    
 
      
     // print the arrival times of the latest outputs
@@ -2034,24 +2096,39 @@ void  Map_MappingGradient(Map_Man_t * p,  Map_Cut_t *pCut,  Map_Super_t *pSuper,
     // return grad;
 }
 
-void  Map_MappingUpdateTauRef(Map_Man_t * p, Map_Node_t *pNode, Map_Cut_t *pCut, Map_Super_t *pSuper, int fPhase, double gateDelay, double * grad, double *gatePara){ 
+int  Map_MappingUpdateTauRef(Map_Man_t * p, Map_Node_t *pNode, Map_Cut_t *pCut, Map_Super_t *pSuper, int fPhase, double gateDelay, double * grad, double *gatePara){ 
     int max_iterations = 3;
-    double lr = 0.05;
-    double tolerance = 3; 
+    double lr = 0.08;
+    double tolerance = 40; 
     int pi = gatePara[0];
 
     double cutDelay = Map_MappingEstCutDelay(p, pCut, pNode, fPhase, pi, gatePara);
-    double gradDirection = cutDelay - gateDelay > tolerance  ? 1 : - 1;  // TODO:
+    double gradDirection = 0;
+    if (cutDelay - gateDelay > tolerance) { 
+        gradDirection = 1;
+    } else if ( cutDelay - gateDelay < -1* tolerance ) { 
+        gradDirection = -1;
+    } else {
+        return 0;
+    }
+    // double gradDirection = cutDelay - gateDelay > tolerance  ? 1 : - 1;  // TODO:
 
-   
+//    double pNodeNRefEst0 = pNode->nRefEst[0];
+//    double pNodeNRefEst1 = pNode->nRefEst[1];
+//    double pNodeNRefEst2 = pNode->nRefEst[2];
+//     double ppLeafNRefEst0 = pCut->ppLeaves[pi]->nRefEst[0];
+//     double ppLeafNRefEst1 = pCut->ppLeaves[pi]->nRefEst[1];
+//     double ppLeafNRefEst2 = pCut->ppLeaves[pi]->nRefEst[2];
+
     for (int iteration = 0; iteration < max_iterations; iteration++) { 
-        pNode->nRefEst[0] = pNode->nRefEst[0] - 2 * lr * gradDirection * grad[3];
+        pNode->nRefEst[0] = pNode->nRefEst[0] - lr * gradDirection * grad[3];
         pNode->nRefEst[1] = pNode->nRefEst[1] - lr * gradDirection * grad[3];
         pNode->nRefEst[2] = pNode->nRefEst[2] - lr * gradDirection * grad[3];  
+        
         pNode->tauRefs[1] = pNode->tauRefs[1] - lr * gradDirection * grad[4];
         pNode->tauRefs[2] = pNode->tauRefs[2] - lr * gradDirection * grad[5];
 
-        pCut->ppLeaves[pi]->nRefEst[0] = pCut->ppLeaves[pi]->nRefEst[0] - 2 * lr * gradDirection * grad[0];
+        pCut->ppLeaves[pi]->nRefEst[0] = pCut->ppLeaves[pi]->nRefEst[0] - lr * gradDirection * grad[0];
         pCut->ppLeaves[pi]->nRefEst[1] = pCut->ppLeaves[pi]->nRefEst[1] - lr * gradDirection * grad[0];
         pCut->ppLeaves[pi]->nRefEst[2] = pCut->ppLeaves[pi]->nRefEst[2] - lr * gradDirection * grad[0];
         pCut->ppLeaves[pi]->tauRefs[1] = pCut->ppLeaves[pi]->tauRefs[1] - lr * gradDirection * grad[1];
@@ -2060,10 +2137,19 @@ void  Map_MappingUpdateTauRef(Map_Man_t * p, Map_Node_t *pNode, Map_Cut_t *pCut,
         cutDelay = Map_MappingEstCutDelay(p, pCut, pNode, fPhase, pi, gatePara);
 
         if (fabs(cutDelay- gateDelay ) < tolerance) {
-            printf("Converged after %d iterations.\n", iteration + 1);
+            // printf("Converged after %d iterations.\n", iteration + 1);
             break;
         }
     }
+    // pNode->nRefEst[0] = pNode->nRefEst[1] = pNode->nRefEst[2] = pNodeNRefEst;
+    // pCut->ppLeaves[pi]->nRefEst[0] = pCut->ppLeaves[pi]->nRefEst[1] = pCut->ppLeaves[pi]->nRefEst[2] = ppLeafNRefEst;
+    // pNode->nRefEst[0] = pNodeNRefEst0;
+    // pNode->nRefEst[1] = pNodeNRefEst1;
+    // pNode->nRefEst[2] = pNodeNRefEst2;
+    // pCut->ppLeaves[pi]->nRefEst[0] = ppLeafNRefEst0;
+    // pCut->ppLeaves[pi]->nRefEst[1] = ppLeafNRefEst1;
+    // pCut->ppLeaves[pi]->nRefEst[2] = ppLeafNRefEst2;
+    return 1; 
 
 }
 
