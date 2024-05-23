@@ -184,7 +184,7 @@ int Map_MatchNodeCut( Map_Man_t * p, Map_Node_t * pNode, Map_Cut_t * pCut, int f
         if ( Counter == 30 )
            break;
         
-        //  printf("max delay: %3.5f, LD: %3.5f, PD: %3.5f \n", pSuper->tDelayMax.Fall, (pSuper->tDelayLDMax.Fall)*2.5, pSuper->tDelayPDMax.Fall);
+        
         
         // go through different phases of the given match and supergate
         pMatch->pSuperBest = pSuper;
@@ -427,7 +427,7 @@ void Map_MappingSetPiArrivalTimes( Map_Man_t * p )
     Mio_Pin_t * pInvPin =  pInvGate ->pPins;
     //double maxInvLD = 2.5 * MAP_MAX(pInvPin->dDelayLDRise, pInvPin->dDelayLDFall);
     // double maxInvPD = 2.5 * MAP_MAX(pInvPin->dDelayPDRise, pInvPin->dDelayPDFall);
-    double maxD0 =0, maxD1 = 0; 
+    
     Map_Node_t * pNode;
     int i;
     for ( i = 0; i < p->nInputs; i++ )
@@ -454,20 +454,14 @@ void Map_MappingSetPiArrivalTimes( Map_Man_t * p )
         // pNode->tArrival[1].Rise += pInvPin->dDelayLDRise * 2.5 * (pNode->nRefs + 0.5 * pNode->tauRefs[1] + 0.2 * pNode->tauRefs[1]) + pInvPin->dDelayPDRise;
         // pNode->tArrival[1].Fall += pInvPin->dDelayLDFall * 2.5 * (pNode->nRefs + 0.5 * pNode->tauRefs[1] + 0.2 * pNode->tauRefs[1]) + pInvPin->dDelayPDFall;
         // pNode->tArrival[1].Worst = MAP_MAX(pNode->tArrival[1].Rise, pNode->tArrival[1].Fall);
-        
-
+         
         // + 0.5 * pNode->tauRefs[1] + 0.2 * pNode->tauRefs[1]
         pNode->tArrival[0].Rise  = pNode->tArrival[1].Fall + pInvPin->dDelayLDRise * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDRise;
         pNode->tArrival[0].Fall  = pNode->tArrival[1].Rise + pInvPin->dDelayLDFall * 2.5 * (sqrt(pNode->nRefs) +1 ) + pInvPin->dDelayPDFall;
         pNode->tArrival[0].Worst = MAP_MAX(pNode->tArrival[0].Rise, pNode->tArrival[0].Fall);
-        if (pNode->tArrival[1].Worst > maxD1) {
-            maxD1 = pNode->tArrival[1].Worst;
-        }
-        if (pNode->tArrival[0].Worst > maxD0) {
-            maxD0 = pNode->tArrival[0].Worst;
-        }
+      
     }
-    printf("max D0: %.3f, max D1: %.3f \n", maxD0, maxD1);
+    
 }
 
 /**function*************************************************************
@@ -775,9 +769,7 @@ int Map_MappingMatches( Map_Man_t * p )
     // printf("\n");
     
     }
-    Extra_ProgressBarStop( pProgress );
-    printf("max delay: %.3f\n", md);
-    // printf("num of mode1, mode2, mode3: %f, %f, %f\n", (p->mode1Num*1.0)/(i*1.0), (p->mode2Num*1.0)/(i*1.0), (p->mode3Num*1.0)/(i*1.0));
+    Extra_ProgressBarStop( pProgress ); 
     return 1;
 }
 
@@ -884,8 +876,7 @@ int Map_MappingMatches2( Map_Man_t * p, double *maxD)
     
     }
   
-    Extra_ProgressBarStop( pProgress );
-    printf("max delay: %.3f\n", *maxD);
+    Extra_ProgressBarStop( pProgress ); 
     return 1;
 }
 
