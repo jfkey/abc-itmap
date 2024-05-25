@@ -38,12 +38,50 @@ MODULES := \
 all: $(PROG)
 default: $(PROG)
 
+# python integration
+PYTHON_EXECUTABLE := $(shell if python3 -c ""; then echo "python3"; else echo "python"; fi)
+PYTHON_VERSION_TESTCODE := "import sys;t='{v[0]}.{v[1]}'.format(v=list(sys.version_info[:2]));print(t)"
+PYTHON_VERSION := $(shell $(PYTHON_EXECUTABLE) -c ""$(PYTHON_VERSION_TESTCODE)"")
+PYTHON_MAJOR_VERSION := $(shell echo $(PYTHON_VERSION) | cut -f1 -d.)
+
+ENABLE_PYTHON_CONFIG_EMBED ?= $(shell $(PYTHON_EXECUTABLE)-config --embed --libs > /dev/null && echo 1)
+ifeq ($(ENABLE_PYTHON_CONFIG_EMBED),1)
+PYTHON_CONFIG := $(PYTHON_EXECUTABLE)-config --embed
+else
+PYTHON_CONFIG := $(PYTHON_EXECUTABLE)-config
+endif
+
+PYTHON_SITE_PACKAGES := $(shell $(PYTHON_EXECUTABLE) -c "import site; print(site.getsitepackages()[-1]);")
+
+
+$(info Using Python executable: $(PYTHON_EXECUTABLE))
+$(info Using Python version: $(PYTHON_VERSION))
+$(info Using Python PYTHON_DESTDIR: $(PYTHON_DESTDIR))
+
+
+
+PYTHON_LDFLAGS_SUPPORTED := $(shell $(PYTHON_CONFIG) --ldflags > /dev/null 2>&1 && echo "yes" || echo "no")
+
+ifeq ($(PYTHON_LDFLAGS_SUPPORTED),yes)
+    PYTHON_CFLAGS := $(shell $(PYTHON_CONFIG) --cflags)
+    PYTHON_LDFLAGS := $(shell $(PYTHON_CONFIG) --ldflags)
+	
+else
+    $(error "Neither python3-config nor python-config supports --ldflags")
+endif
+
+$(info Using Python version: $(PYTHON_VERSION))
+$(info Using Python major version: $(PYTHON_MAJOR_VERSION))
+
+
 ARCHFLAGS_EXE ?= ./arch_flags
 
 $(ARCHFLAGS_EXE) : arch_flags.c
 	$(CC) arch_flags.c -o $(ARCHFLAGS_EXE)
 
 INCLUDES += -I$(ABCSRC)/src
+
+INCLUDES += $(shell $(PYTHON_EXECUTABLE) -c "from distutils.sysconfig import get_python_inc; print('-I' + get_python_inc())")
 
 # Use C99 stdint.h header for platform-dependent types
 ifdef ABC_USE_STDINT_H
@@ -55,8 +93,13 @@ endif
 ARCHFLAGS := $(ARCHFLAGS)
 
 OPTFLAGS  ?= -g -O
+ 
+CFLAGS    += -Wall -Wno-unused-function -Wno-write-strings -Wno-sign-compare $(ARCHFLAGS) $(INCLUDES) $(PYTHON_CFLAGS)
+# LDFLAGS   += $(PYTHON_LDFLAGS)
+# using rpath to link: libpython3.10.so.1.0
+LDFLAGS   += $(PYTHON_LDFLAGS) -Wl,-rpath,$(shell $(PYTHON_CONFIG) --prefix)/lib
 
-CFLAGS    += -Wall -Wno-unused-function -Wno-write-strings -Wno-sign-compare $(ARCHFLAGS)
+
 ifneq ($(findstring arm,$(shell uname -m)),)
 	CFLAGS += -DABC_MEMALIGN=4
 endif
@@ -67,7 +110,6 @@ ifdef ABC_USE_NAMESPACE
   CC := $(CXX)
   $(info $(MSG_PREFIX)Compiling in namespace $(ABC_NAMESPACE))
 endif
-
 # compile CUDD with ABC
 ifndef ABC_USE_NO_CUDD
   CFLAGS += -DABC_USE_CUDD=1
@@ -151,6 +193,13 @@ ifdef ABC_USE_LIBSTDCXX
 endif
 
 $(info $(MSG_PREFIX)Using CFLAGS=$(CFLAGS))
+
+ 
+
+$(info Using CFLAGS=$(CFLAGS))
+
+$(info Using LDFLAGS=$(LDFLAGS))
+
 CXXFLAGS += $(CFLAGS)
 
 SRC  :=
@@ -200,9 +249,8 @@ ifndef ABC_MAKE_NO_DEPS
 -include $(DEP)
 endif
 
-# Actual targets
-
-depend: $(DEP)
+# Actual targets 
+depend: $(DEP) 
 
 clean:
 	@echo "$(MSG_PREFIX)\`\` Cleaning up..."
@@ -232,3 +280,10 @@ cmake_info:
 	@echo SEPARATOR_CXXFLAGS $(CXXFLAGS) SEPARATOR_CXXFLAGS
 	@echo SEPARATOR_LIBS $(LIBS) SEPARATOR_LIBS
 	@echo SEPARATOR_SRC $(SRC) SEPARATOR_SRC
+
+# install_python:
+# 	@echo "Installing Python files to $(PYTHON_SITE_PACKAGES)"
+# 	$(VERBOSE)install -m 644 src/map/mapper/hebo_opt.py $(PYTHON_SITE_PACKAGES)
+ 
+# .PHONY: install_python
+ 
