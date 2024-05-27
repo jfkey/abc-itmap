@@ -53,6 +53,7 @@ SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdlib.h>
 #endif
 
+#include "Python.h"
 #include "base/abc/abc.h"
 #include "mainInt.h"
 #include "base/wlc/wlc.h"
