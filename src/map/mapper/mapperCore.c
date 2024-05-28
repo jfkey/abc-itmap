@@ -478,495 +478,250 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
 
     // sin  Area =     5624.61 ( 77.8 %)   Delay =  2898.05 ps
     // Area =    13472.62 ( 97.6 %)   Delay =  3689.19 ps
-    double para[10] = {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252};
-    for(int i = 0; i < para_size; i++) {
-            p->delayParams[i] = para[i];
-     } 
-
-
-    
-    // sin  Area =     5018.32 ( 80.0 %)   Delay =  2843.28 ps 
-    //  Area =    10747.21 ( 97.4 %)   Delay =  3969.87 ps
-    // para[0]=0.814, para[1]=0.366, para[2]=0.262, para[3]=0.705, para[4]=1.826, para[5]=0.392, para[6]=0.283, para[7]=0.461, para[8]=0.716, para[9]=0.322, 
-    // double para[10] = {0.814, 0.366, 0.262, 0.705, 1.826, 0.392, 0.283, 0.461, 0.716, 0.322};
+    // double para[10] = {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252};
     // for(int i = 0; i < para_size; i++) {
     //         p->delayParams[i] = para[i];
     //  } 
 
-    //////////////////////////////////////////////////////////////////////
-    // compute the minimum-delay mapping
+    double goodPara[3][10] = {
+        {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252},
+        {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0, 0.5},  // Expert Design
+        {0.348, 0.061, 0.017, 0.146, 1.832, 0.411, 0.260, 0.050, 1.954, 0.782} // best result for bar
+    };
+    double curDelay, firstDelay, firstArea, firstLevel;
+    int good_itera_num = 3;
+    double objective, min_Obj = MAP_FLOAT_LARGE;
+    int best_idx = 0;
+    
+  /////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    // init samples using some ``good delay parameters''
+    for (int i = 0; i < good_itera_num; i++ ) {
+        // update the parameters for p->delayParas
+        for (int j = 0; j < para_size; j++)  p->delayParams[j] = goodPara[i][j];
+
+        double estDepth = 0.0; 
+
+        ////////////////////////////////////////////////////////////////////// 
+        clk = Abc_Clock();
+        p->fMappingMode = 0;
+        if ( !Map_MappingMatches2( p, &estDepth) )
+            return 0;
+        p->timeMatch = Abc_Clock() - clk;
+        // compute the references and collect the nodes used in the mapping
+        Map_MappingSetRefs( p ); 
+        ////////////////////////////////////////////////////////////////////// 
+
+        // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
+        extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
+        Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
+        if ( Mio_LibraryHasProfile(pLib) )
+                Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
+        // Map_ManFree( p );
+        if ( pNtkMapped == NULL )
+            return 1;
+
+        if ( pNtk->pExdc )
+            pNtkMapped->pExdc = Abc_NtkDup( pNtk->pExdc );
+        // make sure that everything is okay
+        if ( !Abc_NtkCheck( pNtkMapped ) )
+        {
+            printf( "Abc_NtkMap: The network check has failed.\n" );
+            Abc_NtkDelete( pNtkMapped );
+            return 1;
+        }
+         
+        // 2. execute topo command
+        if ( pNtkMapped == NULL )
+        {
+            Abc_Print( -1, "Empty network.\n" );
+            return 1;
+        }
+        if ( !Abc_NtkIsLogic(pNtkMapped) )
+        {
+            Abc_Print( -1, "This command can only be applied to a logic network.\n" );
+            return 1;
+        }
+        // modify the current network
+        Abc_Ntk_t* pNtkTopoed  = Abc_NtkDupDfs( pNtkMapped );
+        if ( pNtkTopoed == NULL )
+        {
+            Abc_Print( -1, "The command has failed.\n" );
+            return 1;
+        }
+            
+         // 3. perform STA
+        int fShowAll      = 0;
+        int fUseWireLoads = 0;
+        int fPrintPath    = 0;
+        int fDumpStats    = 0;
+        int nTreeCRatio   = 0;
+        if ( !Abc_NtkHasMapping(pNtkTopoed) )
+        {
+            Abc_Print(-1, "The current network is not mapped.\n" );
+            return 1;
+        }
+        if ( !Abc_SclCheckNtk(pNtkTopoed, 0) )
+        {
+            Abc_Print(-1, "The current network is not in a topo order (run \"topo\").\n" );
+            return 1;
+        }
+        if ( Abc_FrameReadLibScl() == NULL )
+        {
+            Abc_Print(-1, "There is no Liberty library available.\n" );
+            return 1;
+        }
+        printf("####    NLDM (%d)", i);
+        extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
+        Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
+        
+        curDelay = pNtkTopoed ->MaxDelay;
+        double estArea = Map_MappingGetArea( p );
+        // double estArea = p->AreaFinal;  
+
+        if ( i == 0) {
+            firstDelay = curDelay; 
+            firstArea = estArea;
+            firstLevel = Abc_NtkLevel(pNtkTopoed);
+        }
+        // double gapDelay = Abc_AbsFloat( estDepth - curDelay)/curDelay;
+        double estLevel = Abc_NtkLevel(pNtkTopoed); 
+        
+        // rec_y[0] = curDelay/firstDelay + estArea/firstArea + (estLevel - firstLevel) * 0.05;
+        objective = curDelay/firstDelay + estArea/firstArea; 
+        printf("####   Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Objective = %.3f \n", i, curDelay, estDepth, estLevel, objective);
+  
+        
+        if (objective < min_Obj) {
+            // record better delay parameters and its results
+            min_Obj = objective;
+            best_idx = i;
+        }
+
+        // 4. clean best matches of the mapped network
+        if (i  <= good_itera_num - 1) {
+            Map_Node_t * pNode;
+            Map_Cut_t * pCut;
+            p->nMatches = 0; 
+            p->nPhases = 0; 
+            for (int j = 0; j < p->vMapObjs->nSize; j++ ) { 
+                pNode = p->vMapObjs->pArray[j];
+
+                pNode->nRefAct[0] = pNode->nRefAct[1] = pNode->nRefAct[2] = 0;
+                pNode->nRefEst[0] = pNode->nRefEst[1] = pNode->nRefEst[2] = 0;
+                
+                if ( Map_NodeIsBuf(pNode) )
+                {
+                    assert( pNode->p2 == NULL );
+                    pNode->tArrival[0] = Map_Regular(pNode->p1)->tArrival[ Map_IsComplement(pNode->p1)];
+                    pNode->tArrival[1] = Map_Regular(pNode->p1)->tArrival[!Map_IsComplement(pNode->p1)];
+                    continue;
+                }
+
+                // skip primary inputs and secondary nodes if mapping with choices
+                if ( !Map_NodeIsAnd( pNode ) || pNode->pRepr )
+                    continue;
+
+                // make sure that at least one non-trival cut is present
+                if ( pNode->pCuts->pNext == NULL )
+                {
+                    // Extra_ProgressBarStop( pProgress );
+                    printf( "\nError: A node in the mapping graph does not have feasible cuts.\n" );
+                    return 0;
+                }
+                pNode->pCutBest[0] = NULL;
+                pNode->pCutBest[1] = NULL; 
+ 
+                pNode->tArrival[0].Rise = 0.0;
+                pNode->tArrival[0].Fall = 0.0;
+                pNode->tArrival[0].Worst = 0.0; 
+                pNode->tArrival[1].Rise = 0.0;
+                pNode->tArrival[1].Fall = 0.0;
+                pNode->tArrival[1].Worst = 0.0; 
+
+                pNode->tRequired[0].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Fall = MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Worst =  MAP_FLOAT_LARGE; 
+                pNode->tRequired[1].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Fall =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Worst =  MAP_FLOAT_LARGE;
+
+                  
+                for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext ) { 
+                    Map_Match_t * pMatch =  pCut->M + 0;
+                    if (pMatch->pSuperBest) {
+                        pMatch->pSuperBest = NULL; 
+                    }
+                    pMatch->tArrive.Rise = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
+                    pMatch->AreaFlow = MAP_FLOAT_LARGE;
+                    pMatch->uPhaseBest = 286331153; 
+                    
+                    pMatch =  pCut->M + 1;
+                    if (pMatch->pSuperBest) {
+                        pMatch->pSuperBest = NULL;
+                    }
+                    pMatch->tArrive.Rise = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
+                    pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
+                    pMatch->AreaFlow = MAP_FLOAT_LARGE;
+                    pMatch->uPhaseBest = 286331153; 
+                } 
+            }
+        }  
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    for (int i = 0; i < para_size; i++) p->delayParams[i] = goodPara[best_idx][i];
+     ////////////////////////////////////////////////////////////////////// 
     clk = Abc_Clock();
     p->fMappingMode = 0;
-    if ( !Map_MappingMatches( p ) )
+    if ( !Map_MappingMatches( p) )
         return 0;
     p->timeMatch = Abc_Clock() - clk;
     // compute the references and collect the nodes used in the mapping
     Map_MappingSetRefs( p );
-    p->AreaBase = Map_MappingGetArea( p );
-    if ( p->fVerbose )
-    {
-        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-                fShowSwitching? "Switch" : "Delay",
-                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
-        ABC_PRT( "Time", p->timeMatch );
-    }
+        
     //////////////////////////////////////////////////////////////////////
 
-    if ( !p->fAreaRecovery )
-    {
-        if ( p->fVerbose )
-            Map_MappingPrintOutputArrivals( p );
-        return 1;
-    }
+    //////////////////////////////////////////////////////////////////////
+    // perform area recovery using area flow 
+    // compute the required times
+    Map_TimeComputeRequiredGlobal( p );
+    // recover area flow
+    p->fMappingMode = 1;
+    Map_MappingMatches( p );
+    // compute the references and collect the nodes used in the mapping
+    Map_MappingSetRefs( p );
+    p->AreaFinal = Map_MappingGetArea( p );
 
+ 
+    //////////////////////////////////////////////////////////////////////
+    // perform area recovery using exact area 
+    // compute the required times
+    Map_TimeComputeRequiredGlobal( p );
+    // recover area
+    p->fMappingMode = 2;
+    Map_MappingMatches( p );
+    // compute the references and collect the nodes used in the mapping
+    Map_MappingSetRefs( p );
+    p->AreaFinal = Map_MappingGetArea( p );
+
+    //////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////////////////////
+    // perform area recovery using exact area
+    // compute the required times
+    Map_TimeComputeRequiredGlobal( p );
+    // recover area
+    p->fMappingMode = 3;
+    Map_MappingMatches( p );
+    // compute the references and collect the nodes used in the mapping
+    Map_MappingSetRefs( p );
+    p->AreaFinal = Map_MappingGetArea( p );
+    //////////////////////////////////////////////////////////////////////
+     
     
-   /* perform STA,  update the load-dependent delay for the cut
-       1. construct the mapped network. (also store the mapped network)
-       2. perform topo
-       3. perfrom STA
-       -> update the delay of  Match_t, Cut_t, or Supergate?
-       4. update the parameter of CUT delay
-   */
 
-   // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
-   extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
-   Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
-   if ( Mio_LibraryHasProfile(pLib) )
-           Mio_LibraryTransferProfile2( (Mio_Library_t *)Abc_FrameReadLibGen(), pLib );
-   // Map_ManFree( p );
-   if ( pNtkMapped == NULL )
-       return 1;
-
-   if ( pNtk->pExdc )
-       pNtkMapped->pExdc = Abc_NtkDup( pNtk->pExdc );
-   // make sure that everything is okay
-   if ( !Abc_NtkCheck( pNtkMapped ) )
-   {
-       printf( "Abc_NtkMap: The network check has failed.\n" );
-       Abc_NtkDelete( pNtkMapped );
-       return 1;
-   }
-
-   /*
-   // print the mapped_network
-   printf("\nReturn mapped Ntk...\n");
-   Abc_Obj_t * pNode;
-   int i1 = 0;
-   Abc_NtkForEachObj(pNtkMapped, pNode, i1 ) {
-       if(Abc_ObjIsCi(pNode)){
-           printf("CI index=(%d), mappingID=(%d) \n", i1, Abc_ObjMapNtkId(pNode));
-       }
-       if (Abc_ObjIsNode(pNode)){
-           printf("Cell index=(%d), mappingID=(%d) \n", i1, Abc_ObjMapNtkId(pNode));
-       }
-       if (Abc_ObjIsCo(pNode)){
-           printf("CO index=(%d), mappingID=(%d) \n", i1, Abc_ObjMapNtkId(pNode));
-       }
-   }
-   */
-
-   // 2. execute topo command
-   if ( pNtkMapped == NULL )
-   {
-       Abc_Print( -1, "Empty network.\n" );
-       return 1;
-   }
-   if ( !Abc_NtkIsLogic(pNtkMapped) )
-   {
-       Abc_Print( -1, "This command can only be applied to a logic network.\n" );
-       return 1;
-   }
-   // modify the current network
-   Abc_Ntk_t* pNtkTopoed  = Abc_NtkDupDfs( pNtkMapped );
-   if ( pNtkTopoed == NULL )
-   {
-       Abc_Print( -1, "The command has failed.\n" );
-       return 1;
-   }
-   // replace the current network
-   // Abc_FrameReplaceCurrentNetwork( pAbc, pNtkRes );
-
-   /*
-   // debug
-   printf("\nReturn the topological ordered Ntk...\n");
-   Abc_Obj_t *pNodej; int j;
-   Abc_NtkForEachObj(pNtkTopoed, pNodej, j ) {
-       if (j < 100 || j > 110) continue;
-       if(Abc_ObjIsCi(pNodej)){
-           printf("node(%d), index(%d), CI\n", Abc_ObjId(pNodej), j);
-       }
-       if (Abc_ObjIsNode(pNodej)){
-           printf("node(%d), index(%d), mapNtkID(%d), mapNtkPhase(%d), Node\n", Abc_ObjId(pNodej) , j, Abc_ObjMapNtkId(pNodej),
-                   Abc_ObjMapNtkPhase(pNodej));
-       }
-       if (Abc_ObjIsCo(pNodej)){
-           printf("node(%d), index(%d), CO\n", Abc_ObjId(pNodej), j);
-       }
-   }
-  */
-
-   // 3. perform STA
-   int fShowAll      = 0;
-   int fUseWireLoads = 0;
-   int fPrintPath    = 0;
-   int fDumpStats    = 0;
-   int nTreeCRatio   = 0;
-   if ( !Abc_NtkHasMapping(pNtkTopoed) )
-   {
-       Abc_Print(-1, "The current network is not mapped.\n" );
-       return 1;
-   }
-   if ( !Abc_SclCheckNtk(pNtkTopoed, 0) )
-   {
-       Abc_Print(-1, "The current network is not in a topo order (run \"topo\").\n" );
-       return 1;
-   }
-   if ( Abc_FrameReadLibScl() == NULL )
-   {
-       Abc_Print(-1, "There is no Liberty library available.\n" );
-       return 1;
-   }
-   extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
-   Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
-
-   // 4. update delay of STA in the the mapping graph (rather the mapped network)
-   Abc_Obj_t * pObj;
-   Map_Node_t * pNodeMap;
-   Map_Cut_t * pCutBest;
-   Map_Super_t *       pSuperBest; 
-   int i,  mappingID, fPhase;
-   float gateDelay;
-   
-   double *grad = malloc(sizeof(double) * MAP_TAO);
-   memset(grad, 0, sizeof(double) * MAP_TAO);
-   int gate_params_size = 6;
-   double *gateParams = malloc(sizeof(double) * gate_params_size);
-   memset(gateParams, 0, sizeof(double) * gate_params_size);
-    int updatedNode = 0; 
-    
-    Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){  
-        mappingID = Abc_ObjMapNtkId(pObj);
-        fPhase =  Abc_ObjMapNtkPhase(pObj);
-        gateDelay = Abc_ObjMapNtkTime(pObj);
-        pNodeMap = p->vMapObjs->pArray[mappingID];
-        // update the tauRef using gradient descent
-        // skip the node that has no cut
-        if ( Map_NodeReadCutBest(pNodeMap, fPhase) == NULL ) 
-            continue; 
-        pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);    
-        pSuperBest = pCutBest->M[fPhase].pSuperBest;
-
-        Map_MappingGradient(p, pCutBest,  pSuperBest, fPhase, grad, gateParams);
-        if (Map_MappingUpdateTauRef(p, pNodeMap, pCutBest, pSuperBest, fPhase, gateDelay, grad, gateParams)) {
-            updatedNode += 1; 
-        }
-        // pNodeMap->tauRefs[1],
-    }
-    printf("Updated nodes(%.3f) \n", (updatedNode*1.0)/i);
-
-   /*
-   Abc_NtkForEachCi( pNtkTopoed, pObj, i ){
-       printf("CI node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
-   }
-   Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){
-       printf("Cell node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
-   }
-   Abc_NtkForEachCo( pNtkTopoed, pObj, i ){
-       printf("Co node id=(%d) MappingID=(%d) Phase(%d) Delay=(%4.4f) \n", Abc_ObjId(pObj), Abc_ObjMapNtkId(pObj), Abc_ObjMapNtkPhase(pObj), Abc_ObjMapNtkTime(pObj));
-   }
-   */
-
-
-//    Abc_NtkForEachNode1( pNtkTopoed, pObj, i ){ 
-//        if (i < 1000 || i > 1030) continue;
-//        mappingID = Abc_ObjMapNtkId(pObj);
-//        fPhase =  Abc_ObjMapNtkPhase(pObj);
-//        gateDelay = Abc_ObjMapNtkTime(pObj);
-//        pNodeMap = p->vMapObjs->pArray[mappingID];
-//        // pNodeMap->bestDelay= gateDelay;
-//        // pNodeMap->delay[fPhase] = gateDelay;
-//     //    int num = Map_NodeReadNum(pNodeMap);
-//     //    printf("%d,",  num);
-//        if ( Map_NodeReadCutBest(pNodeMap, fPhase) != NULL ) {
-//            pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);
-//            pCutBest->delay[fPhase] = gateDelay;
-//            pSuperBest = pCutBest->M[fPhase].pSuperBest;
-//            pRoot = Map_SuperReadRoot(pSuperBest);
- 
-//         //    printf("name(%s), mappingID(%d), phase(%d), delay(%4.4f), ", Mio_GateReadName(pRoot), mappingID, fPhase, gateDelay);
- 
-//            printf("%24s, ",             Mio_GateReadName(pRoot));
-//            printf("%4d, ",              mappingID );
-            
-//            printf("%4d, ",              fPhase );
-//            printf("%4.2f, ",            gateDelay);
-//            Abc_Obj_t * pObj2;
-//            int k = 0;
-//            int maxFaninDegree = 0;
-//            Abc_ObjForEachFanin( pObj, pObj2, k ) {
-//                if (maxFaninDegree < Abc_ObjFanoutNum(pObj2))
-//                    maxFaninDegree = Abc_ObjFanoutNum(pObj2);
-//            }
-//            printf( "%4d, ",             maxFaninDegree);
-//            printf( "%4d, ",             Abc_ObjFanoutNum(pObj) );
-//            printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayLDMax.Rise, pSuperBest->tDelayLDMax.Fall));
-//            printf("%6.2f, ",            Abc_MaxFloat(pSuperBest->tDelayPDMax.Rise, pSuperBest->tDelayPDMax.Fall));
-//            printf("\n"); 
-//        } else {
-           
-//            // inveter
-//            Mio_Gate_t * inveter =  (Mio_Gate_t *)pObj->pData; 
-//            printf("%24s, ",               Mio_GateReadName(inveter));
-//            printf("%4d, ",              mappingID ); 
-//            printf("%4d, ",              fPhase );
-//            printf("%6.2f, ",            gateDelay);
-//            Abc_Obj_t * pObj2;
-//            int k = 0;
-//            int maxFaninDegree = 0;
-//            Abc_ObjForEachFanin( pObj, pObj2, k ) {
-//                if (maxFaninDegree < Abc_ObjFanoutNum(pObj2))
-//                    maxFaninDegree = Abc_ObjFanoutNum(pObj2);
-//            }
-//            printf( "%4d, ",             maxFaninDegree);
-//            printf( "%4d, ",             Abc_ObjFanoutNum(pObj) );
-
-//            printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayLDRise, inveter->pPins->dDelayLDFall));
-//            printf("%6.2f, ",            Abc_MaxFloat(inveter->pPins->dDelayPDRise, inveter->pPins->dDelayPDFall));
-//            printf("\n"); 
-//        }
-//    }
-//    printf("number nodes of topo network(%6d), itera num (%6d) \n", Abc_NtkNodeNum(pNtkTopoed), i);
-   // LD, PD, faninD, D b
-   // 2.4  1.1  -0.01   2.1  -10.9
-   // 2.4 * 2.5 + 1.1 * 7.6 - 0.01*6 + 2.1 * 2 -10.9
-   // 0.7 * LD * ( 0.9 * D + 0.2 * sqrt(faninD)) + 0.6 * PD + 5
-
-
-
-   // 5. update the new delay of the mapped network
-   // print the nRef of the mapping network
-   
-//    printf("the number of fanout of the mapping network \n");
-//    Map_Node_t * pNodeM;
-//    for ( i = 0; i < p->vMapObjs->nSize; i++ )
-//    {
-//        pNodeM = p->vMapObjs->pArray[i];
-//        if ( Map_NodeIsBuf(pNodeM) )
-//            continue;
-//        printf("node(%d),  nRefs(%d), nRefAct(%d, %d), nRefEst(%2.2f, %2.2f) \n", Map_NodeReadNum(pNodeM), pNodeM->nRefs, pNodeM->nRefAct[0], pNodeM->nRefAct[1], pNodeM->nRefEst[0], pNodeM->nRefEst[1]);
-//    }
-   
-//
-//    //////////////////////////////////////////////////////////////////////
-//    // delay-depenpent mapping
-//    clk = Abc_Clock();
-//    p->fMappingMode = 5;
-//    if ( !Map_MappingMatches( p ) )
-//        return 0;
-//    p->timeMatch = Abc_Clock() - clk;
-//    // compute the references and collect the nodes used in the mapping
-//    Map_MappingSetRefs( p );
-//    p->AreaBase = Map_MappingGetArea( p );
-//    if ( p->fVerbose )
-//    {
-//        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-//                fShowSwitching? "Switch" : "Delay",
-//                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-//                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
-//        ABC_PRT( "Time", p->timeMatch );
-//    }
-//    //////////////////////////////////////////////////////////////////////
-//
-//
-//
-//    //////////////////////////////////////////////////////////////////////
-//    // delay-depenpent mapping
-//    clk = Abc_Clock();
-//    p->fMappingMode = 5;
-//    if ( !Map_MappingMatches( p ) )
-//        return 0;
-//    p->timeMatch = Abc_Clock() - clk;
-//    // compute the references and collect the nodes used in the mapping
-//    Map_MappingSetRefs( p );
-//    p->AreaBase = Map_MappingGetArea( p );
-//    if ( p->fVerbose )
-//    {
-//        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-//                fShowSwitching? "Switch" : "Delay",
-//                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-//                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
-//        ABC_PRT( "Time", p->timeMatch );
-//    }
-//    //////////////////////////////////////////////////////////////////////
-//
-//  //////////////////////////////////////////////////////////////////////
-//    // delay-depenpent mapping
-//    clk = Abc_Clock();
-//    p->fMappingMode = 5;
-//    if ( !Map_MappingMatches( p ) )
-//        return 0;
-//    p->timeMatch = Abc_Clock() - clk;
-//    // compute the references and collect the nodes used in the mapping
-//    Map_MappingSetRefs( p );
-//    p->AreaBase = Map_MappingGetArea( p );
-//    if ( p->fVerbose )
-//    {
-//        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-//                fShowSwitching? "Switch" : "Delay",
-//                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-//                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
-//        ABC_PRT( "Time", p->timeMatch );
-//    }
-//    //////////////////////////////////////////////////////////////////////
-//
-//
-//    //////////////////////////////////////////////////////////////////////
-//    // delay-depenpent mapping
-//    clk = Abc_Clock();
-//    p->fMappingMode = 5;
-//    if ( !Map_MappingMatches( p ) )
-//        return 0;
-//    p->timeMatch = Abc_Clock() - clk;
-//    // compute the references and collect the nodes used in the mapping
-//    Map_MappingSetRefs( p );
-//    p->AreaBase = Map_MappingGetArea( p );
-//    if ( p->fVerbose )
-//    {
-//        printf( "Delay    : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-//                fShowSwitching? "Switch" : "Delay",
-//                fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-//                Map_MappingGetAreaFlow(p), p->AreaBase, 0.0 );
-//        ABC_PRT( "Time", p->timeMatch );
-//    }
-//    //////////////////////////////////////////////////////////////////////
-
-
- 
-    //////////////////////////////////////////////////////////////////////
-
-    // perform area recovery using area flow
-    clk = Abc_Clock();
-    if ( fUseAreaFlow )
-    {
-        // compute the required times
-        Map_TimeComputeRequiredGlobal( p );
-        // recover area flow
-        p->fMappingMode = 1;
-        Map_MappingMatches( p );
-        // compute the references and collect the nodes used in the mapping
-        Map_MappingSetRefs( p );
-        p->AreaFinal = Map_MappingGetArea( p );
-        if ( p->fVerbose )
-        {
-            printf( "AreaFlow : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-                    fShowSwitching? "Switch" : "Delay",
-                    fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-                    Map_MappingGetAreaFlow(p), p->AreaFinal,
-                    100.0*(p->AreaBase-p->AreaFinal)/p->AreaBase );
-            ABC_PRT( "Time", Abc_Clock() - clk );
-        }
-    }
-    p->timeArea += Abc_Clock() - clk;
-    //////////////////////////////////////////////////////////////////////
- 
-    //////////////////////////////////////////////////////////////////////
-    // perform area recovery using exact area
-    clk = Abc_Clock();
-    if ( fUseExactArea )
-    {
-        // compute the required times
-        Map_TimeComputeRequiredGlobal( p );
-        // recover area
-        p->fMappingMode = 2;
-        Map_MappingMatches( p );
-        // compute the references and collect the nodes used in the mapping
-        Map_MappingSetRefs( p );
-        p->AreaFinal = Map_MappingGetArea( p );
-        if ( p->fVerbose )
-        {
-            printf( "Area     : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-                    fShowSwitching? "Switch" : "Delay",
-                    fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-                    0.0, p->AreaFinal,
-                    100.0*(p->AreaBase-p->AreaFinal)/p->AreaBase );
-            ABC_PRT( "Time", Abc_Clock() - clk );
-        }
-    }
-    p->timeArea += Abc_Clock() - clk;
-    //////////////////////////////////////////////////////////////////////
- 
-    //////////////////////////////////////////////////////////////////////
-    // perform area recovery using exact area
-    clk = Abc_Clock();
-    if ( fUseExactAreaWithPhase )
-    {
-        // compute the required times
-        Map_TimeComputeRequiredGlobal( p );
-        // recover area
-        p->fMappingMode = 3;
-        Map_MappingMatches( p );
-        // compute the references and collect the nodes used in the mapping
-        Map_MappingSetRefs( p );
-        p->AreaFinal = Map_MappingGetArea( p );
-        if ( p->fVerbose )
-        {
-            printf( "Area     : %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-                    fShowSwitching? "Switch" : "Delay",
-                    fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-                    0.0, p->AreaFinal,
-                    100.0*(p->AreaBase-p->AreaFinal)/p->AreaBase );
-            ABC_PRT( "Time", Abc_Clock() - clk );
-        }
-    }
-    p->timeArea += Abc_Clock() - clk;
-    //////////////////////////////////////////////////////////////////////
-
-    //////////////////////////////////////////////////////////////////////
-    // perform area recovery using exact area
-    clk = Abc_Clock();
-    if ( p->fSwitching )
-    {
-        // compute the required times
-        Map_TimeComputeRequiredGlobal( p );
-        // recover switching activity
-        p->fMappingMode = 4;
-        Map_MappingMatches( p );
-        // compute the references and collect the nodes used in the mapping
-        Map_MappingSetRefs( p );
-        p->AreaFinal = Map_MappingGetArea( p );
-        if ( p->fVerbose )
-        {
-            printf( "Switching: %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-                    fShowSwitching? "Switch" : "Delay",
-                    fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-                    0.0, p->AreaFinal,
-                    100.0*(p->AreaBase-p->AreaFinal)/p->AreaBase );
-            ABC_PRT( "Time", Abc_Clock() - clk );
-        }
-
-        // compute the required times
-        Map_TimeComputeRequiredGlobal( p );
-        // recover switching activity
-        p->fMappingMode = 4;
-        Map_MappingMatches( p );
-        // compute the references and collect the nodes used in the mapping
-        Map_MappingSetRefs( p );
-        p->AreaFinal = Map_MappingGetArea( p );
-        if ( p->fVerbose )
-        {
-            printf( "Switching: %s = %8.2f  Flow = %11.1f  Area = %11.1f  %4.1f %%   ",
-                    fShowSwitching? "Switch" : "Delay",
-                    fShowSwitching? Map_MappingGetSwitching(p) : p->fRequiredGlo,
-                    0.0, p->AreaFinal,
-                    100.0*(p->AreaBase-p->AreaFinal)/p->AreaBase );
-            ABC_PRT( "Time", Abc_Clock() - clk );
-        }
-    }
-    p->timeArea += Abc_Clock() - clk;
-    //////////////////////////////////////////////////////////////////////
- 
- 
 
     // print the arrival times of the latest outputs
     if ( p->fVerbose )
@@ -1281,7 +1036,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     int fUseAreaFlow           = 1;
     int fUseExactArea          = !p->fSwitching;
     int fUseExactAreaWithPhase = !p->fSwitching;
-    abctime clk;
+    abctime clk, clk2, clkInitPy, clkIterExp, clkIterBayes, clkDeterPara, clkGradient, clkAreaRecovery;
 
     //////////////////////////////////////////////////////////////////////
     // perform pre-mapping computations
@@ -1321,6 +1076,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     memset(rec_x, 0, para_size * sizeof(double));
     memset(rec_y, 0, rec_y_size * sizeof(double));
 
+    clk = Abc_Clock();
     // parameters for recording the best results
     ItResults* itRes = (ItResults*)malloc((itera_num+ good_itera_num) * sizeof(ItResults));
     double min_Y = MAP_FLOAT_LARGE;
@@ -1340,14 +1096,14 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     if (!pModule) {
         printf("can't find hebo_opt.py\n");
         Py_Finalize();
-        return;
+        return 1;
     } 
     pFuncInit = PyObject_GetAttrString(pModule, "init_opt");
     if (!pFuncInit) {
         printf("can't find function init_opt\n");
         Py_DECREF(pModule);
         Py_Finalize();
-        return;
+        return 1;
     }
     pFuncIterate = PyObject_GetAttrString(pModule, "iterate_opt");
     if (!pFuncIterate) {
@@ -1355,7 +1111,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         Py_DECREF(pFuncInit);
         Py_DECREF(pModule);
         Py_Finalize();
-        return;
+        return 1;
     }
 
     PyObject* pOpt = PyObject_CallObject(pFuncInit, NULL);
@@ -1365,9 +1121,11 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         Py_DECREF(pFuncInit);
         Py_DECREF(pModule);
         Py_Finalize();
-        return;
+        return 1;
     }
+    clkInitPy = Abc_Clock() - clk;
     
+    clk = Abc_Clock();
     /////////////////////////////////////////////////////////////////////////////////////////////////////// 
     // init samples using some ``good delay parameters''
     for (int i = 0; i < good_itera_num; i++ ) {
@@ -1636,7 +1394,9 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    clkIterExp = Abc_Clock() - clk;
 
+    clk = Abc_Clock();
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     memset(rec_x, 0, para_size * sizeof(double));
     memset(rec_y, 0, rec_y_size * sizeof(double));
@@ -1644,7 +1404,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     for (int i = 0; i <  itera_num; i ++ ) {
         // create args for iterate_opt: 
         // def iterate_opt(opt, i_iter,  given_rec_x : List[float], given_rec_y : List[float]):
-
+        clk2 = Abc_Clock();
         // 1. the first one: opt
         PyObject* pArgs = PyTuple_New(4);
         PyTuple_SetItem(pArgs, 0, pOpt);  
@@ -1706,6 +1466,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         // update the parameters for p->delayParas
         for (int j = 0; j < para_size; j++) p->delayParams[j] = rec_x[j];
         
+        clkDeterPara += Abc_Clock() - clk2;
+
         double estDepth = 0.0; 
 
         ////////////////////////////////////////////////////////////////////// 
@@ -1843,6 +1605,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         itRes[i+good_itera_num].rec_x = tmpParas;
         itRes[i+good_itera_num].rec_y = rec_y[0];
 
+        clk2 = Abc_Clock();
         if (itRes[i+good_itera_num].rec_y < min_Y) {
             min_Y = itRes[i+good_itera_num].rec_y;
             min_rec_x = itRes[i+good_itera_num].rec_x;
@@ -1885,6 +1648,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             free(grad);
             free(gateParams);
         }
+        clkGradient += Abc_Clock() - clk2;
 
         // 4. clean best matches of the mapped network
         if (i  <= itera_num - 1) {
@@ -1960,6 +1724,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         } 
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
+    clkIterBayes = Abc_Clock() - clk;
 
     // set parameters for the best iteration
 
@@ -1970,7 +1735,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     }
     printf("\n");
 
-        
+    clk = Abc_Clock();
     ////////////////////////////////////////////////////////////////////// 
     clk = Abc_Clock();
     p->fMappingMode = 0;
@@ -2018,13 +1783,22 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     Map_MappingSetRefs( p );
     p->AreaFinal = Map_MappingGetArea( p );
     //////////////////////////////////////////////////////////////////////
-    
+    clkAreaRecovery = Abc_Clock() - clk;
     
 
      
     // print the arrival times of the latest outputs
-    if ( p->fVerbose )
+    if ( p->fVerbose ){
         Map_MappingPrintOutputArrivals( p );
+        ABC_PRT("Runtime for init Python", clkInitPy);
+        ABC_PRT("Runtime for iter expert parameters", clkIterExp);
+        // ABC_PRT("Runtime for determining parameters", clkDeterPara);
+        Abc_Print( 1, "Runtime for determining parameters = %.1f sec ",   1.0*clkDeterPara/CLOCKS_PER_SEC  );
+        ABC_PRT("Runtime for iter bayesian opt", clkIterBayes); 
+        Abc_Print( 1, "Runtime for local gradient = %.1f sec ",   1.0*clkGradient/CLOCKS_PER_SEC  );
+        ABC_PRT("Runtime for area recovery", clkAreaRecovery);
+    }
+        
     return 1;
 
 

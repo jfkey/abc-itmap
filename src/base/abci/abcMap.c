@@ -252,7 +252,7 @@ void call_python(){
   SeeAlso     []
 
 ***********************************************************************/
-Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, double DelayMulti, float LogFan, float Slew, float Gain, int nGatesMin, int fRecovery, int fSwitching, int fSkipFanout, int fUseProfile, int fUseBuffs, int fVerbose )
+Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, double DelayMulti, float LogFan, float Slew, float Gain, int nGatesMin, int fRecovery, int fSwitching, int fSkipFanout, int fUseProfile, int fUseBuffs, int fVerbose, int usingExp )
 {   
     // test_bayes2();
     // call_python(); 
@@ -336,7 +336,13 @@ Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, 
     // perform the mapping
     pMan = Abc_NtkToMap( pNtk, DelayTarget, fRecovery, pSwitching, fVerbose );
     // update tau-order fanouts for the mapped network
-    Abc_NtkTauRefs(pMan, pNtk);
+    abctime clkRauRef = Abc_Clock();
+    Abc_NtkTauRefs(pMan, pNtk); 
+    if ( fVerbose )
+    {
+        printf("Computing %d-order fanouts: ", MAP_TAO);
+        ABC_PRT( "Time", Abc_Clock() - clkRauRef ); 
+    }
 
     // // update 
     // int i;
@@ -363,12 +369,18 @@ clk = Abc_Clock();
 
     // if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
-    // if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
-    if ( !Map_MappingHeboIt( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs))
-    {
-        Map_ManFree( pMan );
-        return NULL;
+    if (usingExp){
+        if ( !Map_MappingSTA( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs)){
+            Map_ManFree( pMan );
+            return NULL;
+        }
+    } else {
+        if ( !Map_MappingHeboIt( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs)){
+            Map_ManFree( pMan );
+            return NULL;
+        }
     }
+     
     
 //    Map_ManPrintStatsToFile( pNtk->pSpec, Map_ManReadAreaFinal(pMan), Map_ManReadRequiredGlo(pMan), Abc_Clock()-clk );
 
