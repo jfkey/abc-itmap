@@ -336,7 +336,8 @@ Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, 
     // perform the mapping
     pMan = Abc_NtkToMap( pNtk, DelayTarget, fRecovery, pSwitching, fVerbose );
     // update tau-order fanouts for the mapped network
-    abctime clkRauRef = Abc_Clock();
+    abctime clkRauRef;
+    clkRauRef = Abc_Clock();
     Abc_NtkTauRefs(pMan, pNtk); 
     if ( fVerbose )
     {

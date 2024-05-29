@@ -11,8 +11,8 @@ def obj(params : pd.DataFrame) -> np.ndarray:
     return ((params.values - 0.50)**2).sum(axis = 1).reshape(-1, 1)
 
 def init_opt():
-    # np.random.seed(42)
-    # torch.manual_seed(42)
+    np.random.seed(42)
+    torch.manual_seed(42)
     params = [
         {'name' : 'delay_para0', 'type' : 'num', 'lb' : 0.0, 'ub' : 1.0},
         {'name' : 'delay_para1', 'type' : 'num', 'lb' : 0.0, 'ub' : 0.5},
