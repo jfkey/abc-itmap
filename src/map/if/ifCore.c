@@ -113,9 +113,10 @@ int If_ManPerformMappingComb( If_Man_t * p )
     If_ManForEachCi( p, pObj, i )
     {
         If_ObjSetArrTime( pObj, p->pPars->pTimesArr ? p->pPars->pTimesArr[i] : (float)0.0 );
-        pObj->EstRefs = (float)1.0;
+        // pObj->EstRefs = (float)1.0 + 0.5 * pObj->tauRefs[0] + 0.25 * pObj->tauRefs[1] + 0.125 * pObj->tauRefs[2];
+        pObj->EstRefs = 0.5  +  0.5 * pObj->tauRefs[0] + 0.2 * pObj->tauRefs[1] + 0.1 * pObj->tauRefs[2];
     }
-
+ 
     // delay oriented mapping
     if ( p->pPars->fPreprocess && !p->pPars->fArea )
     {

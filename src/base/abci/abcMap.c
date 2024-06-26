@@ -368,6 +368,11 @@ clk = Abc_Clock();
     if ( LogFan != 0 )
         Map_ManCreateNodeDelays( pMan, LogFan );
 
+    if ( fVerbose )
+    {
+    ABC_PRT( "Other running time:", Abc_Clock() - clkTotal );
+    }
+
     // if ( !Map_Mapping( pMan ) )
     // using the delay in STA to guide the mapping.
     if (usingExp){

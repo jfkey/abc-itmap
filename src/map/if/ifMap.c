@@ -173,10 +173,34 @@ void If_ObjPerformMappingAnd( If_Man_t * p, If_Obj_t * pObj, int Mode, int fPrep
     assert( !If_ObjIsAnd(pObj->pFanin1) || pObj->pFanin1->pCutSet->nCuts > 0 );
 
     // prepare
-    if ( Mode == 0 )
-        pObj->EstRefs = (float)pObj->nRefs;
-    else if ( Mode == 1 )
-        pObj->EstRefs = (float)((2.0 * pObj->EstRefs + pObj->nRefs) / 3.0);
+    // if ( Mode == 0 )
+    //     pObj->EstRefs = (float)pObj->nRefs;
+    // else if ( Mode == 1 )
+    //     pObj->EstRefs = (float)((2.0 * pObj->EstRefs + pObj->nRefs) / 3.0);
+    if (fFirst) {
+        float estRef = 0, epsion = 1;
+        if (pObj->tauRefs != NULL){
+            for (int j = 0; j < IF_MAX_TAU; j++){
+                estRef += epsion * (float) pObj->tauRefs[j];
+                epsion = 0.3 * epsion;
+            } 
+        } else{
+            estRef = (float)pObj->nRefs;
+        }
+        
+        if ( Mode == 0 )
+            pObj->EstRefs = estRef;
+        else if ( Mode == 1 )
+            pObj->EstRefs = (float)((1.5 * pObj->EstRefs + 1.5* pObj->nRefs) / 3.0);
+
+    } else {
+        if ( Mode == 0 )
+        pObj->EstRefs = 0.5 * (float)pObj->nRefs + 0.5 * pObj->EstRefs;
+        else if ( Mode == 1 )
+        pObj->EstRefs = (float)((1.5 * pObj->EstRefs + 1.5 * pObj->nRefs) / 3.0);
+    }
+   
+
     // deref the selected cut
     if ( Mode && pObj->nRefs > 0 )
         If_CutAreaDeref( p, If_ObjCutBest(pObj) );

@@ -40,6 +40,7 @@ static Vec_Ptr_t * Abc_NtkFindGoodOrder( Abc_Ntk_t * pNtk );
 
 extern void Abc_NtkBddReorder( Abc_Ntk_t * pNtk, int fVerbose );
 extern void Abc_NtkBidecResyn( Abc_Ntk_t * pNtk, int fVerbose );
+extern void Abc_NtkIfTauRefs(If_Man_t * pIfMan, Abc_Ntk_t *pNtk); 
  
 ////////////////////////////////////////////////////////////////////////
 ///                     FUNCTION DEFINITIONS                         ///
@@ -91,6 +92,63 @@ void If_ManComputeSwitching( If_Man_t * pIfMan )
     Gia_ManStop( pNew );
     if ( pIfMan->pPars->fVerbose )
         Abc_PrintTime( 1, "Computing switching activity", Abc_Clock() - clk );
+}
+
+
+void Abc_NtkIfTauRefs( If_Man_t * pIfMan, Abc_Ntk_t *pNtk ){
+// Vec_Ptr_t * vNodes; // Map_TaoRefs_t
+    Abc_Obj_t *pNode;
+    int i, j, order;
+    // vNodes = Abc_AigDfs( pNtk, 0, 1); 
+    int **tauRefsArr = malloc(sizeof(int*) *  Abc_NtkObjNumMax(pNtk));
+    for (i = 0; i < Abc_NtkObjNumMax(pNtk); i++) {
+        tauRefsArr[i] = calloc(IF_MAX_TAU, sizeof(int));
+    }
+              
+     
+    // init  1-order fanouts
+    Abc_NtkForEachObj(pNtk, pNode, i) {
+        int nodeId = Abc_ObjId(pNode);
+        if (Abc_ObjIsCo(pNode)) { 
+            for (order = 0; order < IF_MAX_TAU; order ++){
+                tauRefsArr[nodeId][order] = 0;
+            } 
+        }
+        else {
+            tauRefsArr[nodeId][0] = Abc_ObjFanoutNum(pNode); 
+        } 
+    }
+    
+    // compute k-order fanouts
+    for (order = 1; order < IF_MAX_TAU; order++) {
+        Abc_NtkForEachObj( pNtk, pNode, i ){
+            int nodeId = Abc_ObjId(pNode);
+            Abc_Obj_t *pFanout;
+            Abc_ObjForEachFanout(pNode, pFanout, j) {
+                int fanoutId = Abc_ObjId(pFanout); 
+                tauRefsArr[nodeId][order] += tauRefsArr[fanoutId][order -1];
+            }
+        }
+    }
+ 
+    // update the k-order fanout for Mapped network 
+    Abc_NtkForEachObj( pNtk,  pNode, i ){ 
+        If_Obj_t * pNodeMap = (If_Obj_t *)pNode->pCopy; 
+        
+        if (pNodeMap != NULL){ 
+            memcpy(pNodeMap->tauRefs, tauRefsArr[Abc_ObjId(pNode)], sizeof(int) * IF_MAX_TAU); 
+            // if (tauRefsArr[Abc_ObjId(pNode)][0]>10) {
+            //     printf("Node %d: ", pNodeMap->Id);
+            //     for (order = 0; order <  IF_MAX_TAU; order++) {
+            //         printf("%d-order degree: %d, ", order, pNodeMap->tauRefs[order]);
+            //     }
+            //     printf("\n");
+            // }
+        } 
+        free(tauRefsArr[i]);
+    }
+    free(tauRefsArr); 
+            
 }
 
 /**Function*************************************************************
@@ -160,7 +218,8 @@ Abc_Ntk_t * Abc_NtkIf( Abc_Ntk_t * pNtk, If_Par_t * pPars )
         if ( pPars->fDsdBalance )
             If_DsdManAllocIsops( pIfMan->pIfDsdMan, pPars->nLutSize );
     }
-
+    // compute tau order fanouts tiers for each nodes  
+    Abc_NtkIfTauRefs(pIfMan, pNtk); 
     // perform FPGA mapping
     if ( !If_ManPerformMapping( pIfMan ) )
     {

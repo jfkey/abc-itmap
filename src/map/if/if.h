@@ -59,6 +59,8 @@ ABC_NAMESPACE_HEADER_START
 
 #define IF_BIG_CHAR ((char)120)
 
+#define IF_MAX_TAU 4
+
 // object types
 typedef enum { 
     IF_NONE,     // 0: non-existent object
@@ -289,7 +291,7 @@ struct If_Man_t_
     void **            pHashTable[2];    // hash table bins
     Mem_Fixed_t *      pMemEntries;      // memory manager for hash table entries
     // statistics 
-//    abctime                timeTruth;
+//    abctime                timeTruth; 
 };
 
 // priority cut
@@ -350,9 +352,11 @@ struct If_Obj_t_
     void *             pCopy;         // used for object duplication
     int                iCopy;
     };
-    
+  
     If_Set_t *         pCutSet;       // the pointer to the cutset
     If_Cut_t           CutBest;       // the best cut selected 
+
+    int                 tauRefs[IF_MAX_TAU]; // tau order fanout tiers 
 };
 
 typedef struct If_Box_t_ If_Box_t;

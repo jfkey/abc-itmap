@@ -1037,8 +1037,9 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     int fUseExactArea          = !p->fSwitching;
     int fUseExactAreaWithPhase = !p->fSwitching;
     abctime clk, clk2;
-    abctime clkInitPy = 0, clkIterExp = 0, clkIterBayes = 0, clkDeterPara = 0, clkGradient = 0, clkAreaRecovery = 0;
+    abctime clkInitPy = 0, clkIterExp = 0, clkIterBayes = 0, clkDeterPara = 0, clkGradient = 0, clkAreaRecovery = 0, clkDelayMap = 0, clkmapTT = 0, clkSTA = 0 ;
 
+    clk = Abc_Clock();
     //////////////////////////////////////////////////////////////////////
     // perform pre-mapping computations
     if ( p->fVerbose )
@@ -1055,6 +1056,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     Map_MappingTruths( p );
     p->timeTruth = Abc_Clock() - clk;
     //////////////////////////////////////////////////////////////////////
+    clkmapTT = Abc_Clock() - clk;
       
     // parameters for iteration 
     int itera_num = 10;
@@ -1190,7 +1192,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         p->AreaFinal = Map_MappingGetArea( p );
         //////////////////////////////////////////////////////////////////////
         */
-
+        clk = Abc_Clock();
         // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
         extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
         Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
@@ -1354,7 +1356,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             }
         } 
  
-
+        clkSTA += Abc_Clock() - clk;
         // create args for iterate_opt: 
         // def iterate_opt(opt, i_iter,  given_rec_x : List[float], given_rec_y : List[float]):
 
@@ -1486,7 +1488,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         p->timeMatch = Abc_Clock() - clk;
         // compute the references and collect the nodes used in the mapping
         Map_MappingSetRefs( p );
-         
+        clkDelayMap += Abc_Clock() - clk;
         //////////////////////////////////////////////////////////////////////
 
         /* area oriented mapping. 
@@ -1527,7 +1529,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         p->AreaFinal = Map_MappingGetArea( p );
         //////////////////////////////////////////////////////////////////////
         */
-
+        abctime clk_t2 = Abc_Clock();
         // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
         extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
         Abc_Ntk_t* pNtkMapped = Abc_NtkFromMap(p, pNtk, fUseBuffs || (DelayTarget == (double)ABC_INFINITY) );
@@ -1730,6 +1732,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                 } 
             }
         } 
+        clkSTA += Abc_Clock() - clk_t2;
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     clkIterBayes = Abc_Clock() - clk;
@@ -1805,6 +1808,9 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         ABC_PRT("Runtime for iter bayesian opt", clkIterBayes); 
         Abc_Print( 1, "Runtime for local gradient = %.1f sec ",   1.0*clkGradient/CLOCKS_PER_SEC  );
         ABC_PRT("Runtime for area recovery", clkAreaRecovery);
+        ABC_PRT("Runtime for delay oriented mapping", clkDelayMap);
+        ABC_PRT("Runtime for mapping TT", clkmapTT);
+        Abc_Print( 1, "Update graph and STA= %.1f sec ",   1.0*clkSTA/CLOCKS_PER_SEC  );
     }
         
     return 1;
