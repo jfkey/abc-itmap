@@ -9,10 +9,7 @@ if len(sys.argv) < 2:
 # The first command-line argument after the script name is the file path
 file_path = sys.argv[1]
 
-# file_path = "20240405020222_arith-RF.log"
-#file_path = "20240405024315_arith-GP.log"
-# file_path = "20240405025210_control-GP.log"
-# file_path = "20240405021205_control-RF.log"
+ 
 
 arrays_arith = ['log2', 'square', 'adder', 'sin', 'div', 'hyp', 'max', 'sqrt', 'multiplier', 'bar']
 arrays_control = ['priority', 'cavlc', 'arbiter', 'i2c', 'voter', 'int2float', 'ctrl', 'dec', 'mem_ctrl', 'router']
@@ -39,14 +36,43 @@ def parseLine(text_data):
     else:
         print("The specified marker 'best para' was not found in the text.")
 
- 
 
+def parseLine(text_data, circuit_name, log_order_id):
+    pass 
+    
+
+def get_cir_name (line):
+    res = 0
+    for cir in arrays_arith:
+        if cir in line: return cir 
+    for cir in arrays_control:
+        if cir in line: return cir 
+    return res      
+ 
 with open(file_path, 'r') as file:
     # Iterate over each line in the file
     for line in file:
-        # Process the line (in this example, we'll just print it)
-        # print(line.strip())  # Using strip() to remove newline characters
-        parseLine(line.strip())
+        firstResults = 1    
+        cir_name = get_cir_name(line)
+        if cir_name == 0: continue 
+        elif firstResults == 1: 
+            parts = line.split("{}:".format(cir_name))
+            if len(parts) != 3:  print("parse the first log line of {} error".format(cir_name))
+            parseLine(parts[1], cir_name, 0)
+            parseLine(parts[2], cir_name, 1)
+            firstResults = 0 
+        else: 
+            parts = line.split("{}:".format(cir_name))
+            if len(parts) != 2:  print("parse the second log line of {} error".format(cir_name))
+            parseLine(parts[1], cir_name, 2)
+
+            firstResults = 1
+            
+
+        elif "for exampel" in line:
+            
+            parseLine(line.strip())
+        
         if (line.find("random_control") != -1):
             type = 'control'
 

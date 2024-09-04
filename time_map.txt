@@ -1,0 +1,300 @@
+ABC command line: "read /home/liujunfeng/benchmarks/arithmetic/div.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map  -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.85 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.01 sec
+Maximum level: Original = 4372. Reduced due to choices = 4372.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes =  57375.  Total 5-feasible cuts =    1305640.  Per node = 22.8. Time =     0.64 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates =  88961[0m (  0.8 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =   144553.34[0m ( 99.2 %)   [1;35mDelay = 71316.37 ps[0m  (  8.9 %)               
+####   Heuristic (0) Delay = 71316.367, Depth = 136856.672, Level = 2230.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates =  88009[0m (  0.4 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =   146227.14[0m ( 99.6 %)   [1;35mDelay = 72684.78 ps[0m  (  9.2 %)               
+####   Heuristic (1) Delay = 72684.781, Depth = 98518.195, Level = 2196.0, Objective = 2.030 
+####    NLDM (2)WireLoad = "none"  [1;33mGates =  98478[0m (  0.2 %)   [1;32mCap =  0.9 ff[0m (  0.0 %)   [1;36mArea =   121072.78[0m ( 99.8 %)   [1;35mDelay = 81428.23 ps[0m  ( 11.4 %)               
+####   Heuristic (2) Delay = 81428.227, Depth = 89925.383, Level = 2189.0, Objective = 1.981 
+####   Parameters(0) [0]=0.998, [1]=0.052, [2]=0.411, [3]=0.419, [4]=1.292, [5]=0.028, [6]=0.228, [7]=0.749, [8]=0.832, [9]=0.618, 
+####  NLDM (0)WireLoad = "none"  [1;33mGates = 102955[0m (  0.1 %)   [1;32mCap =  1.0 ff[0m (  0.0 %)   [1;36mArea =   126123.06[0m ( 99.9 %)   [1;35mDelay =132906.98 ps[0m  ( 10.6 %)               
+####   Bayesian (0) Delay = 132906.984, Depth = 80539.320, Level = 2184.0, Objective = 2.737 
+####   Parameters(1) [0]=0.317, [1]=0.292, [2]=0.143, [3]=0.828, [4]=1.031, [5]=0.361, [6]=0.478, [7]=0.314, [8]=1.630, [9]=0.177, 
+####  NLDM (1)WireLoad = "none"  [1;33mGates =  92844[0m (  5.7 %)   [1;32mCap =  1.1 ff[0m (  1.0 %)   [1;36mArea =   161575.56[0m ( 94.3 %)   [1;35mDelay = 72369.49 ps[0m  (  9.1 %)               
+####   Bayesian (1) Delay = 72369.492, Depth = 153975.891, Level = 2236.0, Objective = 2.132 
+####   Parameters(2) [0]=0.361, [1]=0.047, [2]=0.006, [3]=0.146, [4]=0.869, [5]=0.411, [6]=0.267, [7]=0.132, [8]=1.929, [9]=0.043, 
+####  NLDM (2)WireLoad = "none"  [1;33mGates =  89423[0m (  0.2 %)   [1;32mCap =  1.0 ff[0m (  0.0 %)   [1;36mArea =   125768.24[0m ( 99.8 %)   [1;35mDelay = 74697.23 ps[0m  ( 11.2 %)               
+####   Bayesian (2) Delay = 74697.227, Depth = 109050.633, Level = 2183.0, Objective = 1.918 
+####   Updated node proportion(0.172) 
+####   Parameters(3) [0]=0.337, [1]=0.001, [2]=0.012, [3]=0.545, [4]=0.613, [5]=0.413, [6]=0.366, [7]=0.690, [8]=1.867, [9]=0.010, 
+####  NLDM (3)WireLoad = "none"  [1;33mGates =  89787[0m ( 13.3 %)   [1;32mCap =  1.0 ff[0m (  2.4 %)   [1;36mArea =   151115.05[0m ( 86.7 %)   [1;35mDelay = 72344.37 ps[0m  (  9.5 %)               
+####   Bayesian (3) Delay = 72344.367, Depth = 209976.859, Level = 2271.0, Objective = 2.060 
+####   Parameters(4) [0]=0.195, [1]=0.033, [2]=0.477, [3]=0.061, [4]=1.829, [5]=0.326, [6]=0.273, [7]=0.727, [8]=1.024, [9]=0.067, 
+####  NLDM (4)WireLoad = "none"  [1;33mGates =  85634[0m ( 13.6 %)   [1;32mCap =  1.0 ff[0m (  2.5 %)   [1;36mArea =   148322.45[0m ( 86.4 %)   [1;35mDelay = 72469.31 ps[0m  (  9.3 %)               
+####   Bayesian (4) Delay = 72469.312, Depth = 213457.672, Level = 2275.0, Objective = 2.043 
+####   Parameters(5) [0]=0.348, [1]=0.228, [2]=0.050, [3]=0.193, [4]=0.890, [5]=0.420, [6]=0.061, [7]=0.120, [8]=1.936, [9]=0.946, 
+####  NLDM (5)WireLoad = "none"  [1;33mGates =  97718[0m (  0.2 %)   [1;32mCap =  1.0 ff[0m (  0.0 %)   [1;36mArea =   127542.34[0m ( 99.8 %)   [1;35mDelay = 81648.77 ps[0m  ( 10.2 %)               
+####   Bayesian (5) Delay = 81648.766, Depth = 93686.844, Level = 2190.0, Objective = 2.029 
+####   Parameters(6) [0]=0.668, [1]=0.310, [2]=0.006, [3]=0.499, [4]=0.837, [5]=0.438, [6]=0.380, [7]=0.020, [8]=1.923, [9]=0.031, 
+####  NLDM (6)WireLoad = "none"  [1;33mGates = 104571[0m (  0.1 %)   [1;32mCap =  0.9 ff[0m (  0.0 %)   [1;36mArea =   127167.92[0m ( 99.9 %)   [1;35mDelay =106030.69 ps[0m  ( 11.7 %)               
+####   Bayesian (6) Delay = 106030.688, Depth = 58268.445, Level = 2185.0, Objective = 2.367 
+####   Parameters(7) [0]=0.505, [1]=0.281, [2]=0.001, [3]=0.043, [4]=0.856, [5]=0.041, [6]=0.114, [7]=0.388, [8]=1.942, [9]=0.042, 
+####  NLDM (7)WireLoad = "none"  [1;33mGates =  79160[0m (  0.4 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =   123236.23[0m ( 99.6 %)   [1;35mDelay = 71995.67 ps[0m  (  9.4 %)               
+####   Bayesian (7) Delay = 71995.672, Depth = 112677.562, Level = 2203.0, Objective = 1.862 
+####   Updated node proportion(0.039) 
+####   Parameters(8) [0]=0.286, [1]=0.249, [2]=0.001, [3]=0.025, [4]=0.821, [5]=0.272, [6]=0.110, [7]=0.387, [8]=1.996, [9]=0.037, 
+####  NLDM (8)WireLoad = "none"  [1;33mGates =  88625[0m (  0.9 %)   [1;32mCap =  1.1 ff[0m (  0.2 %)   [1;36mArea =   139568.86[0m ( 99.1 %)   [1;35mDelay = 72818.48 ps[0m  (  8.8 %)               
+####   Bayesian (8) Delay = 72818.484, Depth = 143745.188, Level = 2225.0, Objective = 1.987 
+####   Parameters(9) [0]=0.504, [1]=0.285, [2]=0.001, [3]=0.040, [4]=1.974, [5]=0.150, [6]=0.159, [7]=0.465, [8]=1.989, [9]=0.669, 
+####  NLDM (9)WireLoad = "none"  [1;33mGates =  83029[0m (  0.5 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =   128978.88[0m ( 99.5 %)   [1;35mDelay = 71310.56 ps[0m  (  9.2 %)               
+####   Bayesian (9) Delay = 71310.562, Depth = 170490.641, Level = 2206.0, Objective = 1.892 
+####   Best para[0]=0.505, [1]=0.281, [2]=0.001, [3]=0.043, [4]=0.856, [5]=0.041, [6]=0.114, [7]=0.388, [8]=1.942, [9]=0.042, 
+Output  remainder[0]    : Delay = (114525.63, 114516.69)  NEG
+Output  quotient[0]     : Delay = (114509.01, 114515.02)  NEG
+Output  remainder[5]    : Delay = (114512.40, 114509.62)  NEG
+Output  remainder[1]    : Delay = (114512.05, 114509.27)  NEG
+Output  remainder[2]    : Delay = (114512.05, 114509.27)  NEG
+Runtime for init Python =     2.21 sec
+Runtime for iter expert parameters =     1.14 sec
+Runtime for determining parameters = 17.4 sec Runtime for iter bayesian opt =     1.11 sec
+Runtime for local gradient = 0.0 sec Runtime for area recovery =     5.58 sec
+Total runtime =    41.14 sec
+WireLoad = "none"  [1;33mGates =  45321[0m ( 17.4 %)   [1;32mCap =  0.8 ff[0m (  3.2 %)   [1;36mArea =    50286.54[0m ( 82.6 %)   [1;35mDelay = 62976.88 ps[0m  ( 14.5 %)               
+ABC command line: "read /home/liujunfeng/benchmarks/arithmetic/hyp.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map  -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.95 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.06 sec
+Maximum level: Original = 24801. Reduced due to choices = 24801.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes = 214591.  Total 5-feasible cuts =    5994291.  Per node = 27.9. Time =     3.83 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates = 325595[0m (  0.6 %)   [1;32mCap =  1.3 ff[0m (  0.1 %)   [1;36mArea =   591525.06[0m ( 99.4 %)   [1;35mDelay =359624.19 ps[0m  (  5.0 %)               
+####   Heuristic (0) Delay = 359624.188, Depth = 571549.375, Level = 8686.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates = 309789[0m (  0.1 %)   [1;32mCap =  1.2 ff[0m (  0.0 %)   [1;36mArea =   530478.25[0m ( 99.9 %)   [1;35mDelay =348971.44 ps[0m  (  4.8 %)               
+####   Heuristic (1) Delay = 348971.438, Depth = 405976.969, Level = 8630.0, Objective = 1.867 
+####    NLDM (2)WireLoad = "none"  [1;33mGates = 293274[0m (  2.3 %)   [1;32mCap =  1.0 ff[0m (  0.4 %)   [1;36mArea =   385839.53[0m ( 97.7 %)   [1;35mDelay =353945.19 ps[0m  (  7.9 %)               
+####   Heuristic (2) Delay = 353945.188, Depth = 368772.406, Level = 8679.0, Objective = 1.637 
+####   Parameters(0) [0]=0.998, [1]=0.052, [2]=0.411, [3]=0.419, [4]=1.292, [5]=0.028, [6]=0.228, [7]=0.749, [8]=0.832, [9]=0.618, 
+####  NLDM (0)WireLoad = "none"  [1;33mGates = 282298[0m (  1.3 %)   [1;32mCap =  1.2 ff[0m (  0.2 %)   [1;36mArea =   434154.59[0m ( 98.7 %)   [1;35mDelay =732469.44 ps[0m  (  5.6 %)               
+####   Bayesian (0) Delay = 732469.438, Depth = 314675.281, Level = 8642.0, Objective = 2.771 
+####   Parameters(1) [0]=0.317, [1]=0.292, [2]=0.143, [3]=0.828, [4]=1.031, [5]=0.361, [6]=0.478, [7]=0.314, [8]=1.630, [9]=0.177, 
+####  NLDM (1)WireLoad = "none"  [1;33mGates = 336734[0m (  6.8 %)   [1;32mCap =  1.2 ff[0m (  1.2 %)   [1;36mArea =   625381.94[0m ( 93.2 %)   [1;35mDelay =350528.06 ps[0m  (  4.7 %)               
+####   Bayesian (1) Delay = 350528.062, Depth = 662285.375, Level = 8755.0, Objective = 2.032 
+####   Parameters(2) [0]=0.279, [1]=0.052, [2]=0.000, [3]=0.091, [4]=1.812, [5]=0.408, [6]=0.280, [7]=0.032, [8]=1.961, [9]=0.717, 
+####  NLDM (2)WireLoad = "none"  [1;33mGates = 328818[0m (  3.2 %)   [1;32mCap =  1.0 ff[0m (  0.6 %)   [1;36mArea =   414693.91[0m ( 96.8 %)   [1;35mDelay =413297.25 ps[0m  (  5.5 %)               
+####   Bayesian (2) Delay = 413297.250, Depth = 327880.875, Level = 8685.0, Objective = 1.851 
+####   Parameters(3) [0]=0.455, [1]=0.063, [2]=0.106, [3]=0.162, [4]=1.953, [5]=0.469, [6]=0.146, [7]=0.009, [8]=1.889, [9]=0.941, 
+####  NLDM (3)WireLoad = "none"  [1;33mGates = 297412[0m (  1.9 %)   [1;32mCap =  1.0 ff[0m (  0.3 %)   [1;36mArea =   390289.09[0m ( 98.1 %)   [1;35mDelay =432774.38 ps[0m  (  4.7 %)               
+####   Bayesian (3) Delay = 432774.375, Depth = 300776.781, Level = 8637.0, Objective = 1.864 
+####   Parameters(4) [0]=0.880, [1]=0.024, [2]=0.059, [3]=0.082, [4]=1.820, [5]=0.419, [6]=0.043, [7]=0.081, [8]=1.945, [9]=0.992, 
+####  NLDM (4)WireLoad = "none"  [1;33mGates = 289858[0m (  2.1 %)   [1;32mCap =  1.0 ff[0m (  0.4 %)   [1;36mArea =   396374.69[0m ( 97.9 %)   [1;35mDelay =525943.69 ps[0m  (  5.3 %)               
+####   Bayesian (4) Delay = 525943.688, Depth = 370131.188, Level = 8669.0, Objective = 2.133 
+####   Parameters(5) [0]=0.237, [1]=0.474, [2]=0.406, [3]=0.068, [4]=1.844, [5]=0.492, [6]=0.214, [7]=0.053, [8]=1.954, [9]=0.982, 
+####  NLDM (5)WireLoad = "none"  [1;33mGates = 291600[0m (  1.0 %)   [1;32mCap =  1.0 ff[0m (  0.2 %)   [1;36mArea =   387789.03[0m ( 99.0 %)   [1;35mDelay =348781.38 ps[0m  (  8.0 %)               
+####   Bayesian (5) Delay = 348781.375, Depth = 373615.750, Level = 8652.0, Objective = 1.626 
+####   Updated node proportion(0.007) 
+####   Parameters(6) [0]=0.139, [1]=0.410, [2]=0.440, [3]=0.064, [4]=1.825, [5]=0.016, [6]=0.231, [7]=0.048, [8]=1.974, [9]=0.978, 
+####  NLDM (6)WireLoad = "none"  [1;33mGates = 312613[0m (  1.4 %)   [1;32mCap =  1.0 ff[0m (  0.3 %)   [1;36mArea =   409236.34[0m ( 98.6 %)   [1;35mDelay =414238.44 ps[0m  (  4.8 %)               
+####   Bayesian (6) Delay = 414238.438, Depth = 320873.344, Level = 8677.0, Objective = 1.844 
+####   Parameters(7) [0]=0.256, [1]=0.447, [2]=0.059, [3]=0.252, [4]=1.891, [5]=0.122, [6]=0.328, [7]=0.444, [8]=1.652, [9]=0.935, 
+####  NLDM (7)WireLoad = "none"  [1;33mGates = 337677[0m (  8.1 %)   [1;32mCap =  1.2 ff[0m (  1.5 %)   [1;36mArea =   612553.19[0m ( 91.9 %)   [1;35mDelay =335618.50 ps[0m  (  5.0 %)               
+####   Bayesian (7) Delay = 335618.500, Depth = 744622.125, Level = 8833.0, Objective = 1.969 
+####   Parameters(8) [0]=0.880, [1]=0.251, [2]=0.021, [3]=0.135, [4]=1.848, [5]=0.492, [6]=0.438, [7]=0.056, [8]=1.956, [9]=0.999, 
+####  NLDM (8)WireLoad = "none"  [1;33mGates = 284876[0m (  2.1 %)   [1;32mCap =  1.1 ff[0m (  0.4 %)   [1;36mArea =   391934.44[0m ( 97.9 %)   [1;35mDelay =530841.38 ps[0m  (  5.3 %)               
+####   Bayesian (8) Delay = 530841.375, Depth = 385966.344, Level = 8659.0, Objective = 2.139 
+####   Parameters(9) [0]=0.236, [1]=0.129, [2]=0.377, [3]=0.077, [4]=1.837, [5]=0.475, [6]=0.254, [7]=0.051, [8]=1.995, [9]=0.975, 
+####  NLDM (9)WireLoad = "none"  [1;33mGates = 293304[0m (  1.1 %)   [1;32mCap =  1.0 ff[0m (  0.2 %)   [1;36mArea =   390015.47[0m ( 98.9 %)   [1;35mDelay =350737.28 ps[0m  (  7.9 %)               
+####   Bayesian (9) Delay = 350737.281, Depth = 376419.562, Level = 8652.0, Objective = 1.635 
+####   Best para[0]=0.237, [1]=0.474, [2]=0.406, [3]=0.068, [4]=1.844, [5]=0.492, [6]=0.214, [7]=0.053, [8]=1.954, [9]=0.982, 
+Output  hypotenuse[0]    : Delay = (375760.28, 375755.47)  NEG
+Output  hypotenuse[1]    : Delay = (372106.97, 372220.09)  NEG
+Output  hypotenuse[2]    : Delay = (366600.72, 366713.72)  NEG
+Output  hypotenuse[3]    : Delay = (361215.06, 361327.94)  NEG
+Output  hypotenuse[4]    : Delay = (355835.59, 355945.34)  NEG
+Runtime for init Python =     2.30 sec
+Runtime for iter expert parameters =     4.15 sec
+Runtime for determining parameters = 17.7 sec Runtime for iter bayesian opt =     3.71 sec
+Runtime for local gradient = 0.1 sec Runtime for area recovery =    17.20 sec
+Total runtime =    94.48 sec
+WireLoad = "none"  [1;33mGates = 206414[0m ( 22.6 %)   [1;32mCap =  0.7 ff[0m (  4.1 %)   [1;36mArea =   225368.31[0m ( 77.4 %)   [1;35mDelay =518001.41 ps[0m  (  5.2 %)               
+ABC command line: "read /home/liujunfeng/benchmarks/arithmetic/sqrt.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map  -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.86 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.00 sec
+Maximum level: Original = 5058. Reduced due to choices = 5058.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes =  24746.  Total 5-feasible cuts =     591044.  Per node = 23.9. Time =     0.27 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates =  39488[0m (  0.7 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    70036.72[0m ( 99.3 %)   [1;35mDelay = 99765.88 ps[0m  ( 12.7 %)               
+####   Heuristic (0) Delay = 99765.883, Depth = 169451.016, Level = 2151.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates =  36076[0m (  0.5 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    60946.27[0m ( 99.5 %)   [1;35mDelay = 90448.04 ps[0m  ( 15.9 %)               
+####   Heuristic (1) Delay = 90448.039, Depth = 119993.227, Level = 2132.0, Objective = 1.777 
+####    NLDM (2)WireLoad = "none"  [1;33mGates =  41200[0m (  0.5 %)   [1;32mCap =  1.0 ff[0m (  0.1 %)   [1;36mArea =    51729.61[0m ( 99.5 %)   [1;35mDelay =132730.84 ps[0m  ( 14.8 %)               
+####   Heuristic (2) Delay = 132730.844, Depth = 103116.320, Level = 2139.0, Objective = 2.070 
+####   Parameters(0) [0]=0.998, [1]=0.052, [2]=0.411, [3]=0.419, [4]=1.292, [5]=0.028, [6]=0.228, [7]=0.749, [8]=0.832, [9]=0.618, 
+####  NLDM (0)WireLoad = "none"  [1;33mGates =  36765[0m (  0.8 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =    48553.73[0m ( 99.2 %)   [1;35mDelay =236922.33 ps[0m  ( 32.4 %)               
+####   Bayesian (0) Delay = 236922.328, Depth = 81224.055, Level = 2138.0, Objective = 3.069 
+####   Parameters(1) [0]=0.317, [1]=0.292, [2]=0.143, [3]=0.828, [4]=1.031, [5]=0.361, [6]=0.478, [7]=0.314, [8]=1.630, [9]=0.177, 
+####  NLDM (1)WireLoad = "none"  [1;33mGates =  42882[0m (  1.2 %)   [1;32mCap =  1.3 ff[0m (  0.2 %)   [1;36mArea =    85744.40[0m ( 98.8 %)   [1;35mDelay =105393.15 ps[0m  (  9.6 %)               
+####   Bayesian (1) Delay = 105393.148, Depth = 193062.766, Level = 2180.0, Objective = 2.281 
+####   Parameters(2) [0]=0.497, [1]=0.321, [2]=0.102, [3]=0.449, [4]=0.631, [5]=0.445, [6]=0.113, [7]=0.336, [8]=0.857, [9]=0.694, 
+####  NLDM (2)WireLoad = "none"  [1;33mGates =  40225[0m (  0.5 %)   [1;32mCap =  1.3 ff[0m (  0.1 %)   [1;36mArea =    80673.59[0m ( 99.5 %)   [1;35mDelay = 98668.73 ps[0m  ( 10.8 %)               
+####   Bayesian (2) Delay = 98668.727, Depth = 116863.898, Level = 2154.0, Objective = 2.141 
+####   Parameters(3) [0]=0.940, [1]=0.309, [2]=0.026, [3]=0.500, [4]=1.019, [5]=0.069, [6]=0.052, [7]=0.234, [8]=0.766, [9]=0.955, 
+####  NLDM (3)WireLoad = "none"  [1;33mGates =  33538[0m (  0.6 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    46155.38[0m ( 99.4 %)   [1;35mDelay =171235.23 ps[0m  ( 19.3 %)               
+####   Bayesian (3) Delay = 171235.234, Depth = 74789.586, Level = 2139.0, Objective = 2.376 
+####   Parameters(4) [0]=0.827, [1]=0.164, [2]=0.005, [3]=0.963, [4]=0.916, [5]=0.238, [6]=0.066, [7]=0.819, [8]=0.547, [9]=0.099, 
+####  NLDM (4)WireLoad = "none"  [1;33mGates =  36886[0m (  0.8 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    62273.39[0m ( 99.2 %)   [1;35mDelay =101001.23 ps[0m  ( 12.1 %)               
+####   Bayesian (4) Delay = 101001.227, Depth = 134131.344, Level = 2145.0, Objective = 1.902 
+####   Parameters(5) [0]=0.366, [1]=0.112, [2]=0.123, [3]=0.793, [4]=0.660, [5]=0.185, [6]=0.440, [7]=0.212, [8]=1.121, [9]=0.512, 
+####  NLDM (5)WireLoad = "none"  [1;33mGates =  42573[0m (  0.7 %)   [1;32mCap =  1.3 ff[0m (  0.1 %)   [1;36mArea =    86005.20[0m ( 99.3 %)   [1;35mDelay = 96802.98 ps[0m  (  9.7 %)               
+####   Bayesian (5) Delay = 96802.977, Depth = 120169.602, Level = 2169.0, Objective = 2.199 
+####   Parameters(6) [0]=0.417, [1]=0.049, [2]=0.055, [3]=0.068, [4]=0.800, [5]=0.311, [6]=0.075, [7]=0.141, [8]=0.544, [9]=0.442, 
+####  NLDM (6)WireLoad = "none"  [1;33mGates =  35903[0m (  0.4 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    62889.49[0m ( 99.6 %)   [1;35mDelay = 85211.79 ps[0m  ( 16.4 %)               
+####   Bayesian (6) Delay = 85211.789, Depth = 72467.227, Level = 2123.0, Objective = 1.752 
+####   Updated node proportion(0.095) 
+####   Parameters(7) [0]=0.310, [1]=0.020, [2]=0.097, [3]=0.564, [4]=0.838, [5]=0.272, [6]=0.350, [7]=0.593, [8]=1.688, [9]=0.080, 
+####  NLDM (7)WireLoad = "none"  [1;33mGates =  42528[0m (  1.4 %)   [1;32mCap =  1.2 ff[0m (  0.2 %)   [1;36mArea =    82322.88[0m ( 98.6 %)   [1;35mDelay =106834.02 ps[0m  (  8.8 %)               
+####   Bayesian (7) Delay = 106834.016, Depth = 234617.078, Level = 2170.0, Objective = 2.247 
+####   Parameters(8) [0]=0.648, [1]=0.048, [2]=0.019, [3]=0.181, [4]=0.745, [5]=0.274, [6]=0.072, [7]=0.151, [8]=0.538, [9]=0.439, 
+####  NLDM (8)WireLoad = "none"  [1;33mGates =  30462[0m (  0.4 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    47203.04[0m ( 99.6 %)   [1;35mDelay = 75526.23 ps[0m  ( 23.6 %)               
+####   Bayesian (8) Delay = 75526.227, Depth = 68552.047, Level = 2140.0, Objective = 1.431 
+####   Updated node proportion(0.204) 
+####   Parameters(9) [0]=0.654, [1]=0.017, [2]=0.435, [3]=0.168, [4]=0.742, [5]=0.104, [6]=0.035, [7]=0.070, [8]=0.533, [9]=0.051, 
+####  NLDM (9)WireLoad = "none"  [1;33mGates =  38351[0m (  0.3 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =    50194.39[0m ( 99.7 %)   [1;35mDelay =139329.19 ps[0m  ( 12.7 %)               
+####   Bayesian (9) Delay = 139329.188, Depth = 46332.082, Level = 2153.0, Objective = 2.114 
+####   Best para[0]=0.648, [1]=0.048, [2]=0.019, [3]=0.181, [4]=0.745, [5]=0.274, [6]=0.072, [7]=0.151, [8]=0.538, [9]=0.439, 
+Output  asqrt[0]    : Delay = (66702.05, 66706.02)  NEG
+Output  asqrt[1]    : Delay = (65475.27, 65415.16)  NEG
+Output  asqrt[2]    : Delay = (63596.36, 63666.10)  NEG
+Output  asqrt[3]    : Delay = (61544.70, 61611.61)  NEG
+Output  asqrt[4]    : Delay = (59676.62, 59746.92)  NEG
+Runtime for init Python =     2.07 sec
+Runtime for iter expert parameters =     0.46 sec
+Runtime for determining parameters = 16.0 sec Runtime for iter bayesian opt =     0.49 sec
+Runtime for local gradient = 0.0 sec Runtime for area recovery =     2.46 sec
+Total runtime =    27.41 sec
+WireLoad = "none"  [1;33mGates =  24272[0m ( 10.3 %)   [1;32mCap =  1.0 ff[0m (  1.9 %)   [1;36mArea =    32941.70[0m ( 89.7 %)   [1;35mDelay =112646.48 ps[0m  ( 12.8 %)               
+ABC command line: "read /home/liujunfeng/benchmarks/arithmetic/multiplier.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map  -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.83 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.00 sec
+Maximum level: Original = 274. Reduced due to choices = 274.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes =  27190.  Total 5-feasible cuts =     833565.  Per node = 30.7. Time =     0.54 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates =  37410[0m (  1.0 %)   [1;32mCap =  1.3 ff[0m (  0.2 %)   [1;36mArea =    66434.64[0m ( 99.0 %)   [1;35mDelay =  4559.26 ps[0m  (  0.7 %)               
+####   Heuristic (0) Delay = 4559.255, Depth = 8876.222, Level = 137.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates =  34635[0m (  0.8 %)   [1;32mCap =  1.3 ff[0m (  0.1 %)   [1;36mArea =    62301.62[0m ( 99.2 %)   [1;35mDelay =  4361.15 ps[0m  (  0.8 %)               
+####   Heuristic (1) Delay = 4361.153, Depth = 6265.350, Level = 135.0, Objective = 1.894 
+####    NLDM (2)WireLoad = "none"  [1;33mGates =  41683[0m (  0.5 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =    56705.70[0m ( 99.5 %)   [1;35mDelay =  5264.93 ps[0m  (  1.9 %)               
+####   Heuristic (2) Delay = 5264.933, Depth = 6188.676, Level = 135.0, Objective = 2.010 
+####   Parameters(0) [0]=0.998, [1]=0.052, [2]=0.411, [3]=0.419, [4]=1.292, [5]=0.028, [6]=0.228, [7]=0.749, [8]=0.832, [9]=0.618, 
+####  NLDM (0)WireLoad = "none"  [1;33mGates =  38201[0m (  0.4 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    57779.96[0m ( 99.6 %)   [1;35mDelay =  6068.71 ps[0m  (  0.3 %)               
+####   Bayesian (0) Delay = 6068.711, Depth = 5102.396, Level = 132.0, Objective = 2.202 
+####   Parameters(1) [0]=0.317, [1]=0.292, [2]=0.143, [3]=0.828, [4]=1.031, [5]=0.361, [6]=0.478, [7]=0.314, [8]=1.630, [9]=0.177, 
+####  NLDM (1)WireLoad = "none"  [1;33mGates =  40378[0m (  1.5 %)   [1;32mCap =  1.3 ff[0m (  0.3 %)   [1;36mArea =    76852.00[0m ( 98.5 %)   [1;35mDelay =  4656.25 ps[0m  (  2.1 %)               
+####   Bayesian (1) Delay = 4656.250, Depth = 9877.929, Level = 140.0, Objective = 2.178 
+####   Parameters(2) [0]=0.571, [1]=0.437, [2]=0.232, [3]=0.197, [4]=0.983, [5]=0.306, [6]=0.022, [7]=0.442, [8]=0.781, [9]=0.625, 
+####  NLDM (2)WireLoad = "none"  [1;33mGates =  35847[0m (  1.0 %)   [1;32mCap =  1.2 ff[0m (  0.2 %)   [1;36mArea =    60002.88[0m ( 99.0 %)   [1;35mDelay =  4338.29 ps[0m  (  0.8 %)               
+####   Bayesian (2) Delay = 4338.290, Depth = 6503.482, Level = 137.0, Objective = 1.855 
+####   Updated node proportion(0.120) 
+####   Parameters(3) [0]=0.975, [1]=0.341, [2]=0.421, [3]=0.542, [4]=1.153, [5]=0.365, [6]=0.007, [7]=0.494, [8]=0.510, [9]=0.656, 
+####  NLDM (3)WireLoad = "none"  [1;33mGates =  38594[0m (  0.4 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    57489.76[0m ( 99.6 %)   [1;35mDelay =  5626.19 ps[0m  (  0.8 %)               
+####   Bayesian (3) Delay = 5626.189, Depth = 5580.443, Level = 134.0, Objective = 2.100 
+####   Parameters(4) [0]=0.980, [1]=0.232, [2]=0.231, [3]=0.526, [4]=0.918, [5]=0.294, [6]=0.336, [7]=0.163, [8]=0.995, [9]=0.631, 
+####  NLDM (4)WireLoad = "none"  [1;33mGates =  39531[0m (  0.3 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    59780.57[0m ( 99.7 %)   [1;35mDelay =  6320.44 ps[0m  (  0.9 %)               
+####   Bayesian (4) Delay = 6320.438, Depth = 4161.229, Level = 132.0, Objective = 2.287 
+####   Parameters(5) [0]=0.030, [1]=0.304, [2]=0.496, [3]=0.123, [4]=0.943, [5]=0.175, [6]=0.056, [7]=0.452, [8]=0.777, [9]=0.792, 
+####  NLDM (5)WireLoad = "none"  [1;33mGates =  43622[0m (  2.1 %)   [1;32mCap =  1.2 ff[0m (  0.4 %)   [1;36mArea =    76708.06[0m ( 97.9 %)   [1;35mDelay =  4701.45 ps[0m  (  0.6 %)               
+####   Bayesian (5) Delay = 4701.445, Depth = 6662.717, Level = 141.0, Objective = 2.186 
+####   Parameters(6) [0]=0.532, [1]=0.495, [2]=0.244, [3]=0.058, [4]=0.897, [5]=0.285, [6]=0.205, [7]=0.105, [8]=0.770, [9]=0.648, 
+####  NLDM (6)WireLoad = "none"  [1;33mGates =  33086[0m (  0.5 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =    49048.98[0m ( 99.5 %)   [1;35mDelay =  4303.98 ps[0m  (  0.6 %)               
+####   Bayesian (6) Delay = 4303.977, Depth = 4113.736, Level = 134.0, Objective = 1.683 
+####   Updated node proportion(0.025) 
+####   Parameters(7) [0]=0.546, [1]=0.429, [2]=0.244, [3]=0.058, [4]=0.688, [5]=0.280, [6]=0.205, [7]=0.105, [8]=0.855, [9]=0.648, 
+####  NLDM (7)WireLoad = "none"  [1;33mGates =  31864[0m (  0.5 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =    47892.62[0m ( 99.5 %)   [1;35mDelay =  4220.85 ps[0m  (  1.2 %)               
+####   Bayesian (7) Delay = 4220.853, Depth = 3701.527, Level = 134.0, Objective = 1.647 
+####   Updated node proportion(0.058) 
+####   Parameters(8) [0]=0.718, [1]=0.447, [2]=0.415, [3]=0.786, [4]=0.634, [5]=0.024, [6]=0.290, [7]=0.920, [8]=0.639, [9]=0.063, 
+####  NLDM (8)WireLoad = "none"  [1;33mGates =  42644[0m (  1.3 %)   [1;32mCap =  1.2 ff[0m (  0.2 %)   [1;36mArea =    73760.80[0m ( 98.7 %)   [1;35mDelay =  4571.14 ps[0m  (  1.5 %)               
+####   Bayesian (8) Delay = 4571.139, Depth = 7923.958, Level = 139.0, Objective = 2.113 
+####   Parameters(9) [0]=0.596, [1]=0.437, [2]=0.188, [3]=0.069, [4]=0.515, [5]=0.281, [6]=0.389, [7]=0.050, [8]=0.851, [9]=0.664, 
+####  NLDM (9)WireLoad = "none"  [1;33mGates =  39268[0m (  0.3 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =    54734.95[0m ( 99.7 %)   [1;35mDelay =  5493.34 ps[0m  (  0.7 %)               
+####   Bayesian (9) Delay = 5493.337, Depth = 2757.040, Level = 134.0, Objective = 2.030 
+####   Best para[0]=0.546, [1]=0.429, [2]=0.244, [3]=0.058, [4]=0.688, [5]=0.280, [6]=0.205, [7]=0.105, [8]=0.855, [9]=0.648, 
+Output  f[127]    : Delay = (3699.96, 3696.91)  POS
+Output  f[126]    : Delay = (3680.20, 3679.22)  POS
+Output  f[125]    : Delay = (3656.04, 3651.86)  POS
+Output  f[124]    : Delay = (3630.51, 3626.40)  POS
+Output  f[123]    : Delay = (3605.08, 3600.71)  POS
+Runtime for init Python =     1.99 sec
+Runtime for iter expert parameters =     0.52 sec
+Runtime for determining parameters = 16.6 sec Runtime for iter bayesian opt =     0.52 sec
+Runtime for local gradient = 0.0 sec Runtime for area recovery =     2.55 sec
+Total runtime =    29.09 sec
+WireLoad = "none"  [1;33mGates =  17036[0m ( 12.7 %)   [1;32mCap =  0.9 ff[0m (  2.3 %)   [1;36mArea =    22109.11[0m ( 87.3 %)   [1;35mDelay =  4113.25 ps[0m  (  1.6 %)               
+ABC command line: "read /home/liujunfeng/benchmarks/random_control/mem_ctrl.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map  -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.82 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.01 sec
+Maximum level: Original = 114. Reduced due to choices = 114.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes =  48040.  Total 5-feasible cuts =     581884.  Per node = 12.1. Time =     0.23 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates =  40780[0m (  3.8 %)   [1;32mCap =  1.2 ff[0m (  0.7 %)   [1;36mArea =    68674.84[0m ( 96.2 %)   [1;35mDelay =  3813.74 ps[0m  (  1.7 %)               
+####   Heuristic (0) Delay = 3813.743, Depth = 4920.972, Level = 54.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates =  40770[0m (  3.0 %)   [1;32mCap =  1.2 ff[0m (  0.5 %)   [1;36mArea =    65368.79[0m ( 97.0 %)   [1;35mDelay =  4457.32 ps[0m  (  2.0 %)               
+####   Heuristic (1) Delay = 4457.315, Depth = 3010.926, Level = 55.0, Objective = 2.121 
+####    NLDM (2)WireLoad = "none"  [1;33mGates =  46368[0m (  2.3 %)   [1;32mCap =  1.0 ff[0m (  0.4 %)   [1;36mArea =    61246.96[0m ( 97.7 %)   [1;35mDelay =  4952.97 ps[0m  (  4.1 %)               
+####   Heuristic (2) Delay = 4952.973, Depth = 2349.030, Level = 53.0, Objective = 2.192 
+####   Parameters(0) [0]=0.998, [1]=0.052, [2]=0.411, [3]=0.419, [4]=1.292, [5]=0.028, [6]=0.228, [7]=0.749, [8]=0.832, [9]=0.618, 
+####  NLDM (0)WireLoad = "none"  [1;33mGates =  43140[0m (  3.0 %)   [1;32mCap =  1.1 ff[0m (  0.6 %)   [1;36mArea =    58428.01[0m ( 96.9 %)   [1;35mDelay = 13222.90 ps[0m  (  2.3 %)               
+####   Bayesian (0) Delay = 13222.901, Depth = 2294.435, Level = 54.0, Objective = 4.319 
+####   Parameters(1) [0]=0.317, [1]=0.292, [2]=0.143, [3]=0.828, [4]=1.031, [5]=0.361, [6]=0.478, [7]=0.314, [8]=1.630, [9]=0.177, 
+####  NLDM (1)WireLoad = "none"  [1;33mGates =  41346[0m (  6.0 %)   [1;32mCap =  1.2 ff[0m (  1.1 %)   [1;36mArea =    77606.66[0m ( 94.0 %)   [1;35mDelay =  3761.61 ps[0m  (  1.1 %)               
+####   Bayesian (1) Delay = 3761.608, Depth = 4860.947, Level = 58.0, Objective = 2.116 
+####   Parameters(2) [0]=0.780, [1]=0.058, [2]=0.413, [3]=0.921, [4]=1.111, [5]=0.454, [6]=0.099, [7]=0.875, [8]=1.333, [9]=0.769, 
+####  NLDM (2)WireLoad = "none"  [1;33mGates =  41005[0m (  4.5 %)   [1;32mCap =  1.2 ff[0m (  0.8 %)   [1;36mArea =    70225.21[0m ( 95.5 %)   [1;35mDelay =  4224.98 ps[0m  (  1.7 %)               
+####   Bayesian (2) Delay = 4224.977, Depth = 5285.306, Level = 54.0, Objective = 2.130 
+####   Parameters(3) [0]=0.429, [1]=0.299, [2]=0.286, [3]=0.438, [4]=0.863, [5]=0.367, [6]=0.034, [7]=0.763, [8]=1.095, [9]=0.324, 
+####  NLDM (3)WireLoad = "none"  [1;33mGates =  41893[0m (  4.7 %)   [1;32mCap =  1.2 ff[0m (  0.9 %)   [1;36mArea =    78019.56[0m ( 95.3 %)   [1;35mDelay =  4269.15 ps[0m  (  0.0 %)               
+####   Bayesian (3) Delay = 4269.146, Depth = 7619.096, Level = 56.0, Objective = 2.255 
+####   Parameters(4) [0]=0.861, [1]=0.167, [2]=0.352, [3]=0.465, [4]=1.045, [5]=0.297, [6]=0.019, [7]=0.946, [8]=1.270, [9]=0.237, 
+####  NLDM (4)WireLoad = "none"  [1;33mGates =  40561[0m (  3.6 %)   [1;32mCap =  1.1 ff[0m (  0.7 %)   [1;36mArea =    60824.96[0m ( 96.4 %)   [1;35mDelay =  4291.48 ps[0m  (  1.8 %)               
+####   Bayesian (4) Delay = 4291.481, Depth = 3473.456, Level = 54.0, Objective = 2.012 
+####   Parameters(5) [0]=0.870, [1]=0.143, [2]=0.480, [3]=0.925, [4]=0.714, [5]=0.174, [6]=0.004, [7]=0.919, [8]=1.376, [9]=0.210, 
+####  NLDM (5)WireLoad = "none"  [1;33mGates =  40799[0m (  4.2 %)   [1;32mCap =  1.1 ff[0m (  0.8 %)   [1;36mArea =    61372.93[0m ( 95.8 %)   [1;35mDelay =  3996.61 ps[0m  (  2.6 %)               
+####   Bayesian (5) Delay = 3996.615, Depth = 3893.120, Level = 54.0, Objective = 1.942 
+####   Updated node proportion(0.759) 
+####   Parameters(6) [0]=0.974, [1]=0.005, [2]=0.377, [3]=0.891, [4]=0.700, [5]=0.150, [6]=0.001, [7]=0.999, [8]=1.354, [9]=0.213, 
+####  NLDM (6)WireLoad = "none"  [1;33mGates =  43422[0m (  2.9 %)   [1;32mCap =  1.1 ff[0m (  0.5 %)   [1;36mArea =    60798.13[0m ( 97.1 %)   [1;35mDelay =  6930.96 ps[0m  (  3.2 %)               
+####   Bayesian (6) Delay = 6930.961, Depth = 1801.387, Level = 51.0, Objective = 2.704 
+####   Parameters(7) [0]=0.901, [1]=0.024, [2]=0.479, [3]=0.657, [4]=1.424, [5]=0.175, [6]=0.001, [7]=0.957, [8]=1.384, [9]=0.007, 
+####  NLDM (7)WireLoad = "none"  [1;33mGates =  44321[0m (  3.6 %)   [1;32mCap =  1.1 ff[0m (  0.7 %)   [1;36mArea =    60567.42[0m ( 96.4 %)   [1;35mDelay =  3922.44 ps[0m  (  3.5 %)               
+####   Bayesian (7) Delay = 3922.440, Depth = 2957.633, Level = 53.0, Objective = 1.912 
+####   Updated node proportion(0.561) 
+####   Parameters(8) [0]=0.898, [1]=0.034, [2]=0.464, [3]=0.625, [4]=1.435, [5]=0.218, [6]=0.001, [7]=0.957, [8]=1.408, [9]=0.020, 
+####  NLDM (8)WireLoad = "none"  [1;33mGates =  44608[0m (  3.5 %)   [1;32mCap =  1.1 ff[0m (  0.6 %)   [1;36mArea =    60290.75[0m ( 96.5 %)   [1;35mDelay =  4216.32 ps[0m  (  3.3 %)               
+####   Bayesian (8) Delay = 4216.317, Depth = 2802.516, Level = 53.0, Objective = 1.985 
+####   Parameters(9) [0]=0.851, [1]=0.036, [2]=0.489, [3]=0.803, [4]=1.411, [5]=0.166, [6]=0.007, [7]=0.960, [8]=1.912, [9]=0.884, 
+####  NLDM (9)WireLoad = "none"  [1;33mGates =  43928[0m (  3.9 %)   [1;32mCap =  1.1 ff[0m (  0.7 %)   [1;36mArea =    59424.58[0m ( 96.1 %)   [1;35mDelay =  4134.80 ps[0m  (  3.4 %)               
+####   Bayesian (9) Delay = 4134.802, Depth = 3167.325, Level = 53.0, Objective = 1.951 
+####   Best para[0]=0.901, [1]=0.024, [2]=0.479, [3]=0.657, [4]=1.424, [5]=0.175, [6]=0.001, [7]=0.957, [8]=1.384, [9]=0.007, 
+Output  po0356    : Delay = (3232.14, 3216.74)  NEG
+Output  po0297    : Delay = (3229.04, 3225.59)  POS
+Output  po0331    : Delay = (3229.01, 3225.63)  POS
+Output  po0346    : Delay = (3229.01, 3225.63)  POS
+Output  po0301    : Delay = (3228.80, 3225.41)  POS
+Runtime for init Python =     1.99 sec
+Runtime for iter expert parameters =     0.72 sec
+Runtime for determining parameters = 16.0 sec Runtime for iter bayesian opt =     0.72 sec
+Runtime for local gradient = 0.0 sec Runtime for area recovery =     4.53 sec
+Total runtime =    32.58 sec
+WireLoad = "none"  [1;33mGates =  28789[0m ( 12.5 %)   [1;32mCap =  0.8 ff[0m (  2.3 %)   [1;36mArea =    33090.77[0m ( 87.5 %)   [1;35mDelay =  2422.21 ps[0m  (  2.0 %)               

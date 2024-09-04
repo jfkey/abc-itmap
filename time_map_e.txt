@@ -1,0 +1,115 @@
+ABC command line: "read /home/liujunfeng/benchmarks/arithmetic/div.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map -e -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.86 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.01 sec
+Maximum level: Original = 4372. Reduced due to choices = 4372.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes =  57375.  Total 5-feasible cuts =    1305640.  Per node = 22.8. Time =     0.61 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates =  88961[0m (  0.8 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =   144553.34[0m ( 99.2 %)   [1;35mDelay = 71316.37 ps[0m  (  8.9 %)               
+####   Heuristic (0) Delay = 71316.367, Depth = 136856.672, Level = 2230.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates =  88009[0m (  0.4 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =   146227.14[0m ( 99.6 %)   [1;35mDelay = 72684.78 ps[0m  (  9.2 %)               
+####   Heuristic (1) Delay = 72684.781, Depth = 98518.195, Level = 2196.0, Objective = 2.030 
+####    NLDM (2)WireLoad = "none"  [1;33mGates =  98478[0m (  0.2 %)   [1;32mCap =  0.9 ff[0m (  0.0 %)   [1;36mArea =   121072.78[0m ( 99.8 %)   [1;35mDelay = 81428.23 ps[0m  ( 11.4 %)               
+####   Heuristic (2) Delay = 81428.227, Depth = 89925.383, Level = 2189.0, Objective = 1.981 
+Output  remainder[1]    : Delay = (89942.41, 89941.77)  NEG
+Output  remainder[0]    : Delay = (89935.43, 89940.73)  NEG
+Output  quotient[0]     : Delay = (89914.84, 89908.33)  NEG
+Output  remainder[2]    : Delay = (89912.48, 89908.88)  NEG
+Output  remainder[3]    : Delay = (89912.48, 89908.88)  NEG
+Total runtime =     9.45 sec
+WireLoad = "none"  [1;33mGates =  47857[0m ( 19.1 %)   [1;32mCap =  0.7 ff[0m (  3.5 %)   [1;36mArea =    50537.55[0m ( 80.9 %)   [1;35mDelay = 69207.37 ps[0m  ( 15.2 %)               
+ABC command line: "read /home/liujunfeng/benchmarks/arithmetic/hyp.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map -e -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.84 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.04 sec
+Maximum level: Original = 24801. Reduced due to choices = 24801.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes = 214591.  Total 5-feasible cuts =    5994291.  Per node = 27.9. Time =     4.28 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates = 325595[0m (  0.6 %)   [1;32mCap =  1.3 ff[0m (  0.1 %)   [1;36mArea =   591525.06[0m ( 99.4 %)   [1;35mDelay =359624.19 ps[0m  (  5.0 %)               
+####   Heuristic (0) Delay = 359624.188, Depth = 571549.375, Level = 8686.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates = 309789[0m (  0.1 %)   [1;32mCap =  1.2 ff[0m (  0.0 %)   [1;36mArea =   530478.25[0m ( 99.9 %)   [1;35mDelay =348971.44 ps[0m  (  4.8 %)               
+####   Heuristic (1) Delay = 348971.438, Depth = 405976.969, Level = 8630.0, Objective = 1.867 
+####    NLDM (2)WireLoad = "none"  [1;33mGates = 293274[0m (  2.3 %)   [1;32mCap =  1.0 ff[0m (  0.4 %)   [1;36mArea =   385839.53[0m ( 97.7 %)   [1;35mDelay =353945.19 ps[0m  (  7.9 %)               
+####   Heuristic (2) Delay = 353945.188, Depth = 368772.406, Level = 8679.0, Objective = 1.637 
+Output  hypotenuse[0]    : Delay = (370333.44, 370326.56)  NEG
+Output  hypotenuse[1]    : Delay = (366352.69, 366433.47)  NEG
+Output  hypotenuse[2]    : Delay = (360920.88, 361004.75)  NEG
+Output  hypotenuse[3]    : Delay = (355590.50, 355674.59)  NEG
+Output  hypotenuse[4]    : Delay = (350282.28, 350366.94)  NEG
+Total runtime =    34.77 sec
+WireLoad = "none"  [1;33mGates = 209645[0m ( 24.7 %)   [1;32mCap =  0.7 ff[0m (  4.5 %)   [1;36mArea =   224779.28[0m ( 75.3 %)   [1;35mDelay =557616.62 ps[0m  (  5.3 %)               
+ABC command line: "read /home/liujunfeng/benchmarks/arithmetic/sqrt.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map -e -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.84 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.00 sec
+Maximum level: Original = 5058. Reduced due to choices = 5058.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes =  24746.  Total 5-feasible cuts =     591044.  Per node = 23.9. Time =     0.27 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates =  39488[0m (  0.7 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    70036.72[0m ( 99.3 %)   [1;35mDelay = 99765.88 ps[0m  ( 12.7 %)               
+####   Heuristic (0) Delay = 99765.883, Depth = 169451.016, Level = 2151.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates =  36076[0m (  0.5 %)   [1;32mCap =  1.2 ff[0m (  0.1 %)   [1;36mArea =    60946.27[0m ( 99.5 %)   [1;35mDelay = 90448.04 ps[0m  ( 15.9 %)               
+####   Heuristic (1) Delay = 90448.039, Depth = 119993.227, Level = 2132.0, Objective = 1.777 
+####    NLDM (2)WireLoad = "none"  [1;33mGates =  41200[0m (  0.5 %)   [1;32mCap =  1.0 ff[0m (  0.1 %)   [1;36mArea =    51729.61[0m ( 99.5 %)   [1;35mDelay =132730.84 ps[0m  ( 14.8 %)               
+####   Heuristic (2) Delay = 132730.844, Depth = 103116.320, Level = 2139.0, Objective = 2.070 
+Output  asqrt[0]    : Delay = (126618.73, 126625.10)  NEG
+Output  asqrt[1]    : Delay = (123978.05, 123955.81)  NEG
+Output  asqrt[2]    : Delay = (120618.40, 120768.78)  NEG
+Output  asqrt[3]    : Delay = (116959.12, 117116.24)  NEG
+Output  asqrt[4]    : Delay = (113337.58, 113501.97)  NEG
+Total runtime =     4.48 sec
+WireLoad = "none"  [1;33mGates =  19623[0m ( 21.3 %)   [1;32mCap =  0.9 ff[0m (  3.9 %)   [1;36mArea =    24732.58[0m ( 78.7 %)   [1;35mDelay = 85261.57 ps[0m  ( 16.4 %)               
+ABC command line: "read /home/liujunfeng/benchmarks/arithmetic/multiplier.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map -e -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.83 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.00 sec
+Maximum level: Original = 274. Reduced due to choices = 274.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes =  27190.  Total 5-feasible cuts =     833565.  Per node = 30.7. Time =     0.56 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates =  37410[0m (  1.0 %)   [1;32mCap =  1.3 ff[0m (  0.2 %)   [1;36mArea =    66434.64[0m ( 99.0 %)   [1;35mDelay =  4559.26 ps[0m  (  0.7 %)               
+####   Heuristic (0) Delay = 4559.255, Depth = 8876.222, Level = 137.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates =  34635[0m (  0.8 %)   [1;32mCap =  1.3 ff[0m (  0.1 %)   [1;36mArea =    62301.62[0m ( 99.2 %)   [1;35mDelay =  4361.15 ps[0m  (  0.8 %)               
+####   Heuristic (1) Delay = 4361.153, Depth = 6265.350, Level = 135.0, Objective = 1.894 
+####    NLDM (2)WireLoad = "none"  [1;33mGates =  41683[0m (  0.5 %)   [1;32mCap =  1.1 ff[0m (  0.1 %)   [1;36mArea =    56705.70[0m ( 99.5 %)   [1;35mDelay =  5264.93 ps[0m  (  1.9 %)               
+####   Heuristic (2) Delay = 5264.933, Depth = 6188.676, Level = 135.0, Objective = 2.010 
+Output  f[127]    : Delay = (6269.52, 6265.36)  POS
+Output  f[126]    : Delay = (6241.03, 6239.82)  POS
+Output  f[125]    : Delay = (6203.28, 6202.08)  POS
+Output  f[124]    : Delay = (6163.21, 6157.34)  POS
+Output  f[123]    : Delay = (6131.71, 6120.12)  POS
+Total runtime =     5.29 sec
+WireLoad = "none"  [1;33mGates =  18225[0m ( 15.0 %)   [1;32mCap =  0.8 ff[0m (  2.7 %)   [1;36mArea =    22541.38[0m ( 85.0 %)   [1;35mDelay =  4310.17 ps[0m  (  1.0 %)               
+ABC command line: "read /home/liujunfeng/benchmarks/random_control/mem_ctrl.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; map -e -v; topo; stime;".
+
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.90 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+Derived GENLIB library "asap7sc7p5t_22b_AO_RVT_SS_170906" with 73 gates using slew 20.00 ps and gain 250.00.
+Converting "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.genlib" into supergate library "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.super".
+Computing 3-order fanouts: Time =     0.01 sec
+Maximum level: Original = 114. Reduced due to choices = 114.
+Choice stats:  Choice nodes = 0. Total choices = 0.
+Nodes =  48040.  Total 5-feasible cuts =     581884.  Per node = 12.1. Time =     0.24 sec
+####    NLDM (0)WireLoad = "none"  [1;33mGates =  40780[0m (  3.8 %)   [1;32mCap =  1.2 ff[0m (  0.7 %)   [1;36mArea =    68674.84[0m ( 96.2 %)   [1;35mDelay =  3813.74 ps[0m  (  1.7 %)               
+####   Heuristic (0) Delay = 3813.743, Depth = 4920.972, Level = 54.0, Objective = 2.000 
+####    NLDM (1)WireLoad = "none"  [1;33mGates =  40770[0m (  3.0 %)   [1;32mCap =  1.2 ff[0m (  0.5 %)   [1;36mArea =    65368.79[0m ( 97.0 %)   [1;35mDelay =  4457.32 ps[0m  (  2.0 %)               
+####   Heuristic (1) Delay = 4457.315, Depth = 3010.926, Level = 55.0, Objective = 2.121 
+####    NLDM (2)WireLoad = "none"  [1;33mGates =  46368[0m (  2.3 %)   [1;32mCap =  1.0 ff[0m (  0.4 %)   [1;36mArea =    61246.96[0m ( 97.7 %)   [1;35mDelay =  4952.97 ps[0m  (  4.1 %)               
+####   Heuristic (2) Delay = 4952.973, Depth = 2349.030, Level = 53.0, Objective = 2.192 
+Output  po0344    : Delay = (4803.60, 4799.96)  POS
+Output  po0334    : Delay = (4803.27, 4799.64)  POS
+Output  po0298    : Delay = (4802.10, 4798.47)  POS
+Output  po0301    : Delay = (4801.70, 4798.07)  POS
+Output  po0356    : Delay = (4801.31, 4793.16)  NEG
+Total runtime =     7.42 sec
+WireLoad = "none"  [1;33mGates =  29076[0m ( 11.7 %)   [1;32mCap =  0.8 ff[0m (  2.1 %)   [1;36mArea =    34018.99[0m ( 88.3 %)   [1;35mDelay =  2257.21 ps[0m  (  1.4 %)               
