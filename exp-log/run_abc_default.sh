@@ -15,8 +15,9 @@
 binary=$(echo "$1" | awk -F "/" '{print $NF}')
 dataname=$(basename "${2%/}")
 timestamp=$(date +%Y%m%d%H%M%S)
-#csv="${timestamp}_$binary.map_r.csv"
-log="${binary}_${dataname}_${timestamp}.log"
+libname=$(echo "$(basename "$4")" | cut -d '.' -f 1)
+
+log="${binary}_${dataname}_${libname}_${timestamp}.log"
 #touch "$csv"
 touch "$log"
 #echo "name, command, input, output, lat, gates, edge, area, delay, lev, stime_gates, stime_gates%, stime_cap(ff), stime_cap%, stime_Area, stime_Area%, stime_Delay(ps), stime_Delay%, cut_time, delay_time, total_time" >> $csv
@@ -26,7 +27,7 @@ files=$(find "$2" -name "*.aig")
 for element in ${files[@]}
 do
     echo "process $element"
-    command="read_lib $4 ; read_aiger $element; strash; dch; map; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime;";
+    command="read_lib $4 ; read_aiger $element; map; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime;";
     outputs=$(timeout $3 $1 -c "$command";)
     echo $outputs >> $log 
 done

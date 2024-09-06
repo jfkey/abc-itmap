@@ -588,7 +588,7 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
         
         // rec_y[0] = curDelay/firstDelay + estArea/firstArea + (estLevel - firstLevel) * 0.05;
         objective = curDelay/firstDelay + estArea/firstArea; 
-        printf("####   Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Objective = %.3f \n", i, curDelay, estDepth, estLevel, objective);
+        printf("#### Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Objective = %.3f \n", i, curDelay, estDepth, estLevel, objective);
   
         
         if (objective < min_Obj) {
@@ -1059,7 +1059,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     clkmapTT = Abc_Clock() - clk;
       
     // parameters for iteration 
-    int itera_num = 10;
+    int itera_num = 30;
 
     int para_size = 10; 
     int rec_y_size = 1;
@@ -1093,8 +1093,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     double *min_rec_x = NULL; 
      
     // parameters for iteration parameters
-    double firstDelay = 0.0, firstArea = 0.0, firstLevel = 0.0; 
-    double curDelay = 0.0;
+    double firstDelay = 0.0, firstArea = 0.0, firstLevel = 0.0, firstGate = 0.0, firstEdge = 0.0; 
+    double curDelay = 0.0, curArea = 0.0, curLevel = 0.0, curGate = 0.0, curEdge = 0.0;
   
     // PyRun_SimpleString("import sys; import os; sys.path.append(os.getcwd());");
     PyRun_SimpleString("import sys;");
@@ -1155,8 +1155,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         // compute the references and collect the nodes used in the mapping
         Map_MappingSetRefs( p ); 
         //////////////////////////////////////////////////////////////////////
-
-        /* area oriented mapping. 
+   
+        /* area oriented mapping.  */
         //////////////////////////////////////////////////////////////////////
         // perform area recovery using area flow 
         // compute the required times
@@ -1193,7 +1193,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         Map_MappingSetRefs( p );
         p->AreaFinal = Map_MappingGetArea( p );
         //////////////////////////////////////////////////////////////////////
-        */
+       
         clk = Abc_Clock();
         // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
         extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
@@ -1232,8 +1232,26 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             Abc_Print( -1, "The command has failed.\n" );
             return 1;
         }
+        
+        // 3. perform Buffer
+        SC_BusPars Pars, * pPars = &Pars;
+        Abc_Ntk_t * pNtkResBuf;
+        int c;
+        memset( pPars, 0, sizeof(SC_BusPars) );
+        pPars->GainRatio     =  300;
+        pPars->Slew          =  Abc_SclComputeAverageSlew((SC_Lib *)pAbc->pLibScl);
+         
+        pPars->nDegree       =   10;
+        pPars->fSizeOnly     =    0;
+        pPars->fAddBufs      =    1;
+        pPars->fBufPis       =    0;
+        pPars->fUseWireLoads =    0;
+        pPars->fVerbose      =    0;
+        pPars->fVeryVerbose  =    0;
+
+        extern void Abc_NtkPerformBuffering( Abc_Ntk_t * pNtk, int fUseZeros, int fUseOnset, int fUseOffset, int fUseDch, int fUseDchS );
             
-         // 3. perform STA
+        // 3. perform STA
         int fShowAll      = 0;
         int fUseWireLoads = 0;
         int fPrintPath    = 0;
@@ -1258,21 +1276,25 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
         Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
         
+        
+        
         curDelay = pNtkTopoed ->MaxDelay;
-        double estArea = Map_MappingGetArea( p );
-        // double estArea = p->AreaFinal;  
+        curArea = Map_MappingGetArea( p );
+        curLevel = Abc_NtkLevel(pNtkTopoed);
+        curGate = Abc_NtkGetLargeNodeNum(pNtkTopoed);
+        curEdge = Abc_NtkGetTotalFanins(pNtkTopoed);
 
         if ( i == 0) {
             firstDelay = curDelay; 
-            firstArea = estArea;
-            firstLevel = Abc_NtkLevel(pNtkTopoed);
+            firstArea = curArea;
+            firstLevel = curLevel;
+            firstGate = curGate;
+            firstEdge  = curEdge;
         }
-        // double gapDelay = Abc_AbsFloat( estDepth - curDelay)/curDelay;
-        double estLevel = Abc_NtkLevel(pNtkTopoed); 
         
-        // rec_y[0] = curDelay/firstDelay + estArea/firstArea + (estLevel - firstLevel) * 0.05;
-        rec_y[0] = curDelay/firstDelay + estArea/firstArea; 
-        printf("####   Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Objective = %.3f \n", i, curDelay, estDepth, estLevel, rec_y[0]);
+        // rec_y[0] = curDelay/firstDelay + estArea/firstArea; 
+        rec_y[0] = curDelay/firstDelay + curArea/firstArea + curLevel/firstLevel + curGate/firstGate + curEdge/firstEdge;
+        printf("#### Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Edge = %.1f, Area = %.3f, Gate = %.1f, Objective = %.3f \n", i, curDelay, estDepth, curLevel, curEdge, curArea, curGate,  rec_y[0]);
   
         double* tmpParas = (double*)malloc(para_size * sizeof(double)); 
         memcpy(tmpParas, p->delayParams, para_size * sizeof(double));
@@ -1442,7 +1464,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         Py_DECREF(pListY);
 
         // parse the return values 
-        printf("####   Parameters(%d) ", i);
+        printf("#### Parameters(%d) ", i);
         if (pReturn != NULL && PyTuple_Check(pReturn)) {
             PyObject* pNewOpt;
             PyObject* pNewListX;
@@ -1591,25 +1613,22 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             Abc_Print(-1, "There is no Liberty library available.\n" );
             return 1;
         }
-        printf("####  NLDM (%d)", i);
+        printf("####    NLDM (%d)", i);
         extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
         Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
-        
+         
         curDelay = pNtkTopoed ->MaxDelay;
-        double estArea = Map_MappingGetArea( p );
-        // double estArea = p->AreaFinal;  
+        curArea = Map_MappingGetArea( p );
+        curLevel = Abc_NtkLevel(pNtkTopoed);
+        curGate = Abc_NtkGetLargeNodeNum(pNtkTopoed);
+        curEdge = Abc_NtkGetTotalFanins(pNtkTopoed);
 
-        // if ( i == 0) {
-        //     firstDelay = curDelay; 
-        //     firstArea = estArea;
-        //     firstLevel = Abc_NtkLevel(pNtkTopoed);
-        // }
-        // double gapDelay = Abc_AbsFloat( estDepth - curDelay)/curDelay;
-        double estLevel = Abc_NtkLevel(pNtkTopoed); 
+        rec_y[0] = curDelay/firstDelay + curArea/firstArea + curLevel/firstLevel + curGate/firstGate + curEdge/firstEdge;
+        printf("#### Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Edge = %.1f, Area = %.3f, Gate = %.1f, Objective = %.3f \n", i, curDelay, estDepth, curLevel, curEdge, curArea, curGate,  rec_y[0]);
         
-        // rec_y[0] = curDelay/firstDelay + estArea/firstArea + (estLevel - firstLevel) * 0.05;
-        rec_y[0] = curDelay/firstDelay + estArea/firstArea;
-        printf("####   Bayesian (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Objective = %.3f \n", i, curDelay, estDepth, estLevel, rec_y[0]);
+       
+        // rec_y[0] = curDelay/firstDelay + estArea/firstArea;
+        // printf("#### Bayesian (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Objective = %.3f \n", i, curDelay, estDepth, estLevel, rec_y[0]);
 
        
         double* tmpParas = (double*)malloc(para_size * sizeof(double)); 
@@ -1656,7 +1675,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                 }
                 // pNodeMap->tauRefs[1],
             }
-            printf("####   Updated node proportion(%.3f) \n", (updatedNode*1.0)/ni);
+            printf("#### Updated node proportion(%.3f) \n", (updatedNode*1.0)/ni);
             free(grad);
             free(gateParams);
         }
@@ -1741,7 +1760,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
 
     // set parameters for the best iteration
 
-    printf("####   Best para");
+    printf("#### Best para");
     for (int j = 0; j < para_size; j++){
         p->delayParams[j] = min_rec_x[j];
         printf("[%d]=%.3f, ", j, min_rec_x[j]);
