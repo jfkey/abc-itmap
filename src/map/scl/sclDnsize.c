@@ -304,7 +304,8 @@ void Abc_SclDnsizePerformInt( SC_Lib * pLib, Abc_Ntk_t * pNtk, SC_SizePars * pPa
             p->MaxDelay = Abc_SclReadMaxDelay( p );
             if ( pPars->fUseDept && pPars->DelayUser > 0 && p->MaxDelay < pPars->DelayUser )
                 p->MaxDelay = pPars->DelayUser;
-            Abc_SclDnsizePrint( p, nRounds++, nAttempt, nOverlap, nChanges, pPars->fVeryVerbose ); 
+            // remove the printed message of dnsizing 
+            // Abc_SclDnsizePrint( p, nRounds++, nAttempt, nOverlap, nChanges, pPars->fVeryVerbose ); 
             nAttemptAll += nAttempt; nOverlapAll += nOverlap; nChangesAll += nChanges;
             if ( nRuntimeLimit && Abc_Clock() > nRuntimeLimit )
                 break;
@@ -321,8 +322,9 @@ void Abc_SclDnsizePerformInt( SC_Lib * pLib, Abc_Ntk_t * pNtk, SC_SizePars * pPa
     Vec_IntFree( vNodes );
     Vec_IntFree( vEvals );
     Vec_IntFree( vTryLater );
-    if ( !pPars->fVerbose )
-        printf( "                                                                                                                                                  \r" );
+
+    // if ( !pPars->fVerbose )
+    //     printf( "                                                                                                                                                  \r" );
 
     // report runtime
     p->timeTotal = Abc_Clock() - p->timeTotal;

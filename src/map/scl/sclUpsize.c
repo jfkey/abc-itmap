@@ -963,7 +963,7 @@ void Abc_SclUpsizePerformInt( SC_Lib * pLib, Abc_Ntk_t * pNtk, SC_SizePars * pPa
             nFramesNoChange++;
 
         // report and cleanup
-        Abc_SclUpsizePrint( p, i, win, Vec_IntSize(vPathPos), Vec_IntSize(vPathNodes), nUpsizes, nConeSize, pPars->fVeryVerbose || (pPars->fVerbose && nFramesNoChange == 0) ); //|| (i == nIters-1) );
+        // Abc_SclUpsizePrint( p, i, win, Vec_IntSize(vPathPos), Vec_IntSize(vPathNodes), nUpsizes, nConeSize, pPars->fVeryVerbose || (pPars->fVerbose && nFramesNoChange == 0) ); //|| (i == nIters-1) );
         nAllPos     += Vec_IntSize(vPathPos);
         nAllNodes   += Vec_IntSize(vPathNodes);
         nAllTfos    += nConeSize;
@@ -989,8 +989,8 @@ void Abc_SclUpsizePerformInt( SC_Lib * pLib, Abc_Ntk_t * pNtk, SC_SizePars * pPa
     Abc_SclTimeNtkRecompute( p, &p->SumArea, &p->MaxDelay, 0, 0 );
     if ( pPars->fVerbose )
         Abc_SclUpsizePrint( p, i, pPars->Window, nAllPos/(i?i:1), nAllNodes/(i?i:1), nAllUpsizes/(i?i:1), nAllTfos/(i?i:1), 1 );
-    else
-        printf( "                                                                                                                                                  \r" );
+    // else
+    //     printf( "                                                                                                                                                  \r" );
     // report runtime
     p->timeTotal = Abc_Clock() - p->timeTotal;
     if ( pPars->fVerbose )

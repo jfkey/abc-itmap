@@ -96,7 +96,9 @@ endfunction()
 set(ABC_MAIN_SRC src/base/main/main.c)
 list(REMOVE_ITEM ABC_SRC ${ABC_MAIN_SRC})
  
-set(BAYESOPT_LIB_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/lib/libbayesopt.so) # liujf
+ 
+
+### set(BAYESOPT_LIB_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/lib/libbayesopt.so) # liujf
  
 
 

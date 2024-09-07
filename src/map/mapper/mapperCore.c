@@ -1060,19 +1060,26 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
       
     // parameters for iteration 
     int itera_num = 30;
-
     int para_size = 10; 
     int rec_y_size = 1;
     p->delayParams = malloc(sizeof(double) * para_size);
     // some good delay parameters for both delay- and area- oriented mapping  
-    double goodPara[3][10] = {
-        {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252},
-        {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0, 0.5},  // Expert Design
-        {0.348, 0.061, 0.017, 0.146, 1.832, 0.411, 0.260, 0.050, 1.954, 0.782} // best result for bar
-        // {0.506, 0.070, 0.315, 0.413, 1.800, 0.004, 0.122, 0.118, 0.989, 0.558},
-        // {0.581, 0.129, 0.082, 0.251, 0.890, 0.297, 0.099, 0.114, 1.028, 0.546}  
-    };
-    int good_itera_num = 3; 
+    // double goodPara[3][10] = {
+    //     {0.736, 0.144, 0.349, 0.458, 1.025, 0.407, 0.020, 0.889, 1.288, 0.252},
+    //     {0.5, 0.3, 0.1, 0.5, 1.0, 0.3, 0.1, 0.25, 1.0, 0.5},  // Expert Design
+    //     {0.348, 0.061, 0.017, 0.146, 1.832, 0.411, 0.260, 0.050, 1.954, 0.782} // best result for bar
+    // };
+    // [0]=0.042, [1]=0.041, [2]=0.261, [3]=0.755, [4]=0.589, [5]=0.189, [6]=0.035, [7]=0.026, [8]=1.836, [9]=0.731, 
+    // [0]=0.139, [1]=0.022, [2]=0.040, [3]=0.174, [4]=1.424, [5]=0.324, [6]=0.298, [7]=0.138, [8]=1.989, [9]=0.631,
+    double goodPara[4][10] = {
+        {0.042, 0.041, 0.261, 0.755, 0.589, 0.189, 0.035, 0.026, 1.836, 0.731},
+        {0.139, 0.022, 0.040, 0.174, 1.424, 0.324, 0.298, 0.138, 1.989, 0.631},  // Expert Design
+        {0.348, 0.061, 0.017, 0.146, 1.832, 0.411, 0.260, 0.050, 1.954, 0.782},  // best result for bar
+        {0.905, 0.243, 0.114, 0.205, 1.363, 0.120, 0.384, 0.780, 1.407, 0.044}
+        };
+
+
+    int good_itera_num = 4; 
     
     // double goodPara[1][10] = {
     //     {0.6, 0.4, 0.4, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5, 0.5} // random init to test the perfromance of the bayesian model. 
@@ -1233,14 +1240,12 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             return 1;
         }
         
-        // 3. perform Buffer
+        /*// 3. perform Buffer   */
         SC_BusPars Pars, * pPars = &Pars;
-        Abc_Ntk_t * pNtkResBuf;
-        int c;
+        Abc_Ntk_t * pNtkResBuf; 
         memset( pPars, 0, sizeof(SC_BusPars) );
         pPars->GainRatio     =  300;
-        pPars->Slew          =  Abc_SclComputeAverageSlew((SC_Lib *)pAbc->pLibScl);
-         
+        pPars->Slew          =  Abc_SclComputeAverageSlew(Abc_FrameReadLibScl());
         pPars->nDegree       =   10;
         pPars->fSizeOnly     =    0;
         pPars->fAddBufs      =    1;
@@ -1248,21 +1253,58 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         pPars->fUseWireLoads =    0;
         pPars->fVerbose      =    0;
         pPars->fVeryVerbose  =    0;
+        pNtkResBuf = Abc_SclBufferingPerform( pNtkTopoed, Abc_FrameReadLibScl(), pPars );
 
-        extern void Abc_NtkPerformBuffering( Abc_Ntk_t * pNtk, int fUseZeros, int fUseOnset, int fUseOffset, int fUseDch, int fUseDchS );
-            
-        // 3. perform STA
+        {
+        // upsize;
+        SC_SizePars Pars, * pPars = &Pars; 
+        memset( pPars, 0, sizeof(SC_SizePars) );
+        pPars->nIters        = 1000;
+        pPars->nIterNoChange =   50;
+        pPars->Window        =    1;
+        pPars->Ratio         =   10;
+        pPars->Notches       = 1000;
+        pPars->DelayUser     =    0;
+        pPars->DelayGap      =    0;
+        pPars->TimeOut       =    0;
+        pPars->BuffTreeEst   =    0;
+        pPars->BypassFreq    =    0;
+        pPars->fUseDept      =    1;
+        pPars->fUseWireLoads =    0;
+        pPars->fDumpStats    =    0;
+        pPars->fVerbose      =    0;
+        pPars->fVeryVerbose  =    0;
+        Abc_SclUpsizePerform(Abc_FrameReadLibScl(), pNtkResBuf, pPars);
+
+        // dnsize; 
+        pPars->nIters        =    5;
+        pPars->nIterNoChange =   50;
+        pPars->Notches       = 1000;
+        pPars->DelayUser     =    0;
+        pPars->DelayGap      = 1000;
+        pPars->TimeOut       =    0;
+        pPars->BuffTreeEst   =    0;
+        pPars->fUseDept      =    1;
+        pPars->fUseWireLoads =    0;
+        pPars->fDumpStats    =    0;
+        pPars->fVerbose      =    0;
+        pPars->fVeryVerbose  =    0;
+        Abc_SclDnsizePerform(Abc_FrameReadLibScl(), pNtkResBuf, pPars);
+        }
+       
+
+        // 4. perform STA   pNtkTopoed   pNtkResBuf
         int fShowAll      = 0;
         int fUseWireLoads = 0;
         int fPrintPath    = 0;
         int fDumpStats    = 0;
         int nTreeCRatio   = 0;
-        if ( !Abc_NtkHasMapping(pNtkTopoed) )
+        if ( !Abc_NtkHasMapping(pNtkResBuf) )
         {
             Abc_Print(-1, "The current network is not mapped.\n" );
             return 1;
         }
-        if ( !Abc_SclCheckNtk(pNtkTopoed, 0) )
+        if ( !Abc_SclCheckNtk(pNtkResBuf, 0) )
         {
             Abc_Print(-1, "The current network is not in a topo order (run \"topo\").\n" );
             return 1;
@@ -1274,15 +1316,15 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         }
         printf("####    NLDM (%d)", i);
         extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
-        Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
+        Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkResBuf, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
         
         
         
-        curDelay = pNtkTopoed ->MaxDelay;
+        curDelay = pNtkResBuf ->MaxDelay;
         curArea = Map_MappingGetArea( p );
-        curLevel = Abc_NtkLevel(pNtkTopoed);
-        curGate = Abc_NtkGetLargeNodeNum(pNtkTopoed);
-        curEdge = Abc_NtkGetTotalFanins(pNtkTopoed);
+        curLevel = Abc_NtkLevel(pNtkResBuf);
+        curGate = Abc_NtkGetLargeNodeNum(pNtkResBuf);
+        curEdge = Abc_NtkGetTotalFanins(pNtkResBuf);
 
         if ( i == 0) {
             firstDelay = curDelay; 
@@ -1291,9 +1333,14 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             firstGate = curGate;
             firstEdge  = curEdge;
         }
-        
-        // rec_y[0] = curDelay/firstDelay + estArea/firstArea; 
-        rec_y[0] = curDelay/firstDelay + curArea/firstArea + curLevel/firstLevel + curGate/firstGate + curEdge/firstEdge;
+        float gapDepth = 0.0;  
+        if (curDelay > estDepth)
+            gapDepth = estDepth/ curDelay;
+        else 
+            gapDepth = curDelay/estDepth; 
+
+        rec_y[0] = curDelay/firstDelay + curArea/firstArea; 
+        // rec_y[0] = curDelay/firstDelay + curArea/firstArea + curLevel/firstLevel + curGate/firstGate + curEdge/firstEdge;
         printf("#### Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Edge = %.1f, Area = %.3f, Gate = %.1f, Objective = %.3f \n", i, curDelay, estDepth, curLevel, curEdge, curArea, curGate,  rec_y[0]);
   
         double* tmpParas = (double*)malloc(para_size * sizeof(double)); 
@@ -1312,13 +1359,30 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             Map_Node_t * pNode;
             Map_Cut_t * pCut;
             p->nMatches = 0; 
-            p->nPhases = 0; 
+            p->nPhases = 0;
+
+            // recovery matching state. 
             for (int j = 0; j < p->vMapObjs->nSize; j++ ) { 
                 pNode = p->vMapObjs->pArray[j];
-
+                // clear the references
                 pNode->nRefAct[0] = pNode->nRefAct[1] = pNode->nRefAct[2] = 0;
                 pNode->nRefEst[0] = pNode->nRefEst[1] = pNode->nRefEst[2] = 0;
-                
+                // clear the arrival times
+                pNode->tArrival[0].Rise = 0.0;
+                pNode->tArrival[0].Fall = 0.0;
+                pNode->tArrival[0].Worst = 0.0; 
+                pNode->tArrival[1].Rise = 0.0;
+                pNode->tArrival[1].Fall = 0.0;
+                pNode->tArrival[1].Worst = 0.0; 
+
+                // clear the required times
+                pNode->tRequired[0].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Fall = MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Worst =  MAP_FLOAT_LARGE; 
+                pNode->tRequired[1].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Fall =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Worst =  MAP_FLOAT_LARGE;
+                 
                 if ( Map_NodeIsBuf(pNode) )
                 {
                     assert( pNode->p2 == NULL );
@@ -1327,35 +1391,22 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                     continue;
                 }
 
-                // skip primary inputs and secondary nodes if mapping with choices
-                if ( !Map_NodeIsAnd( pNode ) || pNode->pRepr )
+                // // skip primary inputs and secondary nodes if mapping with choices
+                if ( !Map_NodeIsAnd( pNode ) || pNode->pRepr ){
                     continue;
-
+                }
+                     
                 // make sure that at least one non-trival cut is present
                 if ( pNode->pCuts->pNext == NULL )
                 {
                     // Extra_ProgressBarStop( pProgress );
-                    printf( "\nError: A node in the mapping graph does not have feasible cuts.\n" );
                     return 0;
                 }
+
                 pNode->pCutBest[0] = NULL;
                 pNode->pCutBest[1] = NULL; 
- 
-                pNode->tArrival[0].Rise = 0.0;
-                pNode->tArrival[0].Fall = 0.0;
-                pNode->tArrival[0].Worst = 0.0; 
-                pNode->tArrival[1].Rise = 0.0;
-                pNode->tArrival[1].Fall = 0.0;
-                pNode->tArrival[1].Worst = 0.0; 
 
-                pNode->tRequired[0].Rise =  MAP_FLOAT_LARGE;
-                pNode->tRequired[0].Fall = MAP_FLOAT_LARGE;
-                pNode->tRequired[0].Worst =  MAP_FLOAT_LARGE; 
-                pNode->tRequired[1].Rise =  MAP_FLOAT_LARGE;
-                pNode->tRequired[1].Fall =  MAP_FLOAT_LARGE;
-                pNode->tRequired[1].Worst =  MAP_FLOAT_LARGE;
-
-                  
+                // clean the node matches   
                 for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext ) { 
                     Map_Match_t * pMatch =  pCut->M + 0;
                     if (pMatch->pSuperBest) {
@@ -1365,8 +1416,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                     pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
                     pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
                     pMatch->AreaFlow = MAP_FLOAT_LARGE;
-                    pMatch->uPhaseBest = 286331153; 
-                    
+                    // pMatch->uPhaseBest = 286331153; 
+                      
                     pMatch =  pCut->M + 1;
                     if (pMatch->pSuperBest) {
                         pMatch->pSuperBest = NULL;
@@ -1374,8 +1425,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                     pMatch->tArrive.Rise = MAP_FLOAT_LARGE;
                     pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
                     pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
-                    pMatch->AreaFlow = MAP_FLOAT_LARGE;
-                    pMatch->uPhaseBest = 286331153; 
+                    pMatch->AreaFlow = MAP_FLOAT_LARGE; 
+                    // pMatch->uPhaseBest = 286331153; 
                 } 
             }
         } 
@@ -1515,7 +1566,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         clkDelayMap += Abc_Clock() - clk;
         //////////////////////////////////////////////////////////////////////
 
-        /* area oriented mapping. 
+        /* area oriented mapping. */
         //////////////////////////////////////////////////////////////////////
         // perform area recovery using area flow 
         // compute the required times
@@ -1552,7 +1603,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         Map_MappingSetRefs( p );
         p->AreaFinal = Map_MappingGetArea( p );
         //////////////////////////////////////////////////////////////////////
-        */
+        
         abctime clk_t2 = Abc_Clock();
         // 1. construct the mapped network, and store the mapped ID in Abc_obj_t
         extern Abc_Ntk_t *  Abc_NtkFromMap( Map_Man_t * pMan, Abc_Ntk_t * pNtk, int fUseBuffs );
@@ -1591,19 +1642,74 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             Abc_Print( -1, "The command has failed.\n" );
             return 1;
         }
-            
-         // 3. perform STA
+        
+        /*
+        // 3. perform Buffer*/
+        SC_BusPars Pars, * pPars = &Pars;
+        Abc_Ntk_t * pNtkResBuf; 
+        memset( pPars, 0, sizeof(SC_BusPars) );
+        pPars->GainRatio     =  300;
+        pPars->Slew          =  Abc_SclComputeAverageSlew(Abc_FrameReadLibScl());
+        pPars->nDegree       =   10;
+        pPars->fSizeOnly     =    0;
+        pPars->fAddBufs      =    1;
+        pPars->fBufPis       =    0;
+        pPars->fUseWireLoads =    0;
+        pPars->fVerbose      =    0;
+        pPars->fVeryVerbose  =    0;
+        pNtkResBuf = Abc_SclBufferingPerform( pNtkTopoed, Abc_FrameReadLibScl(), pPars );
+
+        {
+        // upsize;
+        SC_SizePars Pars, * pPars = &Pars; 
+        memset( pPars, 0, sizeof(SC_SizePars) );
+        pPars->nIters        = 1000;
+        pPars->nIterNoChange =   50;
+        pPars->Window        =    1;
+        pPars->Ratio         =   10;
+        pPars->Notches       = 1000;
+        pPars->DelayUser     =    0;
+        pPars->DelayGap      =    0;
+        pPars->TimeOut       =    0;
+        pPars->BuffTreeEst   =    0;
+        pPars->BypassFreq    =    0;
+        pPars->fUseDept      =    1;
+        pPars->fUseWireLoads =    0;
+        pPars->fDumpStats    =    0;
+        pPars->fVerbose      =    0;
+        pPars->fVeryVerbose  =    0;
+        Abc_SclUpsizePerform(Abc_FrameReadLibScl(), pNtkResBuf, pPars);
+
+        // dnsize; 
+        pPars->nIters        =    5;
+        pPars->nIterNoChange =   50;
+        pPars->Notches       = 1000;
+        pPars->DelayUser     =    0;
+        pPars->DelayGap      = 1000;
+        pPars->TimeOut       =    0;
+        pPars->BuffTreeEst   =    0;
+        pPars->fUseDept      =    1;
+        pPars->fUseWireLoads =    0;
+        pPars->fDumpStats    =    0;
+        pPars->fVerbose      =    0;
+        pPars->fVeryVerbose  =    0;
+        Abc_SclDnsizePerform(Abc_FrameReadLibScl(), pNtkResBuf, pPars);
+        }
+
+        
+
+        // 4. perform STA  pNtkTopoed  pNtkResBuf
         int fShowAll      = 0;
         int fUseWireLoads = 0;
         int fPrintPath    = 0;
         int fDumpStats    = 0;
         int nTreeCRatio   = 0;
-        if ( !Abc_NtkHasMapping(pNtkTopoed) )
+        if ( !Abc_NtkHasMapping(pNtkResBuf) )
         {
             Abc_Print(-1, "The current network is not mapped.\n" );
             return 1;
         }
-        if ( !Abc_SclCheckNtk(pNtkTopoed, 0) )
+        if ( !Abc_SclCheckNtk(pNtkResBuf, 0) )
         {
             Abc_Print(-1, "The current network is not in a topo order (run \"topo\").\n" );
             return 1;
@@ -1615,21 +1721,25 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         }
         printf("####    NLDM (%d)", i);
         extern void Abc_SclTimePerform( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, int fUseWireLoads, int fShowAll, int fPrintPath, int fDumpStats );
-        Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkTopoed, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
+        Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkResBuf, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
          
-        curDelay = pNtkTopoed ->MaxDelay;
+        curDelay = pNtkResBuf ->MaxDelay;
         curArea = Map_MappingGetArea( p );
-        curLevel = Abc_NtkLevel(pNtkTopoed);
-        curGate = Abc_NtkGetLargeNodeNum(pNtkTopoed);
-        curEdge = Abc_NtkGetTotalFanins(pNtkTopoed);
+        curLevel = Abc_NtkLevel(pNtkResBuf);
+        curGate = Abc_NtkGetLargeNodeNum(pNtkResBuf);
+        curEdge = Abc_NtkGetTotalFanins(pNtkResBuf);
 
-        rec_y[0] = curDelay/firstDelay + curArea/firstArea + curLevel/firstLevel + curGate/firstGate + curEdge/firstEdge;
+         float gapDepth = 0.0;  
+        if (curDelay > estDepth)
+            gapDepth = estDepth/ curDelay;
+        else 
+            gapDepth = curDelay/estDepth; 
+            
+        rec_y[0] = curDelay/firstDelay + curArea/firstArea; 
+
+        // rec_y[0] = curDelay/firstDelay + curArea/firstArea + curLevel/firstLevel + curGate/firstGate + curEdge/firstEdge;
         printf("#### Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Edge = %.1f, Area = %.3f, Gate = %.1f, Objective = %.3f \n", i, curDelay, estDepth, curLevel, curEdge, curArea, curGate,  rec_y[0]);
-        
-       
-        // rec_y[0] = curDelay/firstDelay + estArea/firstArea;
-        // printf("#### Bayesian (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Objective = %.3f \n", i, curDelay, estDepth, estLevel, rec_y[0]);
-
+          
        
         double* tmpParas = (double*)malloc(para_size * sizeof(double)); 
         memcpy(tmpParas, p->delayParams, para_size * sizeof(double));
@@ -1640,44 +1750,46 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         if (itRes[i+good_itera_num].rec_y < min_Y) {
             min_Y = itRes[i+good_itera_num].rec_y;
             min_rec_x = itRes[i+good_itera_num].rec_x;
-
-             // update local References. 
-            Abc_Obj_t * pObj;
-            Map_Node_t * pNodeMap;
-            Map_Cut_t * pCutBest;
-            Map_Super_t *  pSuperBest; 
-            int ni,  mappingID, fPhase;
-            float gateDelay;
+         
+            // do not update local references. 
+            //  // update local References. 
+            // Abc_Obj_t * pObj;
+            // Map_Node_t * pNodeMap;
+            // Map_Cut_t * pCutBest;
+            // Map_Super_t *  pSuperBest; 
+            // int ni,  mappingID, fPhase;
+            // float gateDelay;
             
-            double *grad = malloc(sizeof(double) * (MAP_TAO*2));
-            memset(grad, 0, sizeof(double) * (MAP_TAO*2));
-            int gate_params_size = 6;
-            double *gateParams = malloc(sizeof(double) * gate_params_size);
-            memset(gateParams, 0, sizeof(double) * gate_params_size);
+            // double *grad = malloc(sizeof(double) * (MAP_TAO*2));
+            // memset(grad, 0, sizeof(double) * (MAP_TAO*2));
+            // int gate_params_size = 6;
+            // double *gateParams = malloc(sizeof(double) * gate_params_size);
+            // memset(gateParams, 0, sizeof(double) * gate_params_size);
             
-            int updatedNode = 0; 
+            // int updatedNode = 0; 
                 
-            Abc_NtkForEachNode1( pNtkTopoed, pObj, ni ){  
-                mappingID = Abc_ObjMapNtkId(pObj);
-                fPhase =  Abc_ObjMapNtkPhase(pObj);
-                gateDelay = Abc_ObjMapNtkTime(pObj);
-                pNodeMap = p->vMapObjs->pArray[mappingID];
-                // update the tauRef using gradient descent
-                // skip the node that has no cut
-                if ( Map_NodeReadCutBest(pNodeMap, fPhase) == NULL ) 
-                    continue; 
-                pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);    
-                pSuperBest = pCutBest->M[fPhase].pSuperBest;
+            // Abc_NtkForEachNode1( pNtkTopoed, pObj, ni ){  
+            //     mappingID = Abc_ObjMapNtkId(pObj);
+            //     fPhase =  Abc_ObjMapNtkPhase(pObj);
+            //     gateDelay = Abc_ObjMapNtkTime(pObj);
+            //     pNodeMap = p->vMapObjs->pArray[mappingID];
+            //     // update the tauRef using gradient descent
+            //     // skip the node that has no cut
+            //     if ( Map_NodeReadCutBest(pNodeMap, fPhase) == NULL ) 
+            //         continue; 
+            //     pCutBest = Map_NodeReadCutBest(pNodeMap, fPhase);    
+            //     pSuperBest = pCutBest->M[fPhase].pSuperBest;
 
-                Map_MappingGradient(p, pCutBest,  pSuperBest, fPhase, grad, gateParams);
-                if (Map_MappingUpdateTauRef(p, pNodeMap, pCutBest, pSuperBest, fPhase, gateDelay, grad, gateParams)) {
-                    updatedNode += 1; 
-                }
-                // pNodeMap->tauRefs[1],
-            }
-            printf("#### Updated node proportion(%.3f) \n", (updatedNode*1.0)/ni);
-            free(grad);
-            free(gateParams);
+            //     Map_MappingGradient(p, pCutBest,  pSuperBest, fPhase, grad, gateParams);
+            //     if (Map_MappingUpdateTauRef(p, pNodeMap, pCutBest, pSuperBest, fPhase, gateDelay, grad, gateParams)) {
+            //         updatedNode += 1; 
+            //     }
+            //     // pNodeMap->tauRefs[1],
+            // }
+            // printf("#### Updated node proportion(%.3f) \n", (updatedNode*1.0)/ni);
+            // free(grad);
+            // free(gateParams); 
+
         }
         clkGradient += Abc_Clock() - clk2;
 
@@ -1687,11 +1799,29 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
             Map_Cut_t * pCut;
             p->nMatches = 0; 
             p->nPhases = 0; 
+            
+             // recovery matching state. 
             for (int j = 0; j < p->vMapObjs->nSize; j++ ) { 
                 pNode = p->vMapObjs->pArray[j];
-
+                // clear the references
                 pNode->nRefAct[0] = pNode->nRefAct[1] = pNode->nRefAct[2] = 0;
                 pNode->nRefEst[0] = pNode->nRefEst[1] = pNode->nRefEst[2] = 0;
+                // clear the arrival times
+                pNode->tArrival[0].Rise = 0.0;
+                pNode->tArrival[0].Fall = 0.0;
+                pNode->tArrival[0].Worst = 0.0; 
+                pNode->tArrival[1].Rise = 0.0;
+                pNode->tArrival[1].Fall = 0.0;
+                pNode->tArrival[1].Worst = 0.0; 
+
+                // clear the required times
+                pNode->tRequired[0].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Fall = MAP_FLOAT_LARGE;
+                pNode->tRequired[0].Worst =  MAP_FLOAT_LARGE; 
+                pNode->tRequired[1].Rise =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Fall =  MAP_FLOAT_LARGE;
+                pNode->tRequired[1].Worst =  MAP_FLOAT_LARGE;
+                 
                 
                 if ( Map_NodeIsBuf(pNode) )
                 {
@@ -1701,35 +1831,22 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                     continue;
                 }
 
-                // skip primary inputs and secondary nodes if mapping with choices
-                if ( !Map_NodeIsAnd( pNode ) || pNode->pRepr )
+                // // skip primary inputs and secondary nodes if mapping with choices
+                if ( !Map_NodeIsAnd( pNode ) || pNode->pRepr ){
                     continue;
-
+                }
+                     
                 // make sure that at least one non-trival cut is present
                 if ( pNode->pCuts->pNext == NULL )
                 {
                     // Extra_ProgressBarStop( pProgress );
-                    printf( "\nError: A node in the mapping graph does not have feasible cuts.\n" );
                     return 0;
                 }
+                
                 pNode->pCutBest[0] = NULL;
                 pNode->pCutBest[1] = NULL; 
- 
-                pNode->tArrival[0].Rise = 0.0;
-                pNode->tArrival[0].Fall = 0.0;
-                pNode->tArrival[0].Worst = 0.0; 
-                pNode->tArrival[1].Rise = 0.0;
-                pNode->tArrival[1].Fall = 0.0;
-                pNode->tArrival[1].Worst = 0.0; 
 
-                pNode->tRequired[0].Rise =  MAP_FLOAT_LARGE;
-                pNode->tRequired[0].Fall = MAP_FLOAT_LARGE;
-                pNode->tRequired[0].Worst =  MAP_FLOAT_LARGE; 
-                pNode->tRequired[1].Rise =  MAP_FLOAT_LARGE;
-                pNode->tRequired[1].Fall =  MAP_FLOAT_LARGE;
-                pNode->tRequired[1].Worst =  MAP_FLOAT_LARGE;
-
-                  
+                // clean the node matches   
                 for ( pCut = pNode->pCuts->pNext; pCut; pCut = pCut->pNext ) { 
                     Map_Match_t * pMatch =  pCut->M + 0;
                     if (pMatch->pSuperBest) {
@@ -1739,8 +1856,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                     pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
                     pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
                     pMatch->AreaFlow = MAP_FLOAT_LARGE;
-                    pMatch->uPhaseBest = 286331153; 
-                    
+                    // pMatch->uPhaseBest = 286331153; 
+                      
                     pMatch =  pCut->M + 1;
                     if (pMatch->pSuperBest) {
                         pMatch->pSuperBest = NULL;
@@ -1748,10 +1865,12 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
                     pMatch->tArrive.Rise = MAP_FLOAT_LARGE;
                     pMatch->tArrive.Fall = MAP_FLOAT_LARGE;
                     pMatch->tArrive.Worst = MAP_FLOAT_LARGE;
-                    pMatch->AreaFlow = MAP_FLOAT_LARGE;
-                    pMatch->uPhaseBest = 286331153; 
+                    pMatch->AreaFlow = MAP_FLOAT_LARGE; 
+                    // pMatch->uPhaseBest = 286331153; 
                 } 
             }
+ 
+
         } 
         clkSTA += Abc_Clock() - clk_t2;
     }
