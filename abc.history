@@ -1,0 +1,3 @@
+source -s abc.rc
+read_aiger /home/liujunfeng/benchmarks/random_control/mem_ctrl.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map  -e ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/mem_ctrl.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map  ; topo; buffer; upsize; dnsize; stime; time;

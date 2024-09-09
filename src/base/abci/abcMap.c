@@ -252,7 +252,7 @@ void call_python(){
   SeeAlso     []
 
 ***********************************************************************/
-Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, double DelayMulti, float LogFan, float Slew, float Gain, int nGatesMin, int fRecovery, int fSwitching, int fSkipFanout, int fUseProfile, int fUseBuffs, int fVerbose, int usingExp )
+Abc_Ntk_t * Abc_NtkMap( Abc_Ntk_t * pNtk, double DelayTarget, double AreaMulti, double DelayMulti, float LogFan, float Slew, float Gain, int nGatesMin, int fRecovery, int fSwitching, int fSkipFanout, int fUseProfile, int fUseBuffs, int fVerbose, int usingExp, int fGradient )
 {   
     // test_bayes2();
     // call_python(); 
@@ -381,7 +381,7 @@ clk = Abc_Clock();
             return NULL;
         }
     } else {
-        if ( !Map_MappingHeboIt( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs)){
+        if ( !Map_MappingHeboIt( pMan, pNtk, pLib,  1, DelayTarget, fUseBuffs, fGradient)){
             Map_ManFree( pMan );
             return NULL;
         }
@@ -1361,9 +1361,9 @@ void Abc_NtkTauRefs( Map_Man_t * pMan, Abc_Ntk_t * pNtk ) {
     Abc_Obj_t *pNode;
     int i, j, order;
     // vNodes = Abc_AigDfs( pNtk, 0, 1); 
-    int **tauRefsArr = malloc(sizeof(int*) *  Abc_NtkObjNumMax(pNtk));
+    float **tauRefsArr = malloc(sizeof(float*) *  Abc_NtkObjNumMax(pNtk));
     for (i = 0; i < Abc_NtkObjNumMax(pNtk); i++) {
-        tauRefsArr[i] = calloc(MAP_TAO, sizeof(int));
+        tauRefsArr[i] = calloc(MAP_TAO, sizeof(float));
     }
     
     // init  1-order fanouts
@@ -1371,11 +1371,11 @@ void Abc_NtkTauRefs( Map_Man_t * pMan, Abc_Ntk_t * pNtk ) {
         int nodeId = Abc_ObjId(pNode);
         if (Abc_ObjIsCo(pNode)) {
             for (order = 0; order < MAP_TAO; order ++){
-                tauRefsArr[nodeId][order] = 0;
+                tauRefsArr[nodeId][order] = 0.0;
             } 
         }
         else {
-            tauRefsArr[nodeId][0] = Abc_ObjFanoutNum(pNode);
+            tauRefsArr[nodeId][0] = Abc_ObjFanoutNum(pNode) * 1.0;
         } 
     }
     
@@ -1391,7 +1391,17 @@ void Abc_NtkTauRefs( Map_Man_t * pMan, Abc_Ntk_t * pNtk ) {
         }
     }
     
-
+    // scale the extremely large fanouts
+    float MAX_FANOUT = 10.0; 
+    Abc_NtkForEachObj(pNtk, pNode, i) {
+        int nodeId = Abc_ObjId(pNode);
+        if (tauRefsArr[nodeId][MAP_TAO-1] > MAX_FANOUT) {
+            float factor = MAX_FANOUT / tauRefsArr[nodeId][MAP_TAO-1];
+            for (order = 1; order < MAP_TAO; order++) 
+                tauRefsArr[nodeId][order] = tauRefsArr[nodeId][order] * factor;
+        }
+    }
+     
     // update the k-order fanout for Mapped network 
     Abc_NtkForEachObj( pNtk,  pNode, i ){ 
         Map_Node_t * pNodeMap = (Map_Node_t *)pNode->pCopy; 

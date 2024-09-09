@@ -231,7 +231,7 @@ struct Map_NodeStruct_t_
     float               nRefEst[3];    // actual fanout for previous covering phase, neg and pos and sum
     float               Switching;     // the probability of switching
 
-    int                 tauRefs[MAP_TAO]; // tau-order degrees, for each node
+    float               tauRefs[MAP_TAO]; // tau-order degrees, for each node
     double              bestDelay; 
     int                 nRefFirst; 
 

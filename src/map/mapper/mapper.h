@@ -174,7 +174,7 @@ extern int             Map_Mapping( Map_Man_t * p );
 // extern int          Map_MappingSTA( Map_Man_t * p, int fStime);
 extern int             Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs);
 extern int             Map_MappingIteratable( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs);
-extern int             Map_MappingHeboIt( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs);
+extern int             Map_MappingHeboIt( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fStime,  double DelayTarget, int fUseBuffs, int fGradient);
 extern void            Map_MappingGradient(Map_Man_t * p,  Map_Cut_t *pCut, Map_Super_t *pSuper, int  fPhase,  double * grad, double *gatePara);
 extern int             Map_MappingUpdateTauRef(Map_Man_t * p, Map_Node_t *pNode, Map_Cut_t *pCut, Map_Super_t *pSuper, int fPhase, double gateDelay, double * grad, double *gatePara);
 extern double          Map_MappingEstCutDelay (Map_Man_t *p, Map_Cut_t *pCut, Map_Node_t *pNode, int fPhase, int pi,  double *gatePara);

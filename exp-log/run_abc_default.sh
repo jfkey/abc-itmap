@@ -4,13 +4,25 @@
 # bash run_abc.sh <path_abc> <path_benchmark> <timeout> <path_lib>
 # eg: bash run_abc_asic.sh ../bin/abc ../benchmark/EPFL 1000m ../asap7.lib
 # 
-# bash run_abc_test.sh /workspaces/abc-itmap/build/abc /workspaces/abc-itmap/benchmark/EPFL/arithmetic/ 1000m /workspaces/abc-itmap/asap7_clean.lib 
-# bash run_abc_test.sh /workspaces/abc-itmap/build/abc /workspaces/abc-itmap/benchmark/EPFL/random_control/ 1000m /workspaces/abc-itmap/asap7_clean.lib
 
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc-itmap/cmake-build-debug/abc_default /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc-itmap/asap7_clean.lib
+# command for XIG: command="read_lib $4 ; read_aiger $element; &get -n; &nf; &put; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime;";
+# command for AIG Map: map; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime;
 
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# asap7_clean.lib sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/sixteen/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/mtm/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/sixteen/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/mtm/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+
+
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withbo /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withbo /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withbo /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withbo /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withgd /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withgd /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+
 ####################################################################
 binary=$(echo "$1" | awk -F "/" '{print $NF}')
 dataname=$(basename "${2%/}")
@@ -27,7 +39,7 @@ files=$(find "$2" -name "*.aig")
 for element in ${files[@]}
 do
     echo "process $element"
-    command="read_lib $4 ; read_aiger $element; map; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime;";
+    command="read_lib $4 ; read_aiger $element; map; topo; time; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime; time;";
     outputs=$(timeout $3 $1 -c "$command";)
     echo $outputs >> $log 
 done

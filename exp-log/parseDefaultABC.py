@@ -91,20 +91,37 @@ with open(file_name, 'r') as file:
     for line in file:
         cir_name = get_cir_name(line)
         if cir_name == 0: continue 
-        elif firstResults == 1: 
-            parts = line.split("{}:".format(cir_name))
-            if len(parts) != 3:  print("parse the first log line of {} error".format(cir_name))
-            parseLine(parts[1], cir_name, 0)
-            parseLine(parts[2], cir_name, 1)
-            firstResults = 0 
-        else: 
-            parts = line.split("{}:".format(cir_name))
-            if len(parts) != 2:  print("parse the second log line of {} error".format(cir_name))
-            parseLine(parts[1], cir_name, 2) 
-            firstResults = 1
-             
+        
+        parts = line.split("{}:".format(cir_name))
+        if len(parts) != 4:  print("parse the first log line of {} error".format(cir_name))
+        parseLine(parts[1], cir_name, 0)
+        parseLine(parts[2], cir_name, 1)
+        parseLine(parts[3], cir_name, 2)
+ 
         if (line.find("random_control") != -1):
             type = 'control'
+
+# with open(file_name, 'r') as file:
+#     # Iterate over each line in the file
+#     firstResults = 1
+#     for line in file:
+#         cir_name = get_cir_name(line)
+#         if cir_name == 0: continue 
+#         elif firstResults == 1: 
+#             parts = line.split("{}:".format(cir_name))
+#             if len(parts) != 3:  print("parse the first log line of {} error".format(cir_name))
+#             parseLine(parts[1], cir_name, 0)
+#             parseLine(parts[2], cir_name, 1)
+#             firstResults = 0 
+#         else: 
+#             parts = line.split("{}:".format(cir_name))
+#             if len(parts) != 2:  print("parse the second log line of {} error".format(cir_name))
+#             parseLine(parts[1], cir_name, 2) 
+#             firstResults = 1
+             
+#         if (line.find("random_control") != -1):
+#             type = 'control'
+
 
 if type == 'arith':
     print(" , #Gate, #Edge, #Level,  #area, #delay, #NLDM Area, #NLDM Delay")
