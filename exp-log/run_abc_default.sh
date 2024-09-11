@@ -9,18 +9,25 @@
 # command for AIG Map: map; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime;
 
 # asap7_clean.lib sky130.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/sixteen/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/mtm/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/sixteen/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/mtm/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_para_tune2 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_para_tune2 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_para_tune2 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_para_tune2 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_larger /home/liujunfeng/benchmarks/larger_aig/exp_data/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_larger /home/liujunfeng/benchmarks/larger_aig/exp_data/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/larger_aig/exp_data/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/larger_aig/exp_data/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
 
 
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withbo /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withbo /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withbo /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withbo /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
 
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withgd /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# test the results of version 2  
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+
 # bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withgd /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
 
 ####################################################################

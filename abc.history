@@ -1,3 +1,20 @@
-source -s abc.rc
 read_aiger /home/liujunfeng/benchmarks/random_control/mem_ctrl.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map  -e ; topo; buffer; upsize; dnsize; stime; time;
 read_aiger /home/liujunfeng/benchmarks/random_control/mem_ctrl.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map  ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/mem_ctrl.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/dec.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/dec.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map -G 240 ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/dec.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map -G 200 ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/dec.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map -G 100 ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/dec.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map -G 300 ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/dec.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map -G 350 ; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/dec.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/random_control/mem_ctrl.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map; topo; buffer; upsize; dnsize; stime; time;
+source -s abc.rc
+read_aiger /home/liujunfeng/benchmarks/arithmetic/dft.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/arithmetic/dft.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map -G 400; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/arithmetic/dft.aig; 
+print_stats; 
+read_aiger /home/liujunfeng/benchmarks/arithmetic/dft.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; time;  map; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/arithmetic/idft.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; time;  map; topo; buffer; upsize; dnsize; stime; time;
+read_aiger /home/liujunfeng/benchmarks/arithmetic/idft.aig; print_stats; 
+read_aiger /home/liujunfeng/benchmarks/arithmetic/div.aig; read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib; time;  map; stime -p; topo; buffer; upsize; dnsize; stime -p; time;

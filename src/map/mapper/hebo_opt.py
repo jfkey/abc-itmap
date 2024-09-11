@@ -33,6 +33,9 @@ def init_opt():
     #                     'pred_likeli'  : False
     #                     }
     # opt = HEBO(space, model_name='gpy', rand_sample= 8, model_config=cfg )
+    # opt = HEBO(space, model_name='rf', rand_sample= 5)
+    # opt = HEBO(space, model_name='gpy', rand_sample= 5)
+    # opt = HEBO(space, model_name='deep_ensemble', rand_sample= 5) 
     opt = HEBO(space, model_name='rf', rand_sample= 5)
   
     return opt

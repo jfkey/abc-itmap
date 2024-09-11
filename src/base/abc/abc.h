@@ -226,6 +226,7 @@ struct Abc_Ntk_t_
     Vec_Int_t *       vNameIds;      // name IDs
     Vec_Int_t *       vFins;         // obj/type info
     float             MaxDelay;      // maximum (STA) delay of the network, modify by junfeng
+    float             SumArea;       // sum of area of the network, modify by junfeng
     int               mappedInvs;    // number of mapped inverters
 };
 

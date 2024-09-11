@@ -723,6 +723,7 @@ void Abc_SclTimePerformInt( SC_Lib * pLib, Abc_Ntk_t * pNtk, int nTreeCRatio, in
     p = Abc_SclManStart( pLib, pNtk, fUseWireLoads, 1, 0, nTreeCRatio );
     Abc_SclTimeNtkPrint( p, fShowAll, fPrintPath );
     pNtk->MaxDelay = p->MaxDelay;
+    pNtk->SumArea  = p->SumArea;
     if ( fDumpStats )
         Abc_SclDumpStats( p, "stats.txt", 0 );
     Abc_SclManFree( p );

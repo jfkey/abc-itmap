@@ -489,8 +489,11 @@ int Map_MappingSTA( Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int fSt
     //     {0.348, 0.061, 0.017, 0.146, 1.832, 0.411, 0.260, 0.050, 1.954, 0.782} // best result for bar
     // };
 
+    // {0.91, 0.15, 0.26, 0.26, 1.46, 0.24, 0.23, 0.33, 0.89, 0.57} expert design 1
+    // {0.18, 0.18, 0.28, 0.46, 0.76, 0.24, 0.23, 0.05, 1.69, 0.57} expert design 2
+    // {0.77, 0.05, 0.36, 0.08, 1.98, 0.42, 0.03, 0.23, 1.05, 0.99} expert design 3
     double goodPara[1][10] = {
-        {0.91, 0.15, 0.26, 0.26, 1.46, 0.24, 0.23, 0.33, 0.89, 0.57}
+       {0.83, 0.23, 0.26, 0.5 , 1.52, 0.26, 0.25, 0.67, 0.69, 0.67}
     };
       
     double curDelay, firstDelay, firstArea, firstLevel;
@@ -1141,12 +1144,18 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
     //  {0.53, 0.09, 0.2, 0.53, 1.83, 0.29, 0.28, 0.25, 1.82, 0.63},
     //  {0.91, 0.15, 0.26, 0.26, 1.46, 0.24, 0.23, 0.33, 0.89, 0.57},
     //  {0.18, 0.18, 0.28, 0.46, 0.76, 0.24, 0.23, 0.05, 1.69, 0.57},
-
+    //  {0.77, 0.05, 0.36, 0.08, 1.98, 0.42, 0.03, 0.23, 1.05, 0.99}
+    // cluster center for best parameters 2
+    // {0.23, 0.22, 0.26, 0.45, 0.85, 0.26, 0.28, 0.26, 1.55, 0.33}, 
+    // {0.83, 0.23, 0.26, 0.5 , 1.52, 0.26, 0.25, 0.67, 0.69, 0.67}, 
+    // {0.52, 0.34, 0.26, 0.46, 1.73, 0.25, 0.34, 0.52, 1.63, 0.52}
+    
+    // [0]=0.211, [1]=0.404, [2]=0.448, [3]=0.042, [4]=0.518, [5]=0.488, [6]=0.020, [7]=0.088, [8]=1.929, [9]=0.030, better for bar circuit
     double goodPara[3][10] = { 
-        {0.91, 0.15, 0.26, 0.26, 1.46, 0.24, 0.23, 0.33, 0.89, 0.57},
-        {0.18, 0.18, 0.28, 0.46, 0.76, 0.24, 0.23, 0.05, 1.69, 0.57},
-        {0.77, 0.05, 0.36, 0.08, 1.98, 0.42, 0.03, 0.23, 1.05, 0.99}
-        }; 
+     {0.21, 0.40, 0.45, 0.45, 0.04, 0.52, 0.49, 0.02, 0.09, 0.03}, 
+     {0.83, 0.23, 0.26, 0.5 , 1.52, 0.26, 0.25, 0.67, 0.69, 0.67}, 
+     {0.52, 0.34, 0.26, 0.46, 1.73, 0.25, 0.34, 0.52, 1.63, 0.52} 
+     }; 
     int good_itera_num = 3; 
     
     // // worse parameters
@@ -1392,7 +1401,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         
         
         curDelay = pNtkResBuf ->MaxDelay;
-        curArea = Map_MappingGetArea( p );
+        curArea = pNtkResBuf ->SumArea; 
+        // curArea = Abc_SclGetTotalArea(pNtkResBuf);      //  // curArea = Map_MappingGetArea( p );
         curLevel = Abc_NtkLevel(pNtkResBuf);
         curGate = Abc_NtkGetLargeNodeNum(pNtkResBuf);
         curEdge = Abc_NtkGetTotalFanins(pNtkResBuf);
@@ -1410,6 +1420,7 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         else 
             gapDepth = curDelay/estDepth; 
 
+        // rec_y[0] = curLevel/firstLevel;
         rec_y[0] = curDelay/firstDelay + curArea/firstArea; 
         // rec_y[0] = curDelay/firstDelay + curArea/firstArea + curLevel/firstLevel + curGate/firstGate + curEdge/firstEdge;
         printf("#### Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Edge = %.1f, Area = %.3f, Gate = %.1f, Objective = %.3f \n", i, curDelay, estDepth, curLevel, curEdge, curArea, curGate,  rec_y[0]);
@@ -1793,7 +1804,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         Abc_SclTimePerform( Abc_FrameReadLibScl(), pNtkResBuf, nTreeCRatio, fUseWireLoads, fShowAll, fPrintPath, fDumpStats );
          
         curDelay = pNtkResBuf ->MaxDelay;
-        curArea = Map_MappingGetArea( p );
+        curArea = pNtkResBuf ->SumArea;
+        // curArea = Abc_SclGetTotalArea(pNtkResBuf);
         curLevel = Abc_NtkLevel(pNtkResBuf);
         curGate = Abc_NtkGetLargeNodeNum(pNtkResBuf);
         curEdge = Abc_NtkGetTotalFanins(pNtkResBuf);
@@ -1804,8 +1816,8 @@ int Map_MappingHeboIt(Map_Man_t * p, Abc_Ntk_t *pNtk, Mio_Library_t *pLib, int f
         else 
             gapDepth = curDelay/estDepth; 
             
+        // rec_y[0] = curLevel/firstLevel;
         rec_y[0] = curDelay/firstDelay + curArea/firstArea; 
-
         // rec_y[0] = curDelay/firstDelay + curArea/firstArea + curLevel/firstLevel + curGate/firstGate + curEdge/firstEdge;
         printf("#### Heuristic (%d) Delay = %.3f, Depth = %.3f, Level = %.1f, Edge = %.1f, Area = %.3f, Gate = %.1f, Objective = %.3f \n", i, curDelay, estDepth, curLevel, curEdge, curArea, curGate,  rec_y[0]);
           
@@ -2081,7 +2093,7 @@ void  Map_MappingGradient(Map_Man_t * p,  Map_Cut_t *pCut,  Map_Super_t *pSuper,
 
 int  Map_MappingUpdateTauRef(Map_Man_t * p, Map_Node_t *pNode, Map_Cut_t *pCut, Map_Super_t *pSuper, int fPhase, double gateDelay, double * grad, double *gatePara){ 
     int max_iterations = 3;
-    double lr = 0.08;
+    double lr = 0.1;
     double tolerance = 10; 
     int pi = gatePara[0];
 

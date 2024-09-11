@@ -1,0 +1,11 @@
+
+
+(base) liujunfeng@pcl-X11DPi-N-T:~/ABC/abc_itmap/abc-itmap/build$ ./abc_exp3
+UC Berkeley, ABC 1.01 (compiled Sep  7 2024 14:51:10)
+abc 01> read_lib /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib; read_aiger /home/liujunfeng/benchmarks/sixteen/sixteen.aig; map -e;  topo; time; buffer; upsize; dnsize; print_stats; stime; time;
+Library "asap7sc7p5t_22b_AO_RVT_SS_170906" from "/home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib" has 155 cells (0 skipped: 0 seq; 0 tri-state; 0 no func; 0 dont_use).  Time =     0.88 sec
+Warning: Detected 2 multi-output gates (for example, "FAx1_ASAP7_75t_R").
+elapse: 8440.60 seconds, total: 8440.60 seconds
+/home/liujunfeng/benchmarks/sixteen/sixteen: i/o =  117/   50  lat =    0  nd =7386325  edge =24038254  area =9427554.63  delay =1415.87  lev = 66
+WireLoad = "none"  Gates =7386325 ( 19.2 %)   Cap =  1.0 ff (  1.1 %)   Area =  9434005.00 ( 93.6 %)   Delay =  1111.50 ps  ( 15.1 %)
+elapse: 5421.70 seconds, total: 13862.30 seconds
