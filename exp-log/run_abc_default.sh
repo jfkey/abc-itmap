@@ -22,11 +22,11 @@
 
 
 
-# test the results of version 2  
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# test the results of version 3  
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v3 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v3 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v3 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v3 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
 
 # bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_withgd /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
 

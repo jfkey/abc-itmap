@@ -9,10 +9,10 @@
 # command for AIG Map: map; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime;
 
 # asap7_clean.lib sky130.lib
-# bash run_abc_default_gd.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
-# bash run_abc_default_gd.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_abc_default_gd.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
-# bash run_abc_default_gd.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default_gd.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v3 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default_gd.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v3 /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_abc_default_gd.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v3 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_abc_default_gd.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v3 /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
 
 
 # bash run_abc_default.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_rf /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib

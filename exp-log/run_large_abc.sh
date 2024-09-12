@@ -9,10 +9,10 @@
 # command for AIG Map: map; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime;
 
 # asap7_clean.lib sky130.lib
-# bash run_large_abc.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_exp2 /home/liujunfeng/benchmarks/sixteen/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_large_abc.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/mtm/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
-# bash run_large_abc.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/sixteen/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
-# bash run_large_abc.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_default /home/liujunfeng/benchmarks/mtm/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_large_abc.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2_e /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_large_abc.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2_e /home/liujunfeng/benchmarks/arithmetic/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
+# bash run_large_abc.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2_e /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/asap7_clean.lib
+# bash run_large_abc.sh /home/liujunfeng/ABC/abc_itmap/abc-itmap/build/abc_v2_e /home/liujunfeng/benchmarks/random_control/ 1000m /home/liujunfeng/ABC/abc_itmap/abc-itmap/sky130.lib
 
 ####################################################################
 binary=$(echo "$1" | awk -F "/" '{print $NF}')
@@ -30,7 +30,7 @@ files=$(find "$2" -name "*.aig")
 for element in ${files[@]}
 do
     echo "process $element"
-    command="read_lib $4 ; read_aiger $element; map; time; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime; time;";
+    command="read_lib $4 ; read_aiger $element; map -e; time; topo; print_stats; stime; buffer; print_stats; stime; upsize; dnsize; print_stats; stime; time;";
     outputs=$(timeout $3 $1 -c "$command";)
     echo $outputs >> $log 
 done
